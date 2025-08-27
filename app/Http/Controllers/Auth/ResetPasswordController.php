@@ -26,4 +26,14 @@ class ResetPasswordController extends Controller
      * @var string
      */
     protected $redirectTo = '/home';
+
+    /**
+     * Get the field to be used for password reset.
+     *
+     * @return string
+     */
+    public function username()
+    {
+        return 'username';
+    }
 }

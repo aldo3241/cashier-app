@@ -13,14 +13,32 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'akun';
+
+    /**
+     * The primary key for the model.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'kd';
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'nama',
+        'username',
         'email',
         'password',
+        'role',
+        'photo_profile',
+        'dibuat_oleh',
     ];
 
     /**
@@ -41,8 +59,49 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
+            'date_created' => 'datetime',
+            'date_updated' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Get the name attribute (alias for nama)
+     */
+    public function getNameAttribute()
+    {
+        return $this->nama;
+    }
+
+    /**
+     * Set the name attribute (alias for nama)
+     */
+    public function setNameAttribute($value)
+    {
+        $this->attributes['nama'] = $value;
+    }
+
+    /**
+     * Get the timestamps attribute names
+     */
+    public function getCreatedAtColumn()
+    {
+        return 'date_created';
+    }
+
+    public function getUpdatedAtColumn()
+    {
+        return 'date_updated';
+    }
+
+    /**
+     * Send the password reset notification.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new \App\Notifications\ResetPasswordNotification($token));
     }
 }
