@@ -85,13 +85,13 @@ class CashierController extends Controller
         try {
             DB::beginTransaction();
 
-            // Generate invoice number
-            $invoiceNumber = 'INV-' . date('Ymd') . '-' . strtoupper(Str::random(6));
+            // Generate invoice number in format: PJ250723110833
+            $invoiceNumber = 'PJ' . date('ymd') . date('His');
             
-            // Create sales record
+            // Create sales record in penjualan table
             $saleId = DB::table('penjualan')->insertGetId([
                 'no_faktur_penjualan' => $invoiceNumber,
-                'kd_pelanggan' => $request->input('customer.name') ?: 'Walk-in Customer',
+                'kd_pelanggan' => 1, // Default customer ID
                 'sub_total' => $request->input('totals.subtotal'),
                 'pajak' => $request->input('totals.tax'),
                 'total_harga' => $request->input('totals.total'),
@@ -99,38 +99,42 @@ class CashierController extends Controller
                 'lebih_bayar' => $request->input('payment.amountReceived') - $request->input('totals.total'),
                 'status_bayar' => 'Lunas',
                 'keuangan_kotak' => $request->input('payment.method'),
-                'catatan' => 'Transaction via Cashier System',
+                'catatan' => $request->input('customer.name') ?: 'Walk-in Customer',
                 'status_barang' => 'diterima langsung',
                 'date_created' => now(),
                 'date_updated' => now(),
                 'dibuat_oleh' => auth()->user()->name ?? 'Cashier'
             ]);
 
-            // Create sales detail records
+            // Create sales detail records in penjualan_detail table
             foreach ($request->input('items') as $item) {
                 $product = Product::where('kd_produk', $item['id'])->first();
                 
                 if (!$product) continue;
                 
-                DB::table('penjualan_detail')->insert([
-                    'id_penjualan' => $saleId,
-                    'id_produk' => $item['id'],
-                    'nama_produk' => $product->nama_produk,
-                    'jenis_produk' => $product->productType ? $product->productType->nama : 'Unknown',
-                    'id_pemasok' => $product->kd_pemasok ?? 1,
-                    'pemasok' => $product->pemasok ?? 'Unknown',
-                    'keterangan_bayar' => 'Cashier Sale',
-                    'hpp' => $product->hpp,
-                    'harga_jual' => $product->harga_jual,
-                    'qty' => $item['quantity'],
-                    'sub_total' => $item['quantity'] * $product->harga_jual,
-                    'diskon' => 0,
-                    'status_bayar' => 'Lunas',
-                    'data_created' => now(),
-                    'data_updated' => now(),
-                    'dibuat_oleh' => auth()->user()->name ?? 'Cashier',
-                    'no_faktur_penjualan' => $invoiceNumber
-                ]);
+                // Calculate profit
+                $profit = ($product->harga_jual - $product->hpp) * $item['quantity'];
+                
+                                 DB::table('penjualan_detail')->insert([
+                     'kd_penjualan' => $saleId,
+                     'kd_produk' => $item['id'],
+                     'nama_produk' => $product->nama_produk,
+                     'produk_jenis' => $product->productType ? $product->productType->nama : 'Unknown',
+                     'kd_pemasok' => $product->kd_pemasok ?? 1,
+                     'pemasok' => $product->pemasok ?? 'Unknown',
+                     'sistem_bayar' => $request->input('payment.method'),
+                     'hpp' => $product->hpp,
+                     'harga_jual' => $product->harga_jual,
+                     'qty' => $item['quantity'],
+                     'diskon' => 0,
+                     'sub_total' => $item['quantity'] * $product->harga_jual,
+                     'laba' => $profit,
+                     'status_bayar' => 'Lunas',
+                     'catatan' => $invoiceNumber,
+                     'date_created' => now(),
+                     'date_updated' => now(),
+                     'dibuat_oleh' => auth()->user()->name ?? 'Cashier'
+                 ]);
 
                 // Update stock
                 $product->decrement('stok_total', $item['quantity']);
@@ -187,6 +191,399 @@ class CashierController extends Controller
         return response()->json([
             'success' => true,
             'types' => $types
+        ]);
+    }
+
+    /**
+     * Create a new pending sale
+     */
+    public function createPendingSale(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Generate invoice number in format: PJ250723110833
+            $invoiceNumber = 'PJ' . date('ymd') . date('His');
+            
+            // Create pending sales record
+            $saleId = DB::table('penjualan')->insertGetId([
+                'no_faktur_penjualan' => $invoiceNumber,
+                'kd_pelanggan' => 1, // Default customer ID
+                'sub_total' => 0,
+                'pajak' => 0,
+                'total_harga' => 0,
+                'total_bayar' => 0,
+                'lebih_bayar' => 0,
+                'status_bayar' => 'Pending',
+                'keuangan_kotak' => 'Pending',
+                'catatan' => 'Pending sale - Cashier System',
+                'status_barang' => 'pending',
+                'date_created' => now(),
+                'date_updated' => now(),
+                'dibuat_oleh' => auth()->user()->name ?? 'Cashier'
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pending sale created',
+                'sale_id' => $saleId,
+                'invoice_number' => $invoiceNumber
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create pending sale: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Add item to existing sale
+     */
+    public function addItemToSale(Request $request)
+    {
+        $request->validate([
+            'sale_id' => 'required|exists:penjualan,kd_penjualan',
+            'product_id' => 'required|exists:produk,kd_produk',
+            'quantity' => 'required|integer|min:1'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $product = Product::where('kd_produk', $request->product_id)->first();
+            if (!$product) {
+                throw new \Exception('Product not found');
+            }
+
+            // Check stock
+            if ($product->stok_total < $request->quantity) {
+                throw new \Exception('Insufficient stock');
+            }
+
+            // Calculate profit
+            $profit = ($product->harga_jual - $product->hpp) * $request->quantity;
+
+            // Add item to penjualan_detail
+            DB::table('penjualan_detail')->insert([
+                'kd_penjualan' => $request->sale_id,
+                'kd_produk' => $request->product_id,
+                'nama_produk' => $product->nama_produk,
+                'produk_jenis' => $product->productType ? $product->productType->nama : 'Unknown',
+                'kd_pemasok' => $product->kd_pemasok ?? 1,
+                'pemasok' => $product->pemasok ?? 'Unknown',
+                'sistem_bayar' => 'Pending',
+                'hpp' => $product->hpp,
+                'harga_jual' => $product->harga_jual,
+                'qty' => $request->quantity,
+                'diskon' => 0,
+                'sub_total' => $request->quantity * $product->harga_jual,
+                'laba' => $profit,
+                'status_bayar' => 'Pending',
+                'catatan' => 'Added via Cashier',
+                'date_created' => now(),
+                'date_updated' => now(),
+                'dibuat_oleh' => auth()->user()->name ?? 'Cashier'
+            ]);
+
+            // Update sale totals
+            $sale = DB::table('penjualan')->where('kd_penjualan', $request->sale_id)->first();
+            $newSubtotal = $sale->sub_total + ($request->quantity * $product->harga_jual);
+            $tax = $newSubtotal * 0.11; // 11% tax
+            $total = $newSubtotal + $tax;
+
+            DB::table('penjualan')->where('kd_penjualan', $request->sale_id)->update([
+                'sub_total' => $newSubtotal,
+                'pajak' => $tax,
+                'total_harga' => $total,
+                'date_updated' => now()
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Item added to sale',
+                'sale_id' => $request->sale_id,
+                'new_totals' => [
+                    'subtotal' => $newSubtotal,
+                    'tax' => $tax,
+                    'total' => $total
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to add item: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get sale details from penjualan_detail
+     */
+    public function getSaleDetails(Request $request, $saleId)
+    {
+        try {
+            // Get the main sale record
+            $sale = DB::table('penjualan')->where('kd_penjualan', $saleId)->first();
+            
+            if (!$sale) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Sale not found'
+                ], 404);
+            }
+
+            // Get all detail items for this sale
+            $details = DB::table('penjualan_detail')
+                ->where('kd_penjualan', $saleId)
+                ->orderBy('kd_penjualan_detail', 'asc')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'sale' => $sale,
+                'details' => $details,
+                'total_items' => $details->count()
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to get sale details: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update item in penjualan_detail
+     */
+    public function updateSaleItem(Request $request, $detailId)
+    {
+        $request->validate([
+            'qty' => 'required|integer|min:1',
+            'harga_jual' => 'required|numeric|min:0',
+            'diskon' => 'nullable|numeric|min:0'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Get the detail item
+            $detail = DB::table('penjualan_detail')->where('kd_penjualan_detail', $detailId)->first();
+            if (!$detail) {
+                throw new \Exception('Sale detail not found');
+            }
+
+            // Get product info for calculations
+            $product = Product::where('kd_produk', $detail->kd_produk)->first();
+            if (!$product) {
+                throw new \Exception('Product not found');
+            }
+
+            $oldQty = $detail->qty;
+            $newQty = $request->qty;
+            $newPrice = $request->harga_jual;
+            $discount = $request->diskon ?? 0;
+
+            // Check stock availability for quantity changes
+            if ($newQty > $oldQty) {
+                $stockNeeded = $newQty - $oldQty;
+                if ($product->stok_total < $stockNeeded) {
+                    throw new \Exception('Insufficient stock for quantity increase');
+                }
+            }
+
+            // Calculate new values
+            $newSubtotal = ($newQty * $newPrice) - $discount;
+            $newProfit = ($newPrice - $product->hpp) * $newQty;
+
+            // Update the detail item
+            DB::table('penjualan_detail')
+                ->where('kd_penjualan_detail', $detailId)
+                ->update([
+                    'qty' => $newQty,
+                    'harga_jual' => $newPrice,
+                    'diskon' => $discount,
+                    'sub_total' => $newSubtotal,
+                    'laba' => $newProfit,
+                    'date_updated' => now()
+                ]);
+
+            // Update stock (adjust for quantity change)
+            if ($newQty != $oldQty) {
+                $stockAdjustment = $oldQty - $newQty; // Positive if reducing, negative if increasing
+                $product->increment('stok_total', $stockAdjustment);
+            }
+
+            // Recalculate sale totals
+            $this->recalculateSaleTotals($detail->kd_penjualan);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Sale item updated successfully',
+                'updated_item' => [
+                    'qty' => $newQty,
+                    'harga_jual' => $newPrice,
+                    'diskon' => $discount,
+                    'sub_total' => $newSubtotal,
+                    'laba' => $newProfit
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update sale item: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove item from penjualan_detail
+     */
+    public function removeSaleItem(Request $request, $detailId)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Get the detail item
+            $detail = DB::table('penjualan_detail')->where('kd_penjualan_detail', $detailId)->first();
+            if (!$detail) {
+                throw new \Exception('Sale detail not found');
+            }
+
+            $saleId = $detail->kd_penjualan;
+            $qty = $detail->qty;
+            $productId = $detail->kd_produk;
+
+            // Delete the detail item
+            DB::table('penjualan_detail')->where('kd_penjualan_detail', $detailId)->delete();
+
+            // Restore stock
+            $product = Product::where('kd_produk', $productId)->first();
+            if ($product) {
+                $product->increment('stok_total', $qty);
+            }
+
+            // Recalculate sale totals
+            $this->recalculateSaleTotals($saleId);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Sale item removed successfully'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to remove sale item: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get all sales with their details
+     */
+    public function getAllSalesWithDetails(Request $request)
+    {
+        try {
+            $page = $request->input('page', 1);
+            $perPage = $request->input('per_page', 20);
+            $search = $request->input('search', '');
+            $status = $request->input('status', '');
+
+            // Build the base query
+            $query = DB::table('penjualan');
+
+            // Add search conditions
+            if ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('no_faktur_penjualan', 'LIKE', "%{$search}%")
+                      ->orWhere('catatan', 'LIKE', "%{$search}%");
+                });
+            }
+
+            if ($status) {
+                $query->where('status_bayar', $status);
+            }
+
+            // Get total count for pagination
+            $total = $query->count();
+            
+            // Get paginated results
+            $offset = ($page - 1) * $perPage;
+            $sales = $query->orderBy('date_created', 'desc')
+                          ->offset($offset)
+                          ->limit($perPage)
+                          ->get();
+
+            // Get additional data for each sale
+            $salesWithDetails = $sales->map(function($sale) {
+                $details = DB::table('penjualan_detail')
+                    ->where('kd_penjualan', $sale->kd_penjualan)
+                    ->get();
+                
+                $sale->total_items = $details->count();
+                $sale->total_profit = $details->sum('laba');
+                
+                return $sale;
+            });
+
+            $lastPage = ceil($total / $perPage);
+
+            return response()->json([
+                'success' => true,
+                'sales' => $salesWithDetails,
+                'pagination' => [
+                    'current_page' => (int)$page,
+                    'last_page' => $lastPage,
+                    'per_page' => (int)$perPage,
+                    'total' => $total
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to get sales: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Helper method to recalculate sale totals
+     */
+    private function recalculateSaleTotals($saleId)
+    {
+        $details = DB::table('penjualan_detail')->where('kd_penjualan', $saleId)->get();
+        
+        $subtotal = $details->sum('sub_total');
+        $tax = $subtotal * 0.11; // 11% tax
+        $total = $subtotal + $tax;
+
+        DB::table('penjualan')->where('kd_penjualan', $saleId)->update([
+            'sub_total' => $subtotal,
+            'pajak' => $tax,
+            'total_harga' => $total,
+            'date_updated' => now()
         ]);
     }
 }

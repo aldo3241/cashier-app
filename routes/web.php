@@ -16,8 +16,28 @@ Route::get('/sales', [App\Http\Controllers\SalesController::class, 'index'])->na
 Route::get('/cashier', [App\Http\Controllers\CashierController::class, 'index'])->name('cashier');
 Route::post('/cashier/scan', [App\Http\Controllers\CashierController::class, 'scanProduct'])->name('cashier.scan');
 Route::post('/cashier/transaction', [App\Http\Controllers\CashierController::class, 'processTransaction'])->name('cashier.transaction');
+Route::post('/cashier/pending-sale', [App\Http\Controllers\CashierController::class, 'createPendingSale'])->name('cashier.pending-sale');
+Route::post('/cashier/add-item', [App\Http\Controllers\CashierController::class, 'addItemToSale'])->name('cashier.add-item');
 Route::get('/cashier/products', [App\Http\Controllers\CashierController::class, 'getProducts'])->name('cashier.products');
 Route::get('/cashier/product-types', [App\Http\Controllers\CashierController::class, 'getProductTypes'])->name('cashier.product-types');
+
+// Penjualan Detail Management Routes
+Route::get('/cashier/sale/{saleId}/details', [App\Http\Controllers\CashierController::class, 'getSaleDetails'])->name('cashier.sale.details');
+Route::put('/cashier/sale-item/{detailId}', [App\Http\Controllers\CashierController::class, 'updateSaleItem'])->name('cashier.sale-item.update');
+Route::delete('/cashier/sale-item/{detailId}', [App\Http\Controllers\CashierController::class, 'removeSaleItem'])->name('cashier.sale-item.remove');
+Route::get('/cashier/sales-with-details', [App\Http\Controllers\CashierController::class, 'getAllSalesWithDetails'])->name('cashier.sales.with-details');
+Route::get('/sale-details', function() {
+    return view('sales.sale-details');
+})->name('sale-details');
+
+// Payment Methods Management Routes
+Route::get('/payment-methods', [App\Http\Controllers\KeuanganKotakController::class, 'index'])->name('payment-methods.index');
+Route::get('/payment-methods/all', [App\Http\Controllers\KeuanganKotakController::class, 'getAllPaymentMethods'])->name('payment-methods.all');
+Route::post('/payment-methods', [App\Http\Controllers\KeuanganKotakController::class, 'store'])->name('payment-methods.store');
+Route::get('/payment-methods/{id}', [App\Http\Controllers\KeuanganKotakController::class, 'show'])->name('payment-methods.show');
+Route::put('/payment-methods/{id}', [App\Http\Controllers\KeuanganKotakController::class, 'update'])->name('payment-methods.update');
+Route::delete('/payment-methods/{id}', [App\Http\Controllers\KeuanganKotakController::class, 'destroy'])->name('payment-methods.destroy');
+Route::get('/payment-methods/dropdown/all', [App\Http\Controllers\KeuanganKotakController::class, 'getAllForDropdown'])->name('payment-methods.dropdown');
 
 // Test route to verify akun table connection
 Route::get('/test-users', function () {

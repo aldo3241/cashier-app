@@ -11,18 +11,277 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css">
     <!-- Tabler Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.40.0/tabler-icons.min.css">
+    <!-- Font Awesome as backup -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Custom CSS -->
     <style>
-        .navbar-brand {
-            font-weight: 700;
+        /* Reset and Base Styles */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow-x: hidden;
+        }
+        
+        /* App Container */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            min-width: 280px;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            flex-shrink: 0;
+        }
+        
+        .sidebar.collapsed {
+            width: 70px;
+            min-width: 70px;
+        }
+        
+        .sidebar.collapsed .sidebar-brand span,
+        .sidebar.collapsed .nav-link span,
+        .sidebar.collapsed .sidebar-footer .nav-link span {
+            display: none;
+        }
+        
+        .sidebar.collapsed .sidebar-header {
+            padding: 1rem 0.5rem;
+        }
+        
+        .sidebar.collapsed .sidebar-brand {
+            margin: 0;
+        }
+        
+        .sidebar.collapsed .sidebar-toggle i {
+            transform: rotate(180deg);
+        }
+        
+        .sidebar.collapsed .nav-link {
+            padding: 0.75rem 0.5rem;
+            justify-content: center;
+        }
+        
+        .sidebar.collapsed .nav-link i {
+            margin-right: 0;
+            font-size: 1.2rem;
+        }
+        
+        .sidebar.collapsed .sidebar-footer {
+            padding: 0.5rem;
+        }
+        
+        /* Sidebar Header */
+        .sidebar-header {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+        
+        .sidebar-brand {
+            margin: 0;
             font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .sidebar-brand a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+        
+        .sidebar-brand a:hover {
+            color: #667eea;
+        }
+        
+        .sidebar-brand span {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+            text-align: center;
+        }
+        
+        .sidebar-toggle {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.25rem;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Sidebar Navigation */
+        .sidebar-nav {
+            flex: 1;
+            padding: 1rem 0;
+            overflow-y: auto;
+            max-height: calc(100vh - 200px);
+        }
+        
+        .sidebar-nav::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .sidebar-nav::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+        }
+        
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+        }
+        
+        .sidebar-nav::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        .nav-item {
+            margin: 0.25rem 1rem;
         }
         
         .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
             font-weight: 500;
         }
         
+        .nav-link:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .nav-link i {
+            margin-right: 0.75rem;
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .nav-link span {
+            font-size: 0.95rem;
+        }
+        
+        /* Sidebar Footer */
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: auto;
+            position: sticky;
+            bottom: 0;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            z-index: 10;
+        }
+        
+        .sidebar-footer .nav-link {
+            margin: 0;
+            border-radius: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-footer .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            background: #f8f9fa;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+            margin-left: 0;
+            width: 100%;
+        }
+        
+        .content-wrapper {
+            padding: 2rem;
+            max-width: 100%;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100vh;
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .content-wrapper {
+                padding: 1rem;
+            }
+        }
+        
+        /* Existing Styles */
         .btn-cashier {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
@@ -72,104 +331,169 @@
     </style>
 </head>
 <body>
-    <div class="page">
-        <!-- Navbar -->
-        <header class="navbar navbar-expand-md navbar-light d-print-none">
-            <div class="container-xl">
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
+    <div class="app-container">
+        <!-- Left Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h1 class="sidebar-brand">
                     <a href="{{ route('home') }}">
-                        <i class="ti ti-cash-register text-primary me-2"></i>
-                        {{ config('app.name', 'CASHIER-APP') }}
+                        <span>{{ config('app.name', 'CASHIER-APP') }}</span>
                     </a>
                 </h1>
-                
-                <div class="navbar-nav flex-row order-md-last">
-                    <div class="nav-item dropdown">
-                        <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown">
-                            <span class="avatar avatar-sm">
-                                <i class="ti ti-user-circle fa-2x"></i>
-                            </span>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                            @auth
-                                <a class="dropdown-item" href="#">
-                                    <i class="ti ti-user me-2"></i>Profile
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <button type="submit" class="dropdown-item">
-                                        <i class="ti ti-logout me-2"></i>Logout
-                                    </button>
-                                </form>
-                            @else
-                                <a class="dropdown-item" href="{{ route('login') }}">
-                                    <i class="ti ti-login me-2"></i>Login
-                                </a>
-                            @endauth
-                        </div>
+                <button class="sidebar-toggle" id="sidebarToggle" type="button">
+                    <i class="ti ti-chevron-left"></i>
+                </button>
+            </div>
+            
+            <div class="sidebar-nav">
+                <div class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">
+                        <i class="ti ti-home"></i>
+                        <span>Home</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('cashier') ? 'active' : '' }}" href="{{ route('cashier') }}">
+                        <i class="fas fa-cash-register"></i>
+                        <span>Cashier</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}" href="{{ route('products.index') }}">
+                        <i class="ti ti-package"></i>
+                        <span>Products</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('sale-details') ? 'active' : '' }}" href="{{ route('sale-details') }}">
+                        <i class="ti ti-receipt"></i>
+                        <span>Sale Details</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('payment-methods.*') ? 'active' : '' }}" href="{{ route('payment-methods.index') }}">
+                        <i class="ti ti-credit-card"></i>
+                        <span>Payment Methods</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link" data-bs-toggle="dropdown">
+                        <i class="ti ti-user-circle"></i>
+                        <span>Account</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                        @auth
+                            <a class="dropdown-item" href="#">
+                                <i class="ti ti-user me-2"></i>Profile
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="dropdown-item">
+                                    <i class="ti ti-logout me-2"></i>Logout
+                                </button>
+                            </form>
+                        @else
+                            <a class="dropdown-item" href="{{ route('login') }}">
+                                <i class="ti ti-login me-2"></i>Login
+                            </a>
+                        @endauth
                     </div>
                 </div>
             </div>
-        </header>
-        
-        <!-- Navbar Menu -->
-        <div class="navbar-expand-md">
-            <div class="collapse navbar-collapse" id="navbar-menu">
-                <div class="navbar">
-                    <div class="container-xl">
-                        <ul class="navbar-nav">
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('home') }}">
-                                    <span class="nav-link-icon d-md-none d-lg-inline-block">
-                                        <i class="ti ti-home"></i>
-                                    </span>
-                                    <span class="nav-link-title">Home</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('cashier') }}">
-                                    <span class="nav-link-icon d-md-none d-lg-inline-block">
-                                        <i class="ti ti-cash-register"></i>
-                                    </span>
-                                    <span class="nav-link-title">Cashier</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('products.index') }}">
-                                    <span class="nav-link-icon d-md-none d-lg-inline-block">
-                                        <i class="ti ti-package"></i>
-                                    </span>
-                                    <span class="nav-link-title">Products</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('sales') }}">
-                                    <span class="nav-link-icon d-md-none d-lg-inline-block">
-                                        <i class="ti ti-chart-line"></i>
-                                    </span>
-                                    <span class="nav-link-title">Sales</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
+        </aside>
 
-        <!-- Page Content -->
-        <div class="page-wrapper">
-            <div class="container-xl">
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <div class="content-wrapper">
                 @yield('content')
             </div>
-        </div>
+        </main>
     </div>
 
     <!-- Tabler Core JS -->
     <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
+    
+    <!-- Sidebar Toggle Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            
+            // Check if Tabler icons are working, if not use Font Awesome fallback
+            const tablerIcon = document.querySelector('.ti.ti-cash-register');
+            const fallbackIcon = document.querySelector('.fas.fa-cash-register');
+            
+            if (tablerIcon && fallbackIcon) {
+                // Check if Tabler icon is visible (has content)
+                if (!tablerIcon.textContent.trim() && !tablerIcon.innerHTML.includes('data-icon')) {
+                    tablerIcon.style.display = 'none';
+                    fallbackIcon.style.display = 'inline-block';
+                }
+            }
+            
+            // Check if sidebar state is saved in localStorage
+            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            if (isCollapsed) {
+                sidebar.classList.add('collapsed');
+            }
+            
+            if (sidebarToggle && sidebar) {
+                sidebarToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    console.log('Toggle button clicked!');
+                    sidebar.classList.toggle('collapsed');
+                    
+                    // Save state to localStorage
+                    const isNowCollapsed = sidebar.classList.contains('collapsed');
+                    localStorage.setItem('sidebarCollapsed', isNowCollapsed);
+                    
+                    console.log('Sidebar collapsed:', isNowCollapsed);
+                });
+            } else {
+                console.error('Sidebar toggle elements not found:', { sidebarToggle, sidebar });
+            }
+            
+            // Mobile sidebar toggle (if needed)
+            const mobileToggle = document.createElement('button');
+            mobileToggle.className = 'mobile-toggle d-lg-none';
+            mobileToggle.innerHTML = '<i class="ti ti-menu"></i>';
+            mobileToggle.style.cssText = `
+                position: fixed;
+                top: 1rem;
+                left: 1rem;
+                z-index: 1001;
+                background: #667eea;
+                color: white;
+                border: none;
+                border-radius: 0.5rem;
+                padding: 0.5rem;
+                font-size: 1.2rem;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            `;
+            
+            document.body.appendChild(mobileToggle);
+            
+            mobileToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('show');
+            });
+            
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', function(e) {
+                if (window.innerWidth <= 991.98) {
+                    if (!sidebar.contains(e.target) && !mobileToggle.contains(e.target)) {
+                        sidebar.classList.remove('show');
+                    }
+                }
+            });
+        });
+    </script>
     
     @yield('scripts')
 </body>
