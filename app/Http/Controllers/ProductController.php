@@ -180,6 +180,17 @@ class ProductController extends Controller
     public function show($id)
     {
         $product = Product::with('productType')->findOrFail($id);
+        
+        // Calculate stock from stok table
+        $stockIn = DB::table('stok')->where('kd_produk', $id)->sum('masuk');
+        $stockOut = DB::table('stok')->where('kd_produk', $id)->sum('keluar');
+        $calculatedStock = $stockIn - $stockOut;
+        
+        // Add stock information to the product object
+        $product->stok_masuk = $stockIn;
+        $product->stok_keluar = $stockOut;
+        $product->calculated_stock = $calculatedStock;
+        
         return view('products.show', compact('product'));
     }
 
@@ -335,7 +346,7 @@ class ProductController extends Controller
                     'id' => $product->kd_produk,
                     'name' => $product->nama_produk,
                     'price' => $product->harga_jual,
-                    'stock' => $product->stok_total,
+                    'stock' => $product->stok_total, // Use stock from produk table
                     'image' => $product->gambar_produk,
                     'type' => $product->productType ? $product->productType->nama : 'N/A',
                     'stock_status' => $product->stock_status,

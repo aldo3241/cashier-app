@@ -122,7 +122,7 @@
                         </div>
                         <div class="col-md-4 text-center">
                             <div class="stock-stat">
-                                <div class="stock-number text-primary fw-bold">{{ $product->stok_total ?? 0 }}</div>
+                                <div class="stock-number text-primary fw-bold">{{ $product->calculated_stock ?? 0 }}</div>
                                 <div class="stock-label">Total Stock</div>
                             </div>
                         </div>

@@ -107,11 +107,19 @@ class Product extends Model
     }
 
     // Accessors
+    public function getCalculatedStockAttribute()
+    {
+        $stockIn = \DB::table('stok')->where('kd_produk', $this->kd_produk)->sum('masuk');
+        $stockOut = \DB::table('stok')->where('kd_produk', $this->kd_produk)->sum('keluar');
+        return $stockIn - $stockOut;
+    }
+
     public function getStockStatusAttribute()
     {
-        if ($this->stok_total <= 0) {
+        $stock = $this->stok_total;
+        if ($stock <= 0) {
             return 'Out of Stock';
-        } elseif ($this->stok_total <= 10) {
+        } elseif ($stock <= 10) {
             return 'Low Stock';
         } else {
             return 'In Stock';
@@ -120,9 +128,10 @@ class Product extends Model
 
     public function getStockStatusClassAttribute()
     {
-        if ($this->stok_total <= 0) {
+        $stock = $this->stok_total;
+        if ($stock <= 0) {
             return 'danger';
-        } elseif ($this->stok_total <= 10) {
+        } elseif ($stock <= 10) {
             return 'warning';
         } else {
             return 'success';

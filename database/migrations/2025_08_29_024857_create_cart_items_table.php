@@ -13,7 +13,16 @@ return new class extends Migration
     {
         Schema::create('cart_items', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->string('session_id', 100);
+            $table->unsignedBigInteger('kd_produk');
+            $table->integer('quantity');
+            $table->decimal('price', 10, 2);
+            $table->decimal('subtotal', 10, 2);
+            $table->timestamp('created_at')->nullable();
+            $table->timestamp('updated_at')->nullable();
+            
+            $table->index('session_id');
+            $table->foreign('kd_produk')->references('kd_produk')->on('produk')->onDelete('cascade');
         });
     }
 
