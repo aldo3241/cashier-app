@@ -1,183 +1,23 @@
 @extends('layouts.app')
 
-@section('title', 'Payment Methods Management')
+@section('title', 'Payment Methods')
 
 @section('content')
-<style>
-/* Custom styles for payment methods management */
-.table-responsive {
-    border-radius: 0.5rem;
-    overflow: hidden;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-}
-
-.card-table {
-    margin-bottom: 0;
-}
-
-.card-table thead th {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-bottom: 2px solid #dee2e6;
-    font-weight: 600;
-    color: #495057;
-    padding: 1rem 0.75rem;
-    text-transform: uppercase;
-    font-size: 0.875rem;
-    letter-spacing: 0.5px;
-}
-
-.card-table tbody td {
-    padding: 1rem 0.75rem;
-    vertical-align: middle;
-    border-bottom: 1px solid #f1f3f4;
-}
-
-.card-table tbody tr:hover {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease;
-}
-
-.card-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-.badge {
-    font-size: 0.75rem;
-    padding: 0.375rem 0.75rem;
-    font-weight: 500;
-}
-
-.btn-list .btn {
-    margin-right: 0.25rem;
-    transition: all 0.2s ease;
-}
-
-.btn-list .btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-}
-
-.btn-list .btn:last-child {
-    margin-right: 0;
-}
-
-/* Loading animation */
-.spinner-border-sm {
-    width: 1rem;
-    height: 1rem;
-}
-
-#loadingState {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-radius: 1rem;
-    padding: 3rem 1rem;
-}
-
-#loadingState .spinner-border {
-    border-width: 0.25rem;
-}
-
-#loadingState h4 {
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-/* Empty state improvements */
-.empty {
-    padding: 3rem 1rem;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-radius: 1rem;
-    border: 2px dashed #dee2e6;
-}
-
-.empty-img {
-    margin-bottom: 1.5rem;
-}
-
-.empty-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 0.75rem;
-    color: #495057;
-}
-
-.empty-subtitle {
-    font-size: 1.1rem;
-    margin-bottom: 2rem;
-    color: #6c757d;
-}
-
-/* Modal improvements */
-.modal-lg {
-    max-width: 600px;
-}
-
-/* Toast improvements */
-.toast-container {
-    z-index: 9999;
-}
-
-.toast {
-    min-width: 300px;
-}
-
-/* Pagination improvements */
-.pagination {
-    margin-bottom: 0;
-}
-
-.page-link {
-    padding: 0.5rem 0.75rem;
-    color: #495057;
-    border-color: #dee2e6;
-}
-
-.page-link:hover {
-    color: #0d6efd;
-    background-color: #e9ecef;
-    border-color: #dee2e6;
-}
-
-.page-item.active .page-link {
-    background-color: #0d6efd;
-    border-color: #0d6efd;
-}
-
-/* Responsive improvements */
-@media (max-width: 768px) {
-    .table-responsive {
-        font-size: 0.875rem;
-    }
-    
-    .card-table thead th,
-    .card-table tbody td {
-        padding: 0.75rem 0.5rem;
-    }
-    
-    .btn-sm {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.75rem;
-    }
-}
-</style>
-
 <!-- Page header -->
 <div class="page-header d-print-none">
     <div class="container-xl">
         <div class="row g-2 align-items-center">
             <div class="col">
                 <h2 class="page-title">
-                    <i class="ti ti-credit-card text-primary me-2"></i>
-                    Payment Methods Management
+                    <i class="fas fa-credit-card text-primary me-2"></i>
+                    Payment Methods
                 </h2>
-                <div class="text-muted mt-1">Manage payment methods and financial categories</div>
+                <div class="text-muted mt-1">Manage payment methods and financial accounts</div>
             </div>
             <div class="col-auto ms-auto d-print-none">
                 <div class="btn-list">
-                    <button class="btn btn-primary" onclick="showAddModal()">
-                        <i class="ti ti-plus me-2"></i>Add Payment Method
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPaymentMethodModal">
+                        <i class="fas fa-plus me-2"></i>Add Payment Method
                     </button>
                 </div>
             </div>
@@ -187,29 +27,30 @@
 
 <div class="page-body">
     <div class="container-xl">
-        <!-- Search Section -->
+        <!-- Search and Filters -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card">
+                <div class="card card-cashier">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-search me-2"></i>Search & Filters
+                        </h3>
+                    </div>
                     <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-lg-8 col-md-6">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="form-group">
                                 <label class="form-label">Search Payment Methods</label>
-                                <input type="text" class="form-control" id="searchPaymentMethods" placeholder="Search by payment method name...">
+                                    <input type="text" class="form-control" id="searchInput" placeholder="Search by name or type">
                             </div>
-                            <div class="col-lg-2 col-md-3">
-                                <label class="form-label">Items per page</label>
-                                <select class="form-select" id="perPageFilter">
-                                    <option value="10">10</option>
-                                    <option value="20" selected>20</option>
-                                    <option value="50">50</option>
-                                </select>
                             </div>
-                            <div class="col-lg-2 col-md-3">
+                            <div class="col-md-4">
+                                <div class="form-group">
                                 <label class="form-label">&nbsp;</label>
-                                <button class="btn btn-primary w-100" onclick="searchPaymentMethods()" id="searchBtn">
-                                    <i class="ti ti-search me-2"></i>Search
+                                    <button class="btn btn-primary w-100" id="searchBtn">
+                                        <i class="fas fa-search me-2"></i>Search
                                 </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -220,9 +61,11 @@
         <!-- Payment Methods List -->
         <div class="row">
             <div class="col-12">
-                <div class="card">
+                <div class="card card-cashier">
                     <div class="card-header">
-                        <h3 class="card-title">Payment Methods</h3>
+                        <h3 class="card-title">
+                            <i class="fas fa-credit-card text-primary me-2"></i>Payment Methods
+                        </h3>
                         <div class="card-actions">
                             <div class="spinner-border spinner-border-sm text-primary d-none" id="loadingSpinner" role="status">
                                 <span class="visually-hidden">Loading...</span>
@@ -230,23 +73,23 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <!-- Loading State -->
-                        <div id="loadingState" class="text-center py-5 d-none">
-                            <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                            <h4 class="text-muted">Loading payment methods...</h4>
-                            <p class="text-muted">Please wait while we fetch your payment methods</p>
-                        </div>
-                        
-                        <!-- Payment Methods List -->
                         <div id="paymentMethodsList">
-                            <!-- Payment methods will be loaded here -->
+                            <div class="text-center py-4">
+                                <div class="empty">
+                                    <div class="empty-img">
+                                        <i class="fas fa-credit-card fa-4x text-muted mb-3"></i>
+                                    </div>
+                                    <p class="empty-title">No payment methods found</p>
+                                    <p class="empty-subtitle text-muted">
+                                        Add your first payment method to get started
+                                    </p>
+                                    <div class="empty-action">
+                                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPaymentMethodModal">
+                                            <i class="fas fa-plus me-2"></i>Add Payment Method
+                                        </button>
+                            </div>
                         </div>
-                        
-                        <!-- Pagination -->
-                        <div id="paymentMethodsPagination" class="mt-3">
-                            <!-- Pagination will be loaded here -->
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -256,38 +99,77 @@
 </div>
 
 <!-- Add/Edit Payment Method Modal -->
-<div class="modal modal-blur fade" id="paymentMethodModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
+<div class="modal modal-blur fade" id="addPaymentMethodModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle">
-                    <i class="ti ti-plus text-primary me-2"></i>
-                    Add Payment Method
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header bg-gradient-primary text-white">
+                <h4 class="modal-title" id="modalTitle">
+                    <i class="fas fa-plus text-primary me-2"></i>Add Payment Method
+                </h4>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body p-4">
                 <form id="paymentMethodForm">
-                    <input type="hidden" id="editPaymentMethodId">
-                    <div class="row g-3">
-                        <div class="col-12">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
                             <label class="form-label">Payment Method Name</label>
-                            <input type="text" class="form-control" id="paymentMethodName" placeholder="e.g., Cash, Credit Card, Bank Transfer" required>
-                            <div class="invalid-feedback" id="nameError"></div>
-                        </div>
-                        <div class="col-12">
-                            <div class="alert alert-info">
-                                <i class="ti ti-info-circle me-2"></i>
-                                <strong>Note:</strong> Payment method names must be unique. Once created, they can be used in sales transactions.
+                                <input type="text" class="form-control form-control-lg" id="paymentMethodName" 
+                                       placeholder="e.g., Cash, BCA Transfer, Debit Card" required>
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Payment Type</label>
+                                <select class="form-select form-select-lg" id="paymentType" required>
+                                    <option value="">Select Type</option>
+                                    <option value="Cash">Cash</option>
+                                    <option value="Bank Transfer">Bank Transfer</option>
+                                    <option value="Card">Card</option>
+                                    <option value="Digital Wallet">Digital Wallet</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Account Number (Optional)</label>
+                                <input type="text" class="form-control form-control-lg" id="accountNumber" 
+                                       placeholder="e.g., 1234567890">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">Bank Name (Optional)</label>
+                                <input type="text" class="form-control form-control-lg" id="bankName" 
+                                       placeholder="e.g., BCA, Mandiri, BNI">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control form-control-lg" id="description" rows="3" 
+                                  placeholder="Additional details about this payment method"></textarea>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="isActive" checked>
+                        <label class="form-check-label" for="isActive">
+                            Active (Available for transactions)
+                        </label>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="savePaymentMethod()" id="saveBtn">
-                    <i class="ti ti-check me-2"></i>Save Payment Method
+                <button type="button" class="btn btn-secondary btn-lg" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-primary btn-lg" id="savePaymentMethod">
+                    <i class="fas fa-check me-2"></i>Save Payment Method
                 </button>
             </div>
         </div>
@@ -295,86 +177,94 @@
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div class="modal modal-blur fade" id="deleteModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-sm" role="document">
+<div class="modal modal-blur fade" id="deletePaymentMethodModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title text-danger">
-                    <i class="ti ti-alert-triangle text-danger me-2"></i>
-                    Confirm Delete
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header bg-gradient-danger text-white">
+                <h4 class="modal-title">
+                    <i class="fas fa-exclamation-triangle text-danger me-2"></i>Confirm Delete
+                </h4>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete this payment method?</p>
-                <p class="text-muted"><strong id="deletePaymentMethodName"></strong></p>
-                <div class="alert alert-warning">
-                    <i class="ti ti-alert-circle me-2"></i>
-                    <strong>Warning:</strong> This action cannot be undone.
+            <div class="modal-body p-4">
+                <div class="text-center">
+                    <i class="fas fa-exclamation-circle fa-3x text-danger mb-3"></i>
+                    <h5>Are you sure?</h5>
+                    <p class="text-muted">This payment method will be permanently deleted and cannot be recovered.</p>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" onclick="confirmDelete()">
-                    <i class="ti ti-trash me-2"></i>Delete
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">
+                    <i class="fas fa-trash me-2"></i>Delete
                 </button>
             </div>
         </div>
     </div>
 </div>
 
+@endsection
+
+@section('scripts')
 <script>
 let currentPage = 1;
-let currentPerPage = 20;
-let currentPaymentMethodId = null;
+let totalPages = 1;
+let editingPaymentMethodId = null;
+let deletingPaymentMethodId = null;
 
-// Initialize page
 document.addEventListener('DOMContentLoaded', function() {
     loadPaymentMethods();
     
-    // Add event listeners
-    document.getElementById('searchPaymentMethods').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            searchPaymentMethods();
-        }
-    });
-    
-    document.getElementById('perPageFilter').addEventListener('change', function() {
-        currentPerPage = parseInt(this.value);
+    // Event listeners
+    document.getElementById('searchBtn').addEventListener('click', function() {
         currentPage = 1;
         loadPaymentMethods();
     });
+    
+    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            currentPage = 1;
+            loadPaymentMethods();
+        }
+    });
+    
+    document.getElementById('savePaymentMethod').addEventListener('click', savePaymentMethod);
+    document.getElementById('confirmDelete').addEventListener('click', confirmDeletePaymentMethod);
+    
+    // Modal event listeners
+    document.getElementById('addPaymentMethodModal').addEventListener('hidden.bs.modal', function() {
+        resetForm();
+    });
 });
 
-function showLoading() {
-    document.getElementById('loadingState').classList.remove('d-none');
-    document.getElementById('paymentMethodsList').innerHTML = '';
-    document.getElementById('paymentMethodsPagination').innerHTML = '';
-}
-
-function hideLoading() {
-    document.getElementById('loadingState').classList.add('d-none');
-}
-
-function loadPaymentMethods() {
-    showLoading();
-    const search = document.getElementById('searchPaymentMethods').value;
+async function loadPaymentMethods() {
+    const searchTerm = document.getElementById('searchInput').value;
     
-    fetch(`/payment-methods/all?page=${currentPage}&per_page=${currentPerPage}&search=${search}`)
-        .then(response => response.json())
-        .then(data => {
-            hideLoading();
-            if (data.success) {
-                displayPaymentMethods(data.payment_methods);
-                displayPagination(data.pagination);
-            } else {
-                showError('Failed to load payment methods: ' + data.message);
+    try {
+        showLoading();
+        
+        const response = await fetch(`/api/payment-methods?page=${currentPage}&search=${searchTerm}`, {
+            method: 'GET',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             }
-        })
-        .catch(error => {
-            hideLoading();
-            showError('Network error: ' + error.message);
         });
+        
+        if (response.ok) {
+            const data = await response.json();
+                displayPaymentMethods(data.payment_methods);
+            updatePagination(data.current_page, data.last_page);
+            } else {
+            showError('Failed to load payment methods');
+        }
+    } catch (error) {
+        console.error('Error loading payment methods:', error);
+        showError('Network error: ' + error.message);
+    } finally {
+            hideLoading();
+    }
 }
 
 function displayPaymentMethods(paymentMethods) {
@@ -382,20 +272,15 @@ function displayPaymentMethods(paymentMethods) {
     
     if (paymentMethods.length === 0) {
         container.innerHTML = `
-            <div class="text-center py-5">
+            <div class="text-center py-4">
                 <div class="empty">
                     <div class="empty-img">
-                        <i class="ti ti-credit-card fa-4x text-muted mb-3"></i>
+                        <i class="fas fa-credit-card fa-4x text-muted mb-3"></i>
                     </div>
-                    <h3 class="empty-title">No payment methods found</h3>
+                    <p class="empty-title">No payment methods found</p>
                     <p class="empty-subtitle text-muted">
-                        Try adjusting your search criteria or add a new payment method
+                        No payment methods match your search criteria
                     </p>
-                    <div class="empty-action">
-                        <button class="btn btn-primary btn-lg" onclick="showAddModal()">
-                            <i class="ti ti-plus me-2"></i>Add Payment Method
-                        </button>
-                    </div>
                 </div>
             </div>
         `;
@@ -404,51 +289,46 @@ function displayPaymentMethods(paymentMethods) {
     
     let html = `
         <div class="table-responsive">
-            <table class="table table-vcenter card-table">
+            <table class="table table-vcenter">
                 <thead>
                     <tr>
-                        <th class="text-nowrap">ID</th>
-                        <th class="text-nowrap">Payment Method Name</th>
-                        <th class="text-nowrap">Created Date</th>
-                        <th class="text-nowrap">Last Updated</th>
-                        <th class="w-1 text-nowrap">Actions</th>
+                        <th>Payment Method</th>
+                        <th>Type</th>
+                        <th>Account Details</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
     `;
     
-    paymentMethods.forEach(method => {
-        const createdDate = new Date(method.date_created).toLocaleDateString('id-ID');
-        const updatedDate = new Date(method.date_updated).toLocaleDateString('id-ID');
+    paymentMethods.forEach(paymentMethod => {
+        const statusClass = paymentMethod.is_active ? 'success' : 'secondary';
+        const statusText = paymentMethod.is_active ? 'Active' : 'Inactive';
         
         html += `
-            <tr class="align-middle">
-                <td>
+            <tr>
+                <td class="h6">
                     <div class="d-flex align-items-center">
-                        <div class="subheader fw-semibold">${method.kd_keuangan_kotak}</div>
+                        <i class="fas fa-credit-card me-1"></i>
+                        ${paymentMethod.nama_metode_pembayaran}
                     </div>
                 </td>
+                <td><span class="badge bg-primary">${paymentMethod.jenis_pembayaran}</span></td>
                 <td>
-                    <div class="d-flex align-items-center">
-                        <span class="badge bg-primary rounded-pill me-2">
-                            <i class="ti ti-credit-card me-1"></i>
-                        </span>
-                        <div class="text-body-secondary fw-medium">${method.nama}</div>
-                    </div>
+                    ${paymentMethod.nomor_rekening ? `Account: ${paymentMethod.nomor_rekening}` : 'N/A'}
+                    ${paymentMethod.nama_bank ? `<br><small class="text-muted">${paymentMethod.nama_bank}</small>` : ''}
                 </td>
-                <td>
-                    <div class="text-body-secondary">${createdDate}</div>
-                </td>
-                <td>
-                    <div class="text-body-secondary">${updatedDate}</div>
-                </td>
-                <td>
-                    <div class="btn-list flex-nowrap">
-                        <button class="btn btn-sm btn-outline-primary" onclick="editPaymentMethod(${method.kd_keuangan_kotak}, '${method.nama}')" title="Edit">
-                            <i class="ti ti-edit me-1"></i>Edit
+                <td><span class="badge bg-${statusClass}">${statusText}</span></td>
+                <td>${new Date(paymentMethod.created_at).toLocaleDateString('id-ID')}</td>
+                <td class="text-center">
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-warning btn-sm" onclick="editPaymentMethod(${paymentMethod.kd_metode_pembayaran})" title="Edit">
+                            <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deletePaymentMethod(${method.kd_keuangan_kotak}, '${method.nama}')" title="Delete">
-                            <i class="ti ti-trash me-1"></i>Delete
+                        <button class="btn btn-danger btn-sm" onclick="deletePaymentMethod(${paymentMethod.kd_metode_pembayaran})" title="Delete">
+                            <i class="fas fa-trash"></i>
                         </button>
                     </div>
                 </td>
@@ -460,243 +340,187 @@ function displayPaymentMethods(paymentMethods) {
     container.innerHTML = html;
 }
 
-function displayPagination(pagination) {
-    const container = document.getElementById('paymentMethodsPagination');
+function updatePagination(currentPage, lastPage) {
+    totalPages = lastPage;
     
-    if (pagination.last_page <= 1) {
-        container.innerHTML = '';
-        return;
-    }
+    if (lastPage <= 1) return;
     
-    let html = '<nav><ul class="pagination justify-content-center">';
-    
-    // Previous button
-    if (pagination.current_page > 1) {
-        html += `
-            <li class="page-item">
-                <a class="page-link" href="#" onclick="goToPage(${pagination.current_page - 1})">
-                    <i class="ti ti-chevron-left"></i>
-                    Previous
-                </a>
-            </li>
-        `;
-    }
-    
-    // Page numbers with ellipsis for large numbers
-    const startPage = Math.max(1, pagination.current_page - 2);
-    const endPage = Math.min(pagination.last_page, pagination.current_page + 2);
-    
-    if (startPage > 1) {
-        html += `<li class="page-item"><a class="page-link" href="#" onclick="goToPage(1)">1</a></li>`;
-        if (startPage > 2) {
-            html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
-        }
-    }
-    
-    for (let i = startPage; i <= endPage; i++) {
-        if (i === pagination.current_page) {
-            html += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
-        } else {
-            html += `<li class="page-item"><a class="page-link" href="#" onclick="goToPage(${i})">${i}</a></li>`;
-        }
-    }
-    
-    if (endPage < pagination.last_page) {
-        if (endPage < pagination.last_page - 1) {
-            html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
-        }
-        html += `<li class="page-item"><a class="page-link" href="#" onclick="goToPage(${pagination.last_page})">${pagination.last_page}</a></li>`;
-    }
-    
-    // Next button
-    if (pagination.current_page < pagination.last_page) {
-        html += `
-            <li class="page-item">
-                <a class="page-link" href="#" onclick="goToPage(${pagination.current_page + 1})">
-                    Next
-                    <i class="ti ti-chevron-right"></i>
-                </a>
-            </li>
-        `;
-    }
-    
-    html += '</ul></nav>';
-    
-    // Add summary info
-    html += `
-        <div class="text-center text-muted mt-2">
-            Showing ${((pagination.current_page - 1) * pagination.per_page) + 1} to ${Math.min(pagination.current_page * pagination.per_page, pagination.total)} of ${pagination.total} results
+    const paginationHtml = `
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <div class="text-muted">
+                Page ${currentPage} of ${lastPage}
+            </div>
+            <div class="btn-group" role="group">
+                <button class="btn btn-outline-primary" onclick="changePage(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="btn btn-outline-primary" onclick="changePage(${currentPage + 1})" ${currentPage >= lastPage ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
         </div>
     `;
     
-    container.innerHTML = html;
+    document.getElementById('paymentMethodsList').insertAdjacentHTML('beforeend', paginationHtml);
 }
 
-function goToPage(page) {
+function changePage(page) {
+    if (page < 1 || page > totalPages) return;
     currentPage = page;
     loadPaymentMethods();
-    document.getElementById('paymentMethodsList').scrollIntoView({ behavior: 'smooth' });
 }
 
-function searchPaymentMethods() {
-    currentPage = 1;
-    loadPaymentMethods();
-}
-
-function showAddModal() {
-    currentPaymentMethodId = null;
-    document.getElementById('modalTitle').innerHTML = '<i class="ti ti-plus text-primary me-2"></i>Add Payment Method';
-    document.getElementById('paymentMethodForm').reset();
-    document.getElementById('editPaymentMethodId').value = '';
-    document.getElementById('nameError').textContent = '';
-    document.getElementById('paymentMethodName').classList.remove('is-invalid');
+function editPaymentMethod(id) {
+    editingPaymentMethodId = id;
     
-    const modal = new bootstrap.Modal(document.getElementById('paymentMethodModal'));
+    // Load payment method data
+    fetch(`/api/payment-methods/${id}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const paymentMethod = data.payment_method;
+                
+                document.getElementById('paymentMethodName').value = paymentMethod.nama_metode_pembayaran;
+                document.getElementById('paymentType').value = paymentMethod.jenis_pembayaran;
+                document.getElementById('accountNumber').value = paymentMethod.nomor_rekening || '';
+                document.getElementById('bankName').value = paymentMethod.nama_bank || '';
+                document.getElementById('description').value = paymentMethod.deskripsi || '';
+                document.getElementById('isActive').checked = paymentMethod.is_active;
+                
+                document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit text-primary me-2"></i>Edit Payment Method';
+                document.getElementById('savePaymentMethod').innerHTML = '<i class="fas fa-check me-2"></i>Update Payment Method';
+                
+                const modal = new bootstrap.Modal(document.getElementById('addPaymentMethodModal'));
+                modal.show();
+            } else {
+                showError('Failed to load payment method details');
+            }
+        })
+        .catch(error => {
+            showError('Network error: ' + error.message);
+        });
+}
+
+function deletePaymentMethod(id) {
+    deletingPaymentMethodId = id;
+    
+    const modal = new bootstrap.Modal(document.getElementById('deletePaymentMethodModal'));
     modal.show();
 }
 
-function editPaymentMethod(id, name) {
-    currentPaymentMethodId = id;
-    document.getElementById('modalTitle').innerHTML = '<i class="ti ti-edit text-primary me-2"></i>Edit Payment Method';
-    document.getElementById('editPaymentMethodId').value = id;
-    document.getElementById('paymentMethodName').value = name;
-    document.getElementById('nameError').textContent = '';
-    document.getElementById('paymentMethodName').classList.remove('is-invalid');
+async function confirmDeletePaymentMethod() {
+    if (!deletingPaymentMethodId) return;
     
-    const modal = new bootstrap.Modal(document.getElementById('paymentMethodModal'));
-    modal.show();
+    try {
+        const response = await fetch(`/api/payment-methods/${deletingPaymentMethodId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showSuccess('Payment method deleted successfully!');
+            
+            const modal = bootstrap.Modal.getInstance(document.getElementById('deletePaymentMethodModal'));
+            modal.hide();
+            
+            loadPaymentMethods();
+        } else {
+            showError('Failed to delete payment method: ' + data.message);
+        }
+    } catch (error) {
+        showError('Network error: ' + error.message);
+    } finally {
+        deletingPaymentMethodId = null;
+    }
 }
 
-function savePaymentMethod() {
-    const name = document.getElementById('paymentMethodName').value.trim();
+async function savePaymentMethod() {
+    const formData = {
+        nama_metode_pembayaran: document.getElementById('paymentMethodName').value,
+        jenis_pembayaran: document.getElementById('paymentType').value,
+        nomor_rekening: document.getElementById('accountNumber').value,
+        nama_bank: document.getElementById('bankName').value,
+        deskripsi: document.getElementById('description').value,
+        is_active: document.getElementById('isActive').checked
+    };
     
-    if (!name) {
-        document.getElementById('nameError').textContent = 'Payment method name is required';
-        document.getElementById('paymentMethodName').classList.add('is-invalid');
+    if (!formData.nama_metode_pembayaran || !formData.jenis_pembayaran) {
+        showError('Please fill in all required fields');
         return;
     }
     
-    // Clear previous errors
-    document.getElementById('nameError').textContent = '';
-    document.getElementById('paymentMethodName').classList.remove('is-invalid');
-    
-    // Disable button and show loading
-    const saveBtn = document.getElementById('saveBtn');
-    const originalText = saveBtn.innerHTML;
-    saveBtn.disabled = true;
-    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Saving...';
-    
-    const url = currentPaymentMethodId ? `/payment-methods/${currentPaymentMethodId}` : '/payment-methods';
-    const method = currentPaymentMethodId ? 'PUT' : 'POST';
-    
-    fetch(url, {
+    try {
+        const url = editingPaymentMethodId ? 
+            `/api/payment-methods/${editingPaymentMethodId}` : 
+            '/api/payment-methods';
+        
+        const method = editingPaymentMethodId ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
         method: method,
         headers: {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
-        body: JSON.stringify({ nama: name })
-    })
-    .then(response => response.json())
-    .then(data => {
+            body: JSON.stringify(formData)
+        });
+        
+        const data = await response.json();
+        
         if (data.success) {
-            showSuccess(data.message);
-            const modal = bootstrap.Modal.getInstance(document.getElementById('paymentMethodModal'));
+            showSuccess(editingPaymentMethodId ? 
+                'Payment method updated successfully!' : 
+                'Payment method added successfully!');
+            
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addPaymentMethodModal'));
             modal.hide();
+            
             loadPaymentMethods();
         } else {
-            if (data.errors && data.errors.nama) {
-                document.getElementById('nameError').textContent = data.errors.nama[0];
-                document.getElementById('paymentMethodName').classList.add('is-invalid');
-            } else {
-                showError(data.message);
-            }
+            showError('Failed to save payment method: ' + data.message);
         }
-    })
-    .catch(error => {
+    } catch (error) {
         showError('Network error: ' + error.message);
-    })
-    .finally(() => {
-        // Re-enable button
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = originalText;
-    });
+    }
 }
 
-function deletePaymentMethod(id, name) {
-    currentPaymentMethodId = id;
-    document.getElementById('deletePaymentMethodName').textContent = name;
+function resetForm() {
+    editingPaymentMethodId = null;
     
-    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
-    modal.show();
+    document.getElementById('paymentMethodForm').reset();
+    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus text-primary me-2"></i>Add Payment Method';
+    document.getElementById('savePaymentMethod').innerHTML = '<i class="fas fa-check me-2"></i>Save Payment Method';
 }
 
-function confirmDelete() {
-    if (!currentPaymentMethodId) return;
-    
-    fetch(`/payment-methods/${currentPaymentMethodId}`, {
-        method: 'DELETE',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showSuccess(data.message);
-            const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
-            modal.hide();
-            loadPaymentMethods();
-        } else {
-            showError(data.message);
-        }
-    })
-    .catch(error => {
-        showError('Network error: ' + error.message);
-    });
+function showLoading() {
+    document.getElementById('loadingSpinner').classList.remove('d-none');
 }
 
-function showSuccess(message) {
-    const toast = document.createElement('div');
-    toast.className = 'toast align-items-center text-white bg-success border-0';
-    toast.setAttribute('role', 'alert');
-    toast.innerHTML = `
-        <div class="d-flex">
-            <div class="toast-body">
-                <i class="ti ti-check-circle me-2"></i>
-                <strong>Success:</strong> ${message}
-            </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-        </div>
-    `;
-    
-    const container = document.createElement('div');
-    container.className = 'toast-container position-fixed top-0 end-0 p-3';
-    container.style.zIndex = '9999';
-    container.appendChild(toast);
-    document.body.appendChild(container);
-    
-    const bsToast = new bootstrap.Toast(toast);
-    bsToast.show();
-    
-    setTimeout(() => {
-        if (container.parentNode) {
-            container.parentNode.removeChild(container);
-        }
-    }, 5000);
+function hideLoading() {
+    document.getElementById('loadingSpinner').classList.add('d-none');
 }
 
 function showError(message) {
     const toast = document.createElement('div');
-    toast.className = 'toast align-items-center text-white bg-danger border-0';
+    toast.className = 'toast align-items-center text-white bg-danger border-0 shadow-lg';
     toast.setAttribute('role', 'alert');
+    toast.style.borderRadius = '1rem';
     toast.innerHTML = `
         <div class="d-flex">
-            <div class="toast-body">
-                <i class="ti ti-alert-circle me-2"></i>
-                <strong>Error:</strong> ${message}
+            <div class="toast-body d-flex align-items-center">
+                <div class="me-3">
+                    <i class="fas fa-exclamation-circle fa-2x"></i>
+                </div>
+                <div>
+                    <div class="fw-bold mb-1">Error</div>
+                    <div class="small">${message}</div>
+                </div>
             </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            <button type="button" class="btn-close btn-close-white me-3 m-auto" data-bs-dismiss="toast"></button>
         </div>
     `;
     
@@ -706,7 +530,10 @@ function showError(message) {
     container.appendChild(toast);
     document.body.appendChild(container);
     
-    const bsToast = new bootstrap.Toast(toast);
+    const bsToast = new bootstrap.Toast(toast, {
+        autohide: true,
+        delay: 5000
+    });
     bsToast.show();
     
     setTimeout(() => {
@@ -715,6 +542,103 @@ function showError(message) {
         }
     }, 5000);
 }
+
+function showSuccess(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast align-items-center text-white bg-success border-0 shadow-lg';
+    toast.setAttribute('role', 'alert');
+    toast.style.borderRadius = '1rem';
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body d-flex align-items-center">
+                <div class="me-3">
+                    <i class="fas fa-check-circle fa-2x"></i>
+                </div>
+                <div>
+                    <div class="fw-bold mb-1">Success</div>
+                    <div class="small">${message}</div>
+                </div>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-3 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    `;
+    
+    const container = document.createElement('div');
+    container.className = 'toast-container position-fixed top-0 end-0 p-3';
+    container.style.zIndex = '9999';
+    container.appendChild(toast);
+    document.body.appendChild(container);
+    
+    const bsToast = new bootstrap.Toast(toast, {
+        autohide: true,
+        delay: 4000
+    });
+    bsToast.show();
+    
+    setTimeout(() => {
+        if (container.parentNode) {
+            container.parentNode.removeChild(container);
+        }
+    }, 4000);
+}
 </script>
+
+<style>
+.card-cashier {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.card-cashier:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.12);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+.empty {
+    padding: 3rem 0;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.empty-img {
+    height: 8rem;
+    margin-bottom: 2rem;
+    opacity: 0.4;
+    transition: all 0.3s ease;
+}
+
+.empty:hover .empty-img {
+    opacity: 0.6;
+    transform: scale(1.05);
+}
+
+.empty-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+.empty-subtitle {
+    font-size: 1rem;
+    margin-bottom: 0;
+    color: #6c757d;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
 @endsection
 

@@ -9,13 +9,16 @@
         <div class="row g-2 align-items-center">
             <div class="col">
                 <h2 class="page-title">
-                    <i class="ti ti-cash-register text-primary me-2"></i>
+                    <i class="fas fa-cash-register text-primary me-2"></i>
                     Cashier System
                 </h2>
                 <div class="text-muted mt-1">Scan products and process transactions</div>
             </div>
             <div class="col-auto ms-auto d-print-none">
                 <div class="btn-list">
+                    <button class="btn btn-outline-info btn-sm" id="showShortcutsBtn" title="Keyboard Shortcuts">
+                        <i class="fas fa-keyboard me-1"></i>Shortcuts
+                    </button>
                     <span class="d-none d-sm-inline">
                         <div class="text-muted text-end">
                             <div class="text-h3 text-primary" id="currentTime"></div>
@@ -36,21 +39,21 @@
                 <div class="card card-cashier">
                     <div class="card-header bg-gradient-info text-white">
                         <h3 class="card-title mb-0">
-                            <i class="ti ti-cash-register me-2"></i>Cashier Session
+                            <i class="fas fa-cash-register me-2"></i>Cashier Session
                         </h3>
                     </div>
                     <div class="card-body p-4 text-center">
                         <div id="noSessionState">
                             <div class="empty">
                                 <div class="empty-img">
-                                    <i class="ti ti-cash-register fa-4x text-muted"></i>
+                                    <i class="fas fa-cash-register fa-4x text-muted"></i>
                                 </div>
                                 <p class="empty-title">No Active Session</p>
                                 <p class="empty-subtitle text-muted">
                                     Start a new cashier session to begin scanning products
                                 </p>
                                 <button class="btn btn-primary btn-lg" id="startSessionBtn">
-                                    <i class="ti ti-play me-2"></i>Start Cashier Session
+                                    <i class="fas fa-play me-2"></i>Start Cashier Session
                                 </button>
                             </div>
                         </div>
@@ -59,12 +62,12 @@
                                 <div class="col-lg-7">
                                     <div class="d-flex align-items-center">
                                         <div class="me-3">
-                                            <i class="ti ti-check-circle text-success fa-2x"></i>
+                                            <i class="fas fa-check-circle text-success fa-2x"></i>
                                         </div>
                                         <div>
                                             <h4 class="mb-1 text-success fw-bold">Session Active</h4>
                                             <p class="mb-0 text-muted">
-                                                <i class="ti ti-receipt me-1"></i>
+                                                <i class="fas fa-receipt me-1"></i>
                                                 Invoice: <span id="currentInvoice" class="fw-semibold text-dark"></span>
                                             </p>
                                         </div>
@@ -73,13 +76,13 @@
                                 <div class="col-lg-5">
                                     <div class="d-flex flex-wrap gap-2 justify-content-lg-end justify-content-start">
                                         <button class="btn btn-info btn-sm" id="showPendingSalesBtn">
-                                            <i class="ti ti-clock me-1"></i>Other Sales
+                                            <i class="fas fa-clock me-1"></i>Other Sales
                                         </button>
                                         <button class="btn btn-warning btn-sm" id="resumeSessionBtn">
-                                            <i class="ti ti-refresh me-1"></i>Resume
+                                            <i class="fas fa-redo me-1"></i>Resume
                                         </button>
                                         <button class="btn btn-danger btn-sm" id="endSessionBtn">
-                                            <i class="ti ti-x me-1"></i>End
+                                            <i class="fas fa-times me-1"></i>End
                                         </button>
                                     </div>
                                 </div>
@@ -96,19 +99,19 @@
                 <div class="card card-cashier">
                     <div class="card-header bg-gradient-info text-white">
                         <h3 class="card-title mb-0">
-                            <i class="ti ti-clock me-2"></i>Pending Sales Management
+                            <i class="fas fa-clock me-2"></i>Pending Sales Management
                         </h3>
                     </div>
                     <div class="card-body p-4">
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <button class="btn btn-outline-primary" id="loadPendingSalesBtn">
-                                    <i class="ti ti-refresh me-2"></i>Load All Pending Sales
+                                    <i class="fas fa-redo me-2"></i>Load All Pending Sales
                                 </button>
                             </div>
                             <div class="col-md-6 text-end">
                                 <button class="btn btn-outline-secondary" id="hidePendingSalesBtn">
-                                    <i class="ti ti-x me-2"></i>Hide Pending Sales
+                                    <i class="fas fa-times me-2"></i>Hide Pending Sales
                                 </button>
                             </div>
                         </div>
@@ -116,9 +119,9 @@
                         <div id="pendingSalesList">
                             <div class="text-center py-4">
                                 <div class="empty">
-                                    <div class="empty-img">
-                                        <i class="ti ti-clock fa-3x text-muted"></i>
-                                    </div>
+                                                                    <div class="empty-img">
+                                    <i class="fas fa-clock fa-3x text-muted"></i>
+                                </div>
                                     <p class="empty-title">No pending sales loaded</p>
                                     <p class="empty-subtitle text-muted">
                                         Click "Load All Pending Sales" to view and edit other pending sales
@@ -137,7 +140,7 @@
                 <div class="card card-cashier">
                     <div class="card-header bg-gradient-primary text-white">
                         <h3 class="card-title mb-0">
-                            <i class="ti ti-scan me-2"></i>Product Scanner
+                            <i class="fas fa-barcode me-2"></i>Product Scanner
                         </h3>
                     </div>
                     <div class="card-body p-4">
@@ -147,12 +150,12 @@
                                     <label class="form-label h4 mb-3">Barcode / Product Code</label>
                                     <div class="input-group input-group-lg">
                                         <span class="input-group-text">
-                                            <i class="ti ti-barcode"></i>
+                                            <i class="fas fa-barcode"></i>
                                         </span>
                                         <input type="text" class="form-control form-control-lg" id="barcode" 
                                                placeholder="Scan barcode or enter product code manually" autofocus>
                                         <button class="btn btn-primary btn-lg px-4" type="button" id="scanBtn">
-                                            <i class="ti ti-search me-2"></i>Scan
+                                            <i class="fas fa-search me-2"></i>Scan
                                         </button>
                                     </div>
                                     <div class="form-hint">Press Enter after scanning or typing</div>
@@ -160,7 +163,7 @@
                             </div>
                             <div class="col-lg-4 text-center">
                                 <div class="alert alert-info border-0 mb-0">
-                                    <i class="ti ti-info-circle fa-2x mb-2"></i>
+                                    <i class="fas fa-info-circle fa-2x mb-2"></i>
                                     <p class="mb-0">Use barcode scanner or type manually</p>
                                 </div>
                             </div>
@@ -173,7 +176,7 @@
                                     <div class="row align-items-center">
                                         <div class="col-lg-8">
                                             <div class="d-flex align-items-center mb-3">
-                                                <i class="ti ti-check-circle text-success fa-2x me-3"></i>
+                                                <i class="fas fa-check-circle text-success fa-2x me-3"></i>
                                                 <h4 class="mb-0 text-success">Product Found!</h4>
                                             </div>
                                             <div id="productDetails"></div>
@@ -185,7 +188,7 @@
                                                        id="quantity" value="1" min="1" style="width: 120px;">
                                             </div>
                                             <button class="btn btn-success btn-lg btn-block w-100" id="addToCart">
-                                                <i class="ti ti-plus me-2"></i>Add to Cart
+                                                <i class="fas fa-plus me-2"></i>Add to Cart
                                             </button>
                                         </div>
                                     </div>
@@ -203,7 +206,7 @@
                 <div class="card card-cashier">
                     <div class="card-header bg-gradient-success text-white">
                         <h3 class="card-title mb-0">
-                            <i class="ti ti-shopping-cart me-2"></i>Shopping Cart
+                            <i class="fas fa-shopping-cart me-2"></i>Shopping Cart
                         </h3>
                     </div>
                     <div class="card-body p-4">
@@ -212,7 +215,7 @@
                             <div class="text-center py-5">
                                 <div class="empty">
                                     <div class="empty-img">
-                                        <i class="ti ti-shopping-cart fa-4x text-muted"></i>
+                                        <i class="fas fa-shopping-cart fa-4x text-muted"></i>
                                     </div>
                                     <p class="empty-title">No items in cart</p>
                                     <p class="empty-subtitle text-muted">
@@ -229,7 +232,7 @@
                                     <div class="card bg-light border-0">
                                         <div class="card-body">
                                             <h4 class="card-title text-center mb-4">
-                                                <i class="ti ti-receipt me-2"></i>Transaction Summary
+                                                <i class="fas fa-receipt me-2"></i>Transaction Summary
                                             </h4>
                                             <div class="row text-center">
                                                 <div class="col-4">
@@ -251,10 +254,10 @@
                                 <div class="col-lg-4">
                                     <div class="d-flex flex-column h-100 justify-content-center">
                                         <button class="btn btn-danger btn-lg btn-block mb-3" id="clearCart">
-                                            <i class="ti ti-trash me-2"></i>Clear Cart
+                                            <i class="fas fa-trash me-2"></i>Clear Cart
                                         </button>
                                         <button class="btn btn-success btn-lg btn-block" id="checkoutBtn">
-                                            <i class="ti ti-credit-card me-2"></i>Checkout
+                                            <i class="fas fa-credit-card me-2"></i>Checkout
                                         </button>
                                     </div>
                                 </div>
@@ -273,7 +276,7 @@
         <div class="modal-content">
             <div class="modal-header bg-gradient-primary text-white">
                 <h4 class="modal-title">
-                    <i class="ti ti-credit-card me-2"></i>Complete Transaction
+                    <i class="fas fa-credit-card me-2"></i>Complete Transaction
                 </h4>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -284,7 +287,7 @@
                         <div class="card mb-3">
                             <div class="card-header">
                                 <h5 class="mb-0">
-                                    <i class="ti ti-credit-card me-2"></i>Payment Method
+                                    <i class="fas fa-credit-card me-2"></i>Payment Method
                                 </h5>
                             </div>
                             <div class="card-body">
@@ -300,7 +303,7 @@
                         <div class="card">
                             <div class="card-header">
                                 <h5 class="mb-0">
-                                    <i class="ti ti-user me-2"></i>Customer Information
+                                    <i class="fas fa-user me-2"></i>Customer Information
                                 </h5>
                             </div>
                             <div class="card-body">
@@ -322,7 +325,7 @@
                         <div class="card">
                             <div class="card-header">
                                 <h5 class="mb-0">
-                                    <i class="ti ti-calculator me-2"></i>Payment Details
+                                    <i class="fas fa-calculator me-2"></i>Payment Details
                                 </h5>
                             </div>
                             <div class="card-body">
@@ -345,10 +348,13 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary btn-lg" data-bs-dismiss="modal">
-                    <i class="ti ti-x me-2"></i>Cancel
+                    <i class="fas fa-times me-2"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-info btn-lg" id="printReceipt">
+                    <i class="fas fa-print me-2"></i>Print Receipt
                 </button>
                 <button type="button" class="btn btn-primary btn-lg" id="completeTransaction">
-                    <i class="ti ti-check me-2"></i>Complete Sale
+                    <i class="fas fa-check me-2"></i>Complete Sale
                 </button>
             </div>
         </div>
@@ -361,7 +367,7 @@
         <div class="modal-content">
             <div class="modal-header bg-gradient-warning text-white">
                 <h4 class="modal-title">
-                    <i class="ti ti-edit me-2"></i>Edit Sale Item
+                    <i class="fas fa-edit me-2"></i>Edit Sale Item
                 </h4>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -371,7 +377,7 @@
                         <div class="card">
                             <div class="card-header">
                                 <h5 class="mb-0">
-                                    <i class="ti ti-package me-2"></i>Product Information
+                                    <i class="fas fa-box me-2"></i>Product Information
                                 </h5>
                             </div>
                             <div class="card-body">
@@ -426,10 +432,100 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary btn-lg" data-bs-dismiss="modal">
-                    <i class="ti ti-x me-2"></i>Cancel
+                    <i class="fas fa-times me-2"></i>Cancel
                 </button>
                 <button type="button" class="btn btn-warning btn-lg" id="saveEditItem">
-                    <i class="ti ti-check me-2"></i>Save Changes
+                    <i class="fas fa-check me-2"></i>Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Keyboard Shortcuts Modal -->
+<div class="modal modal-blur fade" id="shortcutsModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient-info text-white">
+                <h4 class="modal-title">
+                    <i class="fas fa-keyboard me-2"></i>Keyboard Shortcuts
+                </h4>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="mb-3">
+                            <i class="fas fa-cogs me-2"></i>Session Management
+                        </h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <tbody>
+                                    <tr>
+                                        <td><kbd>Ctrl/Cmd + N</kbd></td>
+                                        <td>Start new session</td>
+                                    </tr>
+                                    <tr>
+                                        <td><kbd>Ctrl/Cmd + S</kbd></td>
+                                        <td>Show pending sales</td>
+                                    </tr>
+                                    <tr>
+                                        <td><kbd>F1</kbd></td>
+                                        <td>Focus barcode input</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="mb-3">
+                            <i class="fas fa-shopping-cart me-2"></i>Sales & Checkout
+                        </h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <tbody>
+                                    <tr>
+                                        <td><kbd>F2</kbd></td>
+                                        <td>Quick checkout</td>
+                                    </tr>
+                                    <tr>
+                                        <td><kbd>Ctrl/Cmd + P</kbd></td>
+                                        <td>Print receipt</td>
+                                    </tr>
+                                    <tr>
+                                        <td><kbd>Enter</kbd></td>
+                                        <td>Scan product</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h5 class="mb-3">
+                            <i class="fas fa-cog me-2"></i>General
+                        </h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <tbody>
+                                    <tr>
+                                        <td><kbd>Escape</kbd></td>
+                                        <td>Close modals</td>
+                                    </tr>
+                                    <tr>
+                                        <td><kbd>Tab</kbd></td>
+                                        <td>Navigate between fields</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Close
                 </button>
             </div>
         </div>
@@ -462,6 +558,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('showPendingSalesBtn').addEventListener('click', showPendingSalesSection);
     document.getElementById('loadPendingSalesBtn').addEventListener('click', loadAllPendingSales);
     document.getElementById('hidePendingSalesBtn').addEventListener('click', hidePendingSalesSection);
+    document.getElementById('showShortcutsBtn').addEventListener('click', showShortcutsModal);
     
     // Event listeners for scanning (only when session is active)
     document.getElementById('barcode').addEventListener('keypress', function(e) {
@@ -471,11 +568,70 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Only apply shortcuts when not typing in input fields
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            return;
+        }
+        
+        // Ctrl/Cmd + N: Start new session
+        if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+            e.preventDefault();
+            if (!currentSaleId) {
+                startNewSession();
+            }
+        }
+        
+        // Ctrl/Cmd + S: Show pending sales
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault();
+            showPendingSalesSection();
+        }
+        
+        // Ctrl/Cmd + P: Print receipt (when in checkout modal)
+        if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+            e.preventDefault();
+            const checkoutModal = document.getElementById('checkoutModal');
+            if (checkoutModal.classList.contains('show')) {
+                printReceipt();
+            }
+        }
+        
+        // Escape: Close modals
+        if (e.key === 'Escape') {
+            const modals = document.querySelectorAll('.modal.show');
+            modals.forEach(modal => {
+                const modalInstance = bootstrap.Modal.getInstance(modal);
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+            });
+        }
+        
+        // F1: Focus on barcode input
+        if (e.key === 'F1') {
+            e.preventDefault();
+            if (currentSaleId) {
+                document.getElementById('barcode').focus();
+            }
+        }
+        
+        // F2: Quick checkout (if cart has items)
+        if (e.key === 'F2') {
+            e.preventDefault();
+            if (cart.length > 0) {
+                showCheckoutModal();
+            }
+        }
+    });
+    
     document.getElementById('scanBtn').addEventListener('click', scanProduct);
     document.getElementById('addToCart').addEventListener('click', addToCart);
     document.getElementById('clearCart').addEventListener('click', clearCart);
     document.getElementById('checkoutBtn').addEventListener('click', showCheckoutModal);
     document.getElementById('completeTransaction').addEventListener('click', completeTransaction);
+    document.getElementById('printReceipt').addEventListener('click', printReceipt);
     document.getElementById('amountReceived').addEventListener('input', calculateChange);
     document.getElementById('saveEditItem').addEventListener('click', saveEditItem);
     
@@ -541,7 +697,7 @@ async function startNewSession() {
     try {
         // Show loading state
         btn.classList.add('loading');
-        btn.innerHTML = '<i class="ti ti-loader-2 me-2"></i>Starting...';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Starting...';
         btn.disabled = true;
         
         const response = await fetch('/cashier/pending-sale', {
@@ -656,9 +812,9 @@ function displayPendingSales(sales) {
         pendingSalesList.innerHTML = `
             <div class="text-center py-4">
                 <div class="empty">
-                    <div class="empty-img">
-                        <i class="ti ti-check-circle fa-3x text-success"></i>
-                    </div>
+                                                    <div class="empty-img">
+                                    <i class="fas fa-check-circle fa-3x text-success"></i>
+                                </div>
                     <p class="empty-title">No pending sales found</p>
                     <p class="empty-subtitle text-muted">
                         All sales have been completed
@@ -712,13 +868,13 @@ function displayPendingSales(sales) {
                 <td class="text-center">
                     <div class="btn-group" role="group">
                         <button class="btn btn-primary btn-sm" onclick="switchToSale(${sale.kd_penjualan}, '${sale.no_faktur_penjualan}')" title="Switch to this sale">
-                            <i class="ti ti-arrow-right"></i>
+                            <i class="fas fa-arrow-right"></i>
                         </button>
                         <button class="btn btn-info btn-sm" onclick="viewSaleDetails(${sale.kd_penjualan})" title="View details">
-                            <i class="ti ti-eye"></i>
+                            <i class="fas fa-eye"></i>
                         </button>
                         <button class="btn btn-success btn-sm" onclick="completePendingSale(${sale.kd_penjualan})" title="Complete sale">
-                            <i class="ti ti-check"></i>
+                            <i class="fas fa-check"></i>
                         </button>
                     </div>
                 </td>
@@ -914,7 +1070,7 @@ async function scanProduct() {
     try {
         // Show loading state
         scanBtn.classList.add('loading');
-        scanBtn.innerHTML = '<i class="ti ti-loader-2 me-2"></i>Scanning...';
+        scanBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Scanning...';
         scanBtn.disabled = true;
         
         const product = await lookupProduct(barcode);
@@ -1140,10 +1296,10 @@ function updateCart() {
                 <td class="text-center">
                     <div class="btn-group" role="group">
                         <button class="btn btn-warning btn-sm" onclick="editSaleItem(${item.detailId || index}, '${item.name}', ${item.price}, ${item.quantity})" title="Edit Item">
-                            <i class="ti ti-edit"></i>
+                            <i class="fas fa-edit"></i>
                         </button>
                         <button class="btn btn-danger btn-sm" onclick="removeFromSale(${item.detailId || index})" title="Remove Item">
-                            <i class="ti ti-trash"></i>
+                            <i class="fas fa-trash"></i>
                         </button>
                     </div>
                 </td>
@@ -1388,6 +1544,216 @@ async function saveEditItem() {
     }
 }
 
+// Print Receipt Function
+function printReceipt() {
+    if (cart.length === 0) {
+        showError('No items to print');
+        return;
+    }
+    
+    const customerName = document.getElementById('customerName').value || 'Walk-in Customer';
+    const customerPhone = document.getElementById('customerPhone').value || 'N/A';
+    const paymentMethod = document.getElementById('paymentMethod').value;
+    const amountReceived = parseFloat(document.getElementById('amountReceived').value) || 0;
+    const total = parseFloat(document.getElementById('total').textContent.replace('Rp ', '').replace(',', ''));
+    const change = amountReceived - total;
+    
+    const receiptContent = generateReceiptContent(customerName, customerPhone, paymentMethod, amountReceived, change);
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(receiptContent);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+}
+
+function generateReceiptContent(customerName, customerPhone, paymentMethod, amountReceived, change) {
+    const now = new Date();
+    const dateString = now.toLocaleDateString('id-ID');
+    const timeString = now.toLocaleTimeString('id-ID');
+    
+    let itemsHtml = '';
+    cart.forEach(item => {
+        itemsHtml += `
+            <tr>
+                <td>${item.name}</td>
+                <td class="text-center">${item.quantity}</td>
+                <td class="text-right">Rp ${item.price.toLocaleString()}</td>
+                <td class="text-right">Rp ${item.subtotal.toLocaleString()}</td>
+            </tr>
+        `;
+    });
+    
+    const subtotal = cart.reduce((sum, item) => sum + item.subtotal, 0);
+    const tax = subtotal * 0.11;
+    const total = subtotal + tax;
+    
+    return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Receipt - ${currentInvoice}</title>
+            <style>
+                body {
+                    font-family: 'Courier New', monospace;
+                    font-size: 12px;
+                    margin: 0;
+                    padding: 20px;
+                    background: white;
+                }
+                .receipt {
+                    max-width: 300px;
+                    margin: 0 auto;
+                    border: 1px solid #ccc;
+                    padding: 15px;
+                }
+                .header {
+                    text-align: center;
+                    border-bottom: 1px solid #ccc;
+                    padding-bottom: 10px;
+                    margin-bottom: 15px;
+                }
+                .store-name {
+                    font-size: 16px;
+                    font-weight: bold;
+                    margin-bottom: 5px;
+                }
+                .invoice-info {
+                    margin-bottom: 15px;
+                }
+                .customer-info {
+                    margin-bottom: 15px;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-bottom: 15px;
+                }
+                th, td {
+                    padding: 3px 0;
+                    text-align: left;
+                }
+                th {
+                    border-bottom: 1px solid #ccc;
+                    font-weight: bold;
+                }
+                .text-center { text-align: center; }
+                .text-right { text-align: right; }
+                .total-section {
+                    border-top: 1px solid #ccc;
+                    padding-top: 10px;
+                    margin-top: 10px;
+                }
+                .total-row {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 5px;
+                }
+                .total-final {
+                    font-weight: bold;
+                    font-size: 14px;
+                    border-top: 2px solid #000;
+                    padding-top: 5px;
+                    margin-top: 5px;
+                }
+                .payment-info {
+                    margin-top: 15px;
+                    padding-top: 10px;
+                    border-top: 1px solid #ccc;
+                }
+                .footer {
+                    text-align: center;
+                    margin-top: 20px;
+                    font-size: 10px;
+                    color: #666;
+                }
+                @media print {
+                    body { margin: 0; }
+                    .receipt { border: none; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="receipt">
+                <div class="header">
+                    <div class="store-name">CASHIER APP</div>
+                    <div>Point of Sale System</div>
+                    <div>Jl. Example Street No. 123</div>
+                    <div>Phone: (021) 1234-5678</div>
+                </div>
+                
+                <div class="invoice-info">
+                    <div><strong>Invoice:</strong> ${currentInvoice}</div>
+                    <div><strong>Date:</strong> ${dateString}</div>
+                    <div><strong>Time:</strong> ${timeString}</div>
+                </div>
+                
+                <div class="customer-info">
+                    <div><strong>Customer:</strong> ${customerName}</div>
+                    <div><strong>Phone:</strong> ${customerPhone}</div>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th class="text-center">Qty</th>
+                            <th class="text-right">Price</th>
+                            <th class="text-right">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itemsHtml}
+                    </tbody>
+                </table>
+                
+                <div class="total-section">
+                    <div class="total-row">
+                        <span>Subtotal:</span>
+                        <span>Rp ${subtotal.toLocaleString()}</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Tax (11%):</span>
+                        <span>Rp ${tax.toLocaleString()}</span>
+                    </div>
+                    <div class="total-row total-final">
+                        <span>TOTAL:</span>
+                        <span>Rp ${total.toLocaleString()}</span>
+                    </div>
+                </div>
+                
+                <div class="payment-info">
+                    <div class="total-row">
+                        <span>Payment Method:</span>
+                        <span>${paymentMethod}</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Amount Received:</span>
+                        <span>Rp ${amountReceived.toLocaleString()}</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Change:</span>
+                        <span>Rp ${change >= 0 ? change.toLocaleString() : 'Insufficient'}</span>
+                    </div>
+                </div>
+                
+                <div class="footer">
+                    <div>Thank you for your purchase!</div>
+                    <div>Please keep this receipt for your records</div>
+                    <div>For questions, contact us at support@cashier-app.com</div>
+                </div>
+            </div>
+        </body>
+        </html>
+    `;
+}
+
+function showShortcutsModal() {
+    const modal = new bootstrap.Modal(document.getElementById('shortcutsModal'));
+    modal.show();
+}
+
 function showError(message) {
     // Create an enhanced notification
     const toast = document.createElement('div');
@@ -1398,7 +1764,7 @@ function showError(message) {
         <div class="d-flex">
             <div class="toast-body d-flex align-items-center">
                 <div class="me-3">
-                    <i class="ti ti-alert-circle fa-2x"></i>
+                    <i class="fas fa-exclamation-circle fa-2x"></i>
                 </div>
                 <div>
                     <div class="fw-bold mb-1">Error</div>
@@ -1452,7 +1818,7 @@ function showSuccess(message) {
         <div class="d-flex">
             <div class="toast-body d-flex align-items-center">
                 <div class="me-3">
-                    <i class="ti ti-check-circle fa-2x"></i>
+                    <i class="fas fa-check-circle fa-2x"></i>
                 </div>
                 <div>
                     <div class="fw-bold mb-1">Success</div>
@@ -1969,6 +2335,28 @@ body {
 .modal-footer {
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 0 0 1rem 1rem;
+}
+
+/* Keyboard shortcuts styling */
+kbd {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    color: #495057;
+    font-size: 0.875em;
+    padding: 0.2em 0.4em;
+    font-family: 'Courier New', monospace;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.table-sm td {
+    padding: 0.5rem;
+    vertical-align: middle;
+}
+
+.table-sm kbd {
+    font-size: 0.8em;
+    padding: 0.15em 0.3em;
 }
 </style>
 @endsection

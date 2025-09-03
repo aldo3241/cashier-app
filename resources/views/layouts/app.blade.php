@@ -9,9 +9,7 @@
 
     <!-- Tabler Core CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css">
-    <!-- Tabler Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.40.0/tabler-icons.min.css">
-    <!-- Font Awesome as backup -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Custom CSS -->
@@ -341,14 +339,14 @@
                     </a>
                 </h1>
                 <button class="sidebar-toggle" id="sidebarToggle" type="button">
-                    <i class="ti ti-chevron-left"></i>
+                    <i class="fas fa-chevron-left"></i>
                 </button>
             </div>
             
             <div class="sidebar-nav">
                 <div class="nav-item">
                     <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">
-                        <i class="ti ti-home"></i>
+                        <i class="fas fa-home"></i>
                         <span>Home</span>
                     </a>
                 </div>
@@ -360,19 +358,19 @@
                 </div>
                 <div class="nav-item">
                     <a class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}" href="{{ route('products.index') }}">
-                        <i class="ti ti-package"></i>
+                        <i class="fas fa-box"></i>
                         <span>Products</span>
                     </a>
                 </div>
                 <div class="nav-item">
                     <a class="nav-link {{ request()->routeIs('sale-details') ? 'active' : '' }}" href="{{ route('sale-details') }}">
-                        <i class="ti ti-receipt"></i>
+                        <i class="fas fa-receipt"></i>
                         <span>Sale Details</span>
                     </a>
                 </div>
                 <div class="nav-item">
                     <a class="nav-link {{ request()->routeIs('payment-methods.*') ? 'active' : '' }}" href="{{ route('payment-methods.index') }}">
-                        <i class="ti ti-credit-card"></i>
+                        <i class="fas fa-credit-card"></i>
                         <span>Payment Methods</span>
                     </a>
                 </div>
@@ -381,24 +379,24 @@
             <div class="sidebar-footer">
                 <div class="nav-item dropdown">
                     <a href="#" class="nav-link" data-bs-toggle="dropdown">
-                        <i class="ti ti-user-circle"></i>
+                        <i class="fas fa-user-circle"></i>
                         <span>Account</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                         @auth
                             <a class="dropdown-item" href="#">
-                                <i class="ti ti-user me-2"></i>Profile
+                                <i class="fas fa-user me-2"></i>Profile
                             </a>
                             <div class="dropdown-divider"></div>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="dropdown-item">
-                                    <i class="ti ti-logout me-2"></i>Logout
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
                                 </button>
                             </form>
                         @else
                             <a class="dropdown-item" href="{{ route('login') }}">
-                                <i class="ti ti-login me-2"></i>Login
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
                             </a>
                         @endauth
                     </div>
@@ -423,18 +421,6 @@
             const sidebarToggle = document.getElementById('sidebarToggle');
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.getElementById('mainContent');
-            
-            // Check if Tabler icons are working, if not use Font Awesome fallback
-            const tablerIcon = document.querySelector('.ti.ti-cash-register');
-            const fallbackIcon = document.querySelector('.fas.fa-cash-register');
-            
-            if (tablerIcon && fallbackIcon) {
-                // Check if Tabler icon is visible (has content)
-                if (!tablerIcon.textContent.trim() && !tablerIcon.innerHTML.includes('data-icon')) {
-                    tablerIcon.style.display = 'none';
-                    fallbackIcon.style.display = 'inline-block';
-                }
-            }
             
             // Check if sidebar state is saved in localStorage
             const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
@@ -463,7 +449,7 @@
             // Mobile sidebar toggle (if needed)
             const mobileToggle = document.createElement('button');
             mobileToggle.className = 'mobile-toggle d-lg-none';
-            mobileToggle.innerHTML = '<i class="ti ti-menu"></i>';
+            mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
             mobileToggle.style.cssText = `
                 position: fixed;
                 top: 1rem;

@@ -206,3 +206,20 @@ Route::get('/products/{id}/edit', [App\Http\Controllers\ProductController::class
 Route::put('/products/{id}', [App\Http\Controllers\ProductController::class, 'update'])->name('products.update');
 Route::delete('/products/{id}', [App\Http\Controllers\ProductController::class, 'destroy'])->name('products.destroy');
 Route::get('/api/products', [App\Http\Controllers\ProductController::class, 'getProductData'])->name('products.api');
+
+// Dashboard API routes
+Route::get('/api/dashboard/stats', [App\Http\Controllers\HomeController::class, 'getDashboardStats'])->name('api.dashboard.stats');
+
+// API Routes for Sales
+Route::get('/api/sales', [App\Http\Controllers\SalesController::class, 'getSales']);
+Route::get('/api/sales/{id}', [App\Http\Controllers\SalesController::class, 'getSaleDetails']);
+Route::put('/api/sale-items/{id}', [App\Http\Controllers\SalesController::class, 'updateSaleItem']);
+Route::delete('/api/sale-items/{id}', [App\Http\Controllers\SalesController::class, 'deleteSaleItem']);
+Route::get('/api/sales/export', [App\Http\Controllers\SalesController::class, 'exportSales']);
+
+// API Routes for Payment Methods
+Route::get('/api/payment-methods', [App\Http\Controllers\PaymentMethodController::class, 'getPaymentMethods']);
+Route::get('/api/payment-methods/{id}', [App\Http\Controllers\PaymentMethodController::class, 'getPaymentMethod']);
+Route::post('/api/payment-methods', [App\Http\Controllers\PaymentMethodController::class, 'store']);
+Route::put('/api/payment-methods/{id}', [App\Http\Controllers\PaymentMethodController::class, 'update']);
+Route::delete('/api/payment-methods/{id}', [App\Http\Controllers\PaymentMethodController::class, 'destroy']);
