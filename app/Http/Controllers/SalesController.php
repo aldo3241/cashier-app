@@ -9,6 +9,14 @@ use Carbon\Carbon;
 class SalesController extends Controller
 {
     /**
+     * Display the sales index page
+     */
+    public function index()
+    {
+        return view('sales.index');
+    }
+
+    /**
      * Get sales with pagination and search
      */
     public function getSales(Request $request)
