@@ -104,4 +104,32 @@ class User extends Authenticatable
     {
         $this->notify(new \App\Notifications\ResetPasswordNotification($token));
     }
+
+    /**
+     * Check if user is admin
+     */
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Check if user is cashier
+     */
+    public function isCashier()
+    {
+        return $this->role === 'cashier';
+    }
+
+    /**
+     * Get user role display name
+     */
+    public function getRoleDisplayName()
+    {
+        return match($this->role) {
+            'admin' => 'Administrator',
+            'cashier' => 'Cashier',
+            default => 'User'
+        };
+    }
 }

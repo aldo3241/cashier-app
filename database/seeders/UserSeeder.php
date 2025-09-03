@@ -14,9 +14,9 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // Check if admin user already exists
-        $existingUser = User::where('username', 'admin')->first();
+        $existingAdmin = User::where('username', 'admin')->first();
         
-        if (!$existingUser) {
+        if (!$existingAdmin) {
             User::create([
                 'nama' => 'Administrator',
                 'username' => 'admin',
@@ -33,6 +33,28 @@ class UserSeeder extends Seeder
             $this->command->info('Password: password');
         } else {
             $this->command->info('Admin user already exists!');
+        }
+
+        // Check if cashier user already exists
+        $existingCashier = User::where('username', 'cashier')->first();
+        
+        if (!$existingCashier) {
+            User::create([
+                'nama' => 'Cashier User',
+                'username' => 'cashier',
+                'email' => 'cashier@cashier-app.com',
+                'password' => Hash::make('password'),
+                'role' => 'cashier',
+                'dibuat_oleh' => 'System',
+                'date_created' => now(),
+                'date_updated' => now(),
+            ]);
+            
+            $this->command->info('Cashier user created successfully!');
+            $this->command->info('Username: cashier');
+            $this->command->info('Password: password');
+        } else {
+            $this->command->info('Cashier user already exists!');
         }
     }
 }

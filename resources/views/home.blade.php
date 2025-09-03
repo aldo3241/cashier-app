@@ -12,7 +12,12 @@
                     <i class="fas fa-tachometer-alt text-primary me-2"></i>
                     Dashboard
                 </h2>
-                <div class="text-muted mt-1">Welcome to your cashier management system</div>
+                <div class="text-muted mt-1">
+                    Welcome to your cashier management system, {{ auth()->user()->nama }}!
+                    <span class="badge {{ auth()->user()->role === 'admin' ? 'bg-red' : 'bg-blue' }} ms-2">
+                        {{ auth()->user()->getRoleDisplayName() }}
+                    </span>
+                </div>
             </div>
             <div class="col-auto ms-auto d-print-none">
                 <div class="btn-list">
@@ -136,6 +141,9 @@
                                     <small class="text-muted">Start new transaction</small>
                                 </a>
                             </div>
+                            
+                            @if(auth()->user()->isAdmin())
+                            <!-- Admin only quick actions -->
                             <div class="col-md-3 mb-3">
                                 <a href="{{ route('products.index') }}" class="btn btn-success btn-lg w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4">
                                     <i class="fas fa-box fa-3x mb-3"></i>
@@ -151,12 +159,13 @@
                                 </a>
                             </div>
                             <div class="col-md-3 mb-3">
-                                <a href="{{ route('products.create') }}" class="btn btn-warning btn-lg w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4">
-                                    <i class="fas fa-plus fa-3x mb-3"></i>
-                                    <span class="h5 mb-2">Add Product</span>
-                                    <small class="text-muted">New inventory item</small>
+                                <a href="{{ route('users.index') }}" class="btn btn-warning btn-lg w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4">
+                                    <i class="fas fa-users fa-3x mb-3"></i>
+                                    <span class="h5 mb-2">User Management</span>
+                                    <small class="text-muted">Manage users & roles</small>
                                 </a>
                             </div>
+                            @endif
                         </div>
                     </div>
                 </div>

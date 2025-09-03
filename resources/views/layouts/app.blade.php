@@ -379,10 +379,19 @@
                         <span>Cashier</span>
                     </a>
                 </div>
+                
+                @if(auth()->user()->isAdmin())
+                <!-- Admin only menu items -->
                 <div class="nav-item">
                     <a class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}" href="{{ route('products.index') }}">
                         <i class="fas fa-box"></i>
                         <span>Products</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('sales') ? 'active' : '' }}" href="{{ route('sales') }}">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Sales</span>
                     </a>
                 </div>
                 <div class="nav-item">
@@ -397,6 +406,13 @@
                         <span>Payment Methods</span>
                     </a>
                 </div>
+                <div class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
+                        <i class="fas fa-users"></i>
+                        <span>User Management</span>
+                    </a>
+                </div>
+                @endif
             </div>
             
             <div class="sidebar-footer">
@@ -406,6 +422,11 @@
                         <span>Account</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                        <div class="dropdown-header">
+                            <div class="fw-bold">{{ auth()->user()->nama }}</div>
+                            <div class="text-muted small">{{ auth()->user()->getRoleDisplayName() }}</div>
+                        </div>
+                        <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="#">
                             <i class="fas fa-user me-2"></i>Profile
                         </a>
