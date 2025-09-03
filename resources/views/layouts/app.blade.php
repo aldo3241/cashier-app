@@ -249,6 +249,28 @@
             width: 100%;
         }
         
+        /* When sidebar is hidden (not logged in), main content takes full width */
+        .app-container:not(:has(.sidebar)) .main-content {
+            width: 100%;
+            margin-left: 0;
+        }
+        
+        /* Fallback for browsers that don't support :has() */
+        .app-container .main-content {
+            width: 100%;
+            margin-left: 0;
+        }
+        
+        /* When sidebar exists, adjust main content */
+        .app-container .sidebar + .main-content {
+            width: calc(100% - 280px);
+            margin-left: 0;
+        }
+        
+        .app-container .sidebar.collapsed + .main-content {
+            width: calc(100% - 70px);
+        }
+        
         .content-wrapper {
             padding: 2rem;
             max-width: 100%;
@@ -330,6 +352,7 @@
 </head>
 <body>
     <div class="app-container">
+        @auth
         <!-- Left Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
@@ -383,26 +406,21 @@
                         <span>Account</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                        @auth
-                            <a class="dropdown-item" href="#">
-                                <i class="fas fa-user me-2"></i>Profile
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="dropdown-item">
-                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                </button>
-                            </form>
-                        @else
-                            <a class="dropdown-item" href="{{ route('login') }}">
-                                <i class="fas fa-sign-in-alt me-2"></i>Login
-                            </a>
-                        @endauth
+                        <a class="dropdown-item" href="#">
+                            <i class="fas fa-user me-2"></i>Profile
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="dropdown-item">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
         </aside>
+        @endauth
 
         <!-- Main Content -->
         <main class="main-content" id="mainContent">
@@ -422,62 +440,65 @@
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.getElementById('mainContent');
             
-            // Check if sidebar state is saved in localStorage
-            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-            if (isCollapsed) {
-                sidebar.classList.add('collapsed');
-            }
-            
-            if (sidebarToggle && sidebar) {
-                sidebarToggle.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    console.log('Toggle button clicked!');
-                    sidebar.classList.toggle('collapsed');
-                    
-                    // Save state to localStorage
-                    const isNowCollapsed = sidebar.classList.contains('collapsed');
-                    localStorage.setItem('sidebarCollapsed', isNowCollapsed);
-                    
-                    console.log('Sidebar collapsed:', isNowCollapsed);
+            // Only run sidebar logic if sidebar exists (user is logged in)
+            if (sidebar) {
+                // Check if sidebar state is saved in localStorage
+                const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                if (isCollapsed) {
+                    sidebar.classList.add('collapsed');
+                }
+                
+                if (sidebarToggle) {
+                    sidebarToggle.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        console.log('Toggle button clicked!');
+                        sidebar.classList.toggle('collapsed');
+                        
+                        // Save state to localStorage
+                        const isNowCollapsed = sidebar.classList.contains('collapsed');
+                        localStorage.setItem('sidebarCollapsed', isNowCollapsed);
+                        
+                        console.log('Sidebar collapsed:', isNowCollapsed);
+                    });
+                }
+                
+                // Mobile sidebar toggle (if needed)
+                const mobileToggle = document.createElement('button');
+                mobileToggle.className = 'mobile-toggle d-lg-none';
+                mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
+                mobileToggle.style.cssText = `
+                    position: fixed;
+                    top: 1rem;
+                    left: 1rem;
+                    z-index: 1001;
+                    background: #667eea;
+                    color: white;
+                    border: none;
+                    border-radius: 0.5rem;
+                    padding: 0.5rem;
+                    font-size: 1.2rem;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                `;
+                
+                document.body.appendChild(mobileToggle);
+                
+                mobileToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('show');
+                });
+                
+                // Close sidebar when clicking outside on mobile
+                document.addEventListener('click', function(e) {
+                    if (window.innerWidth <= 991.98) {
+                        if (!sidebar.contains(e.target) && !mobileToggle.contains(e.target)) {
+                            sidebar.classList.remove('show');
+                        }
+                    }
                 });
             } else {
-                console.error('Sidebar toggle elements not found:', { sidebarToggle, sidebar });
+                console.log('Sidebar not found - user not logged in');
             }
-            
-            // Mobile sidebar toggle (if needed)
-            const mobileToggle = document.createElement('button');
-            mobileToggle.className = 'mobile-toggle d-lg-none';
-            mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
-            mobileToggle.style.cssText = `
-                position: fixed;
-                top: 1rem;
-                left: 1rem;
-                z-index: 1001;
-                background: #667eea;
-                color: white;
-                border: none;
-                border-radius: 0.5rem;
-                padding: 0.5rem;
-                font-size: 1.2rem;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            `;
-            
-            document.body.appendChild(mobileToggle);
-            
-            mobileToggle.addEventListener('click', function() {
-                sidebar.classList.toggle('show');
-            });
-            
-            // Close sidebar when clicking outside on mobile
-            document.addEventListener('click', function(e) {
-                if (window.innerWidth <= 991.98) {
-                    if (!sidebar.contains(e.target) && !mobileToggle.contains(e.target)) {
-                        sidebar.classList.remove('show');
-                    }
-                }
-            });
         });
     </script>
     
