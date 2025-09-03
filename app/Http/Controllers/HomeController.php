@@ -36,6 +36,14 @@ class HomeController extends Controller
     public function getDashboardStats()
     {
         try {
+            // Cache dashboard stats for 5 minutes to improve performance
+            $cacheKey = 'dashboard_stats_' . date('Y-m-d-H');
+            $cachedStats = cache()->get($cacheKey);
+            
+            if ($cachedStats) {
+                return response()->json($cachedStats);
+            }
+            
             $today = Carbon::today();
             $yesterday = Carbon::yesterday();
             
@@ -139,7 +147,7 @@ class HomeController extends Controller
                 ];
             }
             
-            return response()->json([
+            $stats = [
                 'todaySales' => $todaySales,
                 'salesGrowth' => round($salesGrowth, 1),
                 'todayTransactions' => $todayTransactions,
@@ -150,7 +158,12 @@ class HomeController extends Controller
                 'urgentSales' => $urgentSales,
                 'recentTransactions' => $recentTransactions,
                 'alerts' => $alerts
-            ]);
+            ];
+            
+            // Cache the results for 5 minutes
+            cache()->put($cacheKey, $stats, 300);
+            
+            return response()->json($stats);
             
         } catch (\Exception $e) {
             return response()->json([

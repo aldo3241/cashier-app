@@ -19,9 +19,6 @@ class CashierController extends Controller
     {
         $barcode = $request->input('barcode');
         
-        // Debug: Log the search query
-        \Log::info('Cashier scan request:', ['barcode' => $barcode]);
-        
         // Search by barcode first (exact match)
         $product = Product::where('barcode', $barcode)->with('productType')->first();
         
@@ -36,9 +33,6 @@ class CashierController extends Controller
         if (!$product && is_numeric($barcode)) {
             $product = Product::where('kd_produk', $barcode)->with('productType')->first();
         }
-        
-        // Debug: Log the search result
-        \Log::info('Product search result:', ['found' => $product ? true : false, 'product_id' => $product ? $product->kd_produk : null]);
         
         if (!$product) {
             return response()->json([
@@ -56,6 +50,13 @@ class CashierController extends Controller
         $stockIn = DB::table('stok')->where('kd_produk', $product->kd_produk)->sum('masuk');
         $stockOut = DB::table('stok')->where('kd_produk', $product->kd_produk)->sum('keluar');
         $currentStock = $stockIn - $stockOut;
+        
+        // If no stock records exist, use the stok_total from produk table
+        if ($stockIn == 0 && $stockOut == 0) {
+            $currentStock = $product->stok_total ?? 0;
+        }
+        
+
 
         return response()->json([
             'success' => true,
@@ -67,7 +68,8 @@ class CashierController extends Controller
                 'cost' => (float) $product->hpp,
                 'stock' => (int) $currentStock,
                 'type' => $product->productType ? $product->productType->nama : 'Unknown',
-                'supplier' => $product->pemasok
+                'supplier' => $product->pemasok,
+                'image_url' => $product->image_url ?? null
             ]
         ]);
     }
@@ -174,13 +176,33 @@ class CashierController extends Controller
             ->limit(10)
             ->get();
         
+        // Optimize stock calculation with a single query
+        $productIds = $products->pluck('kd_produk')->toArray();
+        $stockData = collect();
+        
+        if (!empty($productIds)) {
+            $stockData = DB::table('stok')
+                ->select('kd_produk', 
+                    DB::raw('SUM(masuk) as total_in'), 
+                    DB::raw('SUM(keluar) as total_out'))
+                ->whereIn('kd_produk', $productIds)
+                ->groupBy('kd_produk')
+                ->get()
+                ->keyBy('kd_produk');
+        }
+        
         return response()->json([
             'success' => true,
-            'products' => $products->map(function($product) {
-                // Calculate current stock from stok table
-                $stockIn = DB::table('stok')->where('kd_produk', $product->kd_produk)->sum('masuk');
-                $stockOut = DB::table('stok')->where('kd_produk', $product->kd_produk)->sum('keluar');
-                $currentStock = $stockIn - $stockOut;
+            'products' => $products->map(function($product) use ($stockData) {
+                $currentStock = 0;
+                
+                if ($stockData->has($product->kd_produk)) {
+                    $stock = $stockData->get($product->kd_produk);
+                    $currentStock = ($stock->total_in ?? 0) - ($stock->total_out ?? 0);
+                } else {
+                    // No stock records exist, use the stok_total from produk table
+                    $currentStock = $product->stok_total ?? 0;
+                }
                 
                 return [
                     'id' => $product->kd_produk,
@@ -271,55 +293,108 @@ class CashierController extends Controller
                 throw new \Exception('Product not found');
             }
 
-                         // Check stock from stok table
-             $stockIn = DB::table('stok')->where('kd_produk', $request->product_id)->sum('masuk');
-             $stockOut = DB::table('stok')->where('kd_produk', $request->product_id)->sum('keluar');
-             $currentStock = $stockIn - $stockOut;
-             
-             if ($currentStock < $request->quantity) {
-                 throw new \Exception('Insufficient stock. Available: ' . $currentStock);
-             }
+                                     // Check stock from stok table
+            $stockIn = DB::table('stok')->where('kd_produk', $request->product_id)->sum('masuk');
+            $stockOut = DB::table('stok')->where('kd_produk', $request->product_id)->sum('keluar');
+            $currentStock = $stockIn - $stockOut;
+            
+            // If no stock records exist, use the stok_total from produk table
+            if ($stockIn == 0 && $stockOut == 0) {
+                $currentStock = $product->stok_total ?? 0;
+            }
+            
 
-            // Calculate profit
-            $profit = ($product->harga_jual - $product->hpp) * $request->quantity;
+            
+            if ($currentStock < $request->quantity) {
+                throw new \Exception('Insufficient stock. Available: ' . $currentStock);
+            }
 
-                         // Add item to penjualan_detail
-             DB::table('penjualan_detail')->insert([
-                 'kd_penjualan' => $request->sale_id,
-                 'kd_produk' => $request->product_id,
-                 'nama_produk' => $product->nama_produk,
-                 'produk_jenis' => $product->productType ? $product->productType->nama : 'Unknown',
-                 'kd_pemasok' => $product->kd_pemasok ?? 1,
-                 'pemasok' => $product->pemasok ?? 'Unknown',
-                 'sistem_bayar' => 'Pending',
-                 'hpp' => $product->hpp,
-                 'harga_jual' => $product->harga_jual,
-                 'qty' => $request->quantity,
-                 'diskon' => 0,
-                 'sub_total' => $request->quantity * $product->harga_jual,
-                 'laba' => $profit,
-                 'status_bayar' => 'Pending',
-                 'catatan' => 'Added via Cashier',
-                 'date_created' => now(),
-                 'date_updated' => now(),
-                 'dibuat_oleh' => auth()->user()->name ?? 'Cashier'
-             ]);
+            // Check if product already exists in this sale
+            $existingItem = DB::table('penjualan_detail')
+                ->where('kd_penjualan', $request->sale_id)
+                ->where('kd_produk', $request->product_id)
+                ->first();
 
-             // Create stock movement record in stok table
-             DB::table('stok')->insert([
-                 'kd_produk' => $request->product_id,
-                 'masuk' => 0,
-                 'keluar' => $request->quantity,
-                 'klasifikasi' => 'Penjualan',
-                 'no_ref' => $request->sale_id,
-                 'catatan' => 'Cashier Sale - Pending',
-                 'date_created' => now(),
-                 'date_updated' => now(),
-                 'dibuat_oleh' => auth()->user()->name ?? 'Cashier'
-             ]);
+            if ($existingItem) {
+                // Product already exists, update quantity
+                $newQty = $existingItem->qty + $request->quantity;
+                $newSubtotal = $newQty * $product->harga_jual;
+                $newProfit = ($product->harga_jual - $product->hpp) * $newQty;
 
-             // Update product stock total based on stok table
-             $this->updateProductStockTotal($request->product_id);
+                DB::table('penjualan_detail')
+                    ->where('kd_penjualan_detail', $existingItem->kd_penjualan_detail)
+                    ->update([
+                        'qty' => $newQty,
+                        'sub_total' => $newSubtotal,
+                        'laba' => $newProfit,
+                        'date_updated' => now()
+                    ]);
+
+                $message = 'Product quantity updated in sale!';
+            } else {
+                // Product doesn't exist, add new item
+                $profit = ($product->harga_jual - $product->hpp) * $request->quantity;
+
+                DB::table('penjualan_detail')->insert([
+                    'kd_penjualan' => $request->sale_id,
+                    'kd_produk' => $request->product_id,
+                    'nama_produk' => $product->nama_produk,
+                    'produk_jenis' => $product->productType ? $product->productType->nama : 'Unknown',
+                    'kd_pemasok' => $product->kd_pemasok ?? 1,
+                    'pemasok' => $product->pemasok ?? 'Unknown',
+                    'sistem_bayar' => 'Pending',
+                    'hpp' => $product->hpp,
+                    'harga_jual' => $product->harga_jual,
+                    'qty' => $request->quantity,
+                    'diskon' => 0,
+                    'sub_total' => $request->quantity * $product->harga_jual,
+                    'laba' => $profit,
+                    'status_bayar' => 'Pending',
+                    'catatan' => 'Added via Cashier',
+                    'date_created' => now(),
+                    'date_updated' => now(),
+                    'dibuat_oleh' => auth()->user()->name ?? 'Cashier'
+                ]);
+
+                $message = 'Product added to sale!';
+            }
+
+                         // Handle stock management
+            if ($existingItem) {
+                // For existing items, we only need to adjust stock for the additional quantity
+                $additionalQty = $request->quantity; // Only the new quantity added
+            } else {
+                // For new items, use the full quantity
+                $additionalQty = $request->quantity;
+            }
+            
+            // Check if this product has existing stock records
+            $existingStockRecords = DB::table('stok')->where('kd_produk', $request->product_id)->count();
+            
+            if ($existingStockRecords > 0) {
+                // Product has stock records, create stock movement record
+                DB::table('stok')->insert([
+                    'kd_produk' => $request->product_id,
+                    'masuk' => 0,
+                    'keluar' => $additionalQty,
+                    'klasifikasi' => 'Penjualan',
+                    'no_ref' => $request->sale_id,
+                    'catatan' => $existingItem ? 'Cashier Sale - Quantity Updated' : 'Cashier Sale - Pending',
+                    'date_created' => now(),
+                    'date_updated' => now(),
+                    'dibuat_oleh' => auth()->user()->name ?? 'Cashier'
+                ]);
+                
+                // Update product stock total based on stok table
+                $this->updateProductStockTotal($request->product_id);
+            } else {
+                // Product has no stock records, directly update the produk table
+                $newStock = $product->stok_total - $additionalQty;
+                DB::table('produk')->where('kd_produk', $request->product_id)->update([
+                    'stok_total' => $newStock,
+                    'date_updated' => now()
+                ]);
+            }
 
              // Update sale totals
              $sale = DB::table('penjualan')->where('kd_penjualan', $request->sale_id)->first();
@@ -338,7 +413,7 @@ class CashierController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Item added to sale',
+                'message' => $message,
                 'sale_id' => $request->sale_id,
                 'new_totals' => [
                     'subtotal' => $newSubtotal,
@@ -432,6 +507,11 @@ class CashierController extends Controller
                  $stockOut = DB::table('stok')->where('kd_produk', $detail->kd_produk)->sum('keluar');
                  $currentStock = $stockIn - $stockOut;
                  
+                 // If no stock records exist, use the stok_total from produk table
+                 if ($stockIn == 0 && $stockOut == 0) {
+                     $currentStock = $product->stok_total ?? 0;
+                 }
+                 
                  if ($currentStock < $stockNeeded) {
                      throw new \Exception('Insufficient stock for quantity increase. Available: ' . $currentStock);
                  }
@@ -457,37 +537,52 @@ class CashierController extends Controller
              if ($newQty != $oldQty) {
                  $stockAdjustment = $oldQty - $newQty; // Positive if reducing, negative if increasing
                  
-                 // Create stock adjustment record in stok table
-                 if ($stockAdjustment > 0) {
-                     // Stock is being restored (quantity reduced)
-                     DB::table('stok')->insert([
-                         'kd_produk' => $detail->kd_produk,
-                         'masuk' => $stockAdjustment,
-                         'keluar' => 0,
-                         'klasifikasi' => 'Penyesuaian Penjualan',
-                         'no_ref' => $detail->kd_penjualan,
-                         'catatan' => "Quantity reduced from {$oldQty} to {$newQty} - Stock restored",
-                         'date_created' => now(),
-                         'date_updated' => now(),
-                         'dibuat_oleh' => auth()->user()->name ?? 'Cashier'
-                     ]);
-                 } else {
-                     // Stock is being reduced (quantity increased)
-                     DB::table('stok')->insert([
-                         'kd_produk' => $detail->kd_produk,
-                         'masuk' => 0,
-                         'keluar' => abs($stockAdjustment),
-                         'klasifikasi' => 'Penyesuaian Penjualan',
-                         'no_ref' => $detail->kd_penjualan,
-                         'catatan' => "Quantity increased from {$oldQty} to {$newQty} - Additional stock used",
-                         'date_created' => now(),
-                         'date_updated' => now(),
-                         'dibuat_oleh' => auth()->user()->name ?? 'Cashier'
-                     ]);
-                 }
+                 // Check if this product has existing stock records
+                 $existingStockRecords = DB::table('stok')->where('kd_produk', $detail->kd_produk)->count();
                  
-                 // Update product stock total based on stok table
-                 $this->updateProductStockTotal($detail->kd_produk);
+                 if ($existingStockRecords > 0) {
+                     // Product has stock records, create stock adjustment record
+                     if ($stockAdjustment > 0) {
+                         // Stock is being restored (quantity reduced)
+                         DB::table('stok')->insert([
+                             'kd_produk' => $detail->kd_produk,
+                             'masuk' => $stockAdjustment,
+                             'keluar' => 0,
+                             'klasifikasi' => 'Penyesuaian Penjualan',
+                             'no_ref' => $detail->kd_penjualan,
+                             'catatan' => "Quantity reduced from {$oldQty} to {$newQty} - Stock restored",
+                             'date_created' => now(),
+                             'date_updated' => now(),
+                             'dibuat_oleh' => auth()->user()->name ?? 'Cashier'
+                         ]);
+                     } else {
+                         // Stock is being reduced (quantity increased)
+                         DB::table('stok')->insert([
+                             'kd_produk' => $detail->kd_produk,
+                             'masuk' => 0,
+                             'keluar' => abs($stockAdjustment),
+                             'klasifikasi' => 'Penyesuaian Penjualan',
+                             'no_ref' => $detail->kd_penjualan,
+                             'catatan' => "Quantity increased from {$oldQty} to {$newQty} - Additional stock used",
+                             'date_created' => now(),
+                             'date_updated' => now(),
+                             'dibuat_oleh' => auth()->user()->name ?? 'Cashier'
+                         ]);
+                     }
+                     
+                     // Update product stock total based on stok table
+                     $this->updateProductStockTotal($detail->kd_produk);
+                 } else {
+                     // Product has no stock records, directly update the produk table
+                     $product = Product::where('kd_produk', $detail->kd_produk)->first();
+                     if ($product) {
+                         $newStock = $product->stok_total + $stockAdjustment; // + because stockAdjustment is positive when reducing
+                         DB::table('produk')->where('kd_produk', $detail->kd_produk)->update([
+                             'stok_total' => $newStock,
+                             'date_updated' => now()
+                         ]);
+                     }
+                 }
              }
 
             // Recalculate sale totals
@@ -538,21 +633,36 @@ class CashierController extends Controller
                          // Delete the detail item
              DB::table('penjualan_detail')->where('kd_penjualan_detail', $detailId)->delete();
 
-             // Create stock restoration record in stok table
-             DB::table('stok')->insert([
-                 'kd_produk' => $productId,
-                 'masuk' => $qty,
-                 'keluar' => 0,
-                 'klasifikasi' => 'Pembatalan Penjualan',
-                 'no_ref' => $saleId,
-                 'catatan' => 'Item removed from sale - Stock restored',
-                 'date_created' => now(),
-                 'date_updated' => now(),
-                 'dibuat_oleh' => auth()->user()->name ?? 'Cashier'
-             ]);
-
-             // Update product stock total based on stok table
-             $this->updateProductStockTotal($productId);
+             // Check if this product has existing stock records
+             $existingStockRecords = DB::table('stok')->where('kd_produk', $productId)->count();
+             
+             if ($existingStockRecords > 0) {
+                 // Product has stock records, create stock restoration record
+                 DB::table('stok')->insert([
+                     'kd_produk' => $productId,
+                     'masuk' => $qty,
+                     'keluar' => 0,
+                     'klasifikasi' => 'Pembatalan Penjualan',
+                     'no_ref' => $saleId,
+                     'catatan' => 'Item removed from sale - Stock restored',
+                     'date_created' => now(),
+                     'date_updated' => now(),
+                     'dibuat_oleh' => auth()->user()->name ?? 'Cashier'
+                 ]);
+                 
+                 // Update product stock total based on stok table
+                 $this->updateProductStockTotal($productId);
+             } else {
+                 // Product has no stock records, directly update the produk table
+                 $product = Product::where('kd_produk', $productId)->first();
+                 if ($product) {
+                     $newStock = $product->stok_total + $qty;
+                     DB::table('produk')->where('kd_produk', $productId)->update([
+                         'stok_total' => $newStock,
+                         'date_updated' => now()
+                     ]);
+                 }
+             }
 
             // Recalculate sale totals
             $this->recalculateSaleTotals($saleId);

@@ -67,7 +67,6 @@
                                         <div>
                                             <h4 class="mb-1 text-success fw-bold">Session Active</h4>
                                             <p class="mb-0 text-muted">
-                                                <i class="fas fa-receipt me-1"></i>
                                                 Invoice: <span id="currentInvoice" class="fw-semibold text-dark"></span>
                                             </p>
                                         </div>
@@ -140,31 +139,45 @@
                 <div class="card card-cashier">
                     <div class="card-header bg-gradient-primary text-white">
                         <h3 class="card-title mb-0">
-                            <i class="fas fa-barcode me-2"></i>Product Scanner
+                            <i class="fas fa-barcode me-2"></i>Product Scanner & Search
                         </h3>
                     </div>
                     <div class="card-body p-4">
                         <div class="row align-items-center">
                             <div class="col-lg-8">
                                 <div class="form-group">
-                                    <label class="form-label h4 mb-3">Barcode / Product Code</label>
+                                    <label class="form-label h4 mb-3">Barcode / Product Search</label>
                                     <div class="input-group input-group-lg">
                                         <span class="input-group-text">
                                             <i class="fas fa-barcode"></i>
                                         </span>
                                         <input type="text" class="form-control form-control-lg" id="barcode" 
-                                               placeholder="Scan barcode or enter product code manually" autofocus>
+                                               placeholder="Scan barcode, type product name, or use dropdown" autofocus>
                                         <button class="btn btn-primary btn-lg px-4" type="button" id="scanBtn">
-                                            <i class="fas fa-search me-2"></i>Scan
+                                            <i class="fas fa-search me-2"></i>Search
+                                        </button>
+                                        <button class="btn btn-info btn-lg px-3" type="button" id="dropdownBtn" title="Browse Products">
+                                            <i class="fas fa-list me-1"></i>
                                         </button>
                                     </div>
-                                    <div class="form-hint">Press Enter after scanning or typing</div>
+                                    <div class="form-hint">Press Enter after scanning or typing • Use dropdown to browse products</div>
+                                    
+                                    <!-- Product Search Dropdown -->
+                                    <div id="productDropdown" class="dropdown-menu w-100 mt-2" style="max-height: 300px; overflow-y: auto; position: relative;">
+                                        <div class="p-3 text-center">
+                                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                            <span class="ms-2">Loading products...</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-lg-4 text-center">
                                 <div class="alert alert-info border-0 mb-0">
                                     <i class="fas fa-info-circle fa-2x mb-2"></i>
-                                    <p class="mb-0">Use barcode scanner or type manually</p>
+                                    <p class="mb-0">Multiple search methods available</p>
+                                    <small class="text-muted">Barcode • Name • Dropdown</small>
                                 </div>
                             </div>
                         </div>
@@ -174,7 +187,17 @@
                             <div class="card bg-success-lt border-0">
                                 <div class="card-body">
                                     <div class="row align-items-center">
-                                        <div class="col-lg-8">
+                                        <div class="col-lg-3 text-center">
+                                            <div class="product-image-container mb-3">
+                                                <img id="productImage" src="" alt="Product Image" 
+                                                     class="img-fluid rounded" style="max-height: 150px; max-width: 150px; object-fit: cover;">
+                                                <div id="noImagePlaceholder" class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                                     style="height: 150px; width: 150px; margin: 0 auto;">
+                                                    <i class="fas fa-image fa-3x text-muted"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-5">
                                             <div class="d-flex align-items-center mb-3">
                                                 <i class="fas fa-check-circle text-success fa-2x me-3"></i>
                                                 <h4 class="mb-0 text-success">Product Found!</h4>
@@ -565,6 +588,26 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.key === 'Enter' && currentSaleId) {
             e.preventDefault();
             scanProduct();
+        }
+    });
+    
+    // Enhanced product search functionality
+    document.getElementById('barcode').addEventListener('input', function(e) {
+        if (currentSaleId) {
+            debounceSearch(e.target.value);
+        }
+    });
+    
+    document.getElementById('dropdownBtn').addEventListener('click', function() {
+        if (currentSaleId) {
+            toggleProductDropdown();
+        }
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#barcode') && !e.target.closest('#dropdownBtn') && !e.target.closest('#productDropdown')) {
+            hideProductDropdown();
         }
     });
     
@@ -1093,6 +1136,161 @@ async function scanProduct() {
     }
 }
 
+// Debounce function for search with performance optimization
+let searchTimeout;
+let lastSearchQuery = '';
+function debounceSearch(query) {
+    clearTimeout(searchTimeout);
+    
+    // Don't search if query is the same as last search
+    if (query === lastSearchQuery) {
+        return;
+    }
+    
+    if (query.length < 2) {
+        hideProductDropdown();
+        return;
+    }
+    
+    searchTimeout = setTimeout(() => {
+        lastSearchQuery = query;
+        searchProducts(query);
+    }, 200); // Reduced from 300ms to 200ms for better responsiveness
+}
+
+async function searchProducts(query) {
+    try {
+        const response = await fetch(`/api/products?search=${encodeURIComponent(query)}&per_page=10`, {
+            method: 'GET',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            displayProductDropdown(data.products, query);
+        } else {
+            hideProductDropdown();
+        }
+    } catch (error) {
+        console.error('Search error:', error);
+        hideProductDropdown();
+    }
+}
+
+function displayProductDropdown(products, query) {
+    const dropdown = document.getElementById('productDropdown');
+    
+    if (products.length === 0) {
+        dropdown.innerHTML = `
+            <div class="p-3 text-center">
+                <i class="fas fa-search fa-2x text-muted mb-2"></i>
+                <p class="mb-0 text-muted">No products found for "${query}"</p>
+            </div>
+        `;
+        showProductDropdown();
+        return;
+    }
+    
+    let html = '';
+    products.forEach(product => {
+        // Handle image URL - check if it's a full URL or just a path
+        let imageUrl;
+        if (product.gambar_produk) {
+            if (product.gambar_produk.startsWith('http')) {
+                imageUrl = product.gambar_produk;
+            } else if (product.gambar_produk.startsWith('uploads/')) {
+                // Handle uploads/files/ path
+                imageUrl = `/${product.gambar_produk}`;
+            } else {
+                // Handle storage/products/ path
+                imageUrl = `/storage/${product.gambar_produk}`;
+            }
+        } else {
+            imageUrl = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik0yMCAxMEMyNC4xNDIxIDEwIDI3LjUgMTMuMzU3OSAyNy41IDE3LjVDMjcuNSAyMS42NDIxIDI0LjE0MjEgMjUgMjAgMjVDMTUuODU3OSAyNSAxMi41IDIxLjY0MjEgMTIuNSAxNy41QzEyLjUgMTMuMzU3OSAxNS44NTc5IDEwIDIwIDEwWiIgZmlsbD0iI0M5QzlDOSIvPgo8cGF0aCBkPSJNMzAgMzBIMTBDOC45NTQzMSAzMCA4IDI5LjA0NTcgOCAyOFYyNkM4IDI0Ljk1NDMgOC45NTQzMSAyNCAxMCAyNEgzMEMzMS4wNDU3IDI0IDMyIDI0Ljk1NDMgMzIgMjZWMjhDMzIgMjkuMDQ1NyAzMS4wNDU3IDMwIDMwIDMwWiIgZmlsbD0iI0M5QzlDOSIvPgo8L3N2Zz4K';
+        }
+        
+        // Calculate stock from stok table if not available
+        const stock = product.stok_total || 0;
+        const price = parseFloat(product.harga_jual || 0);
+        
+        html += `
+            <div class="dropdown-item d-flex align-items-center p-3" onclick="selectProductFromDropdown(${product.kd_produk})">
+                <div class="me-3">
+                    <img src="${imageUrl}" alt="${product.nama_produk}" 
+                         class="rounded" style="width: 40px; height: 40px; object-fit: cover;"
+                         onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik0yMCAxMEMyNC4xNDIxIDEwIDI3LjUgMTMuMzU3OSAyNy41IDE3LjVDMjcuNSAyMS42NDIxIDI0LjE0MjEgMjUgMjAgMjVDMTUuODU3OSAyNSAxMi41IDIxLjY0MjEgMTIuNSAxNy41QzEyLjUgMTMuMzU3OSAxNS44NTc5IDEwIDIwIDEwWiIgZmlsbD0iI0M5QzlDOSIvPgo8cGF0aCBkPSJNMzAgMzBIMTBDOC45NTQzMSAzMCA4IDI5LjA0NTcgOCAyOFYyNkM4IDI0Ljk1NDMgOC45NTQzMSAyNCAxMCAyNEgzMEMzMS4wNDU3IDI0IDMyIDI0Ljk1NDMgMzIgMjZWMjhDMzIgMjkuMDQ1NyAzMS4wNDU3IDMwIDMwIDMwWiIgZmlsbD0iI0M5QzlDOSIvPgo8L3N2Zz4K'">
+                </div>
+                <div class="flex-grow-1">
+                    <div class="fw-semibold">${product.nama_produk}</div>
+                    <div class="text-muted small">
+                        ${product.barcode || 'No barcode'} • Rp ${price.toLocaleString()}
+                    </div>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-${stock > 10 ? 'success' : stock > 0 ? 'warning' : 'danger'}">
+                        ${stock}
+                    </span>
+                </div>
+            </div>
+        `;
+    });
+    
+    dropdown.innerHTML = html;
+    showProductDropdown();
+}
+
+function selectProductFromDropdown(productId) {
+    // Simulate barcode input with product ID
+    document.getElementById('barcode').value = productId;
+    hideProductDropdown();
+    scanProduct();
+}
+
+function toggleProductDropdown() {
+    const dropdown = document.getElementById('productDropdown');
+    if (dropdown.classList.contains('show')) {
+        hideProductDropdown();
+    } else {
+        loadAllProducts();
+    }
+}
+
+async function loadAllProducts() {
+    try {
+        const response = await fetch('/api/products?per_page=20', {
+            method: 'GET',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            displayProductDropdown(data.products, '');
+        } else {
+            showError('Failed to load products');
+        }
+    } catch (error) {
+        showError('Network error: ' + error.message);
+    }
+}
+
+function showProductDropdown() {
+    const dropdown = document.getElementById('productDropdown');
+    dropdown.classList.add('show');
+    dropdown.style.display = 'block';
+}
+
+function hideProductDropdown() {
+    const dropdown = document.getElementById('productDropdown');
+    dropdown.classList.remove('show');
+    dropdown.style.display = 'none';
+}
+
 async function lookupProduct(barcode) {
     try {
         const response = await fetch('/cashier/scan', {
@@ -1130,6 +1328,7 @@ function showProductInfo(product) {
                     <div class="col-md-6">
                         <p class="mb-1"><strong>Barcode:</strong> ${product.barcode || 'N/A'}</p>
                         <p class="mb-1"><strong>Type:</strong> ${product.type}</p>
+                        <p class="mb-1"><strong>Supplier:</strong> ${product.supplier || 'N/A'}</p>
                     </div>
                     <div class="col-md-6">
                         <h2 class="text-success mb-1">Rp ${product.price.toLocaleString()}</h2>
@@ -1144,6 +1343,35 @@ function showProductInfo(product) {
             </div>
         </div>
     `;
+    
+    // Handle product image
+    const productImage = document.getElementById('productImage');
+    const noImagePlaceholder = document.getElementById('noImagePlaceholder');
+    
+    if (product.image_url) {
+        // Handle image URL - check if it's a full URL or just a path
+        let imageUrl;
+        if (product.image_url.startsWith('http')) {
+            imageUrl = product.image_url;
+        } else if (product.image_url.startsWith('uploads/')) {
+            // Handle uploads/files/ path
+            imageUrl = `/${product.image_url}`;
+        } else {
+            // Handle storage/products/ path
+            imageUrl = `/storage/${product.image_url}`;
+        }
+        
+        productImage.src = imageUrl;
+        productImage.style.display = 'block';
+        noImagePlaceholder.style.display = 'none';
+        productImage.onerror = function() {
+            this.style.display = 'none';
+            noImagePlaceholder.style.display = 'flex';
+        };
+    } else {
+        productImage.style.display = 'none';
+        noImagePlaceholder.style.display = 'flex';
+    }
     
     document.getElementById('productInfo').style.display = 'block';
     document.getElementById('quantity').value = 1;
@@ -1206,7 +1434,7 @@ async function addToSaleDirectly(product) {
         if (data.success) {
             // Reload the cart to show updated items
             await loadExistingSaleItems();
-            showSuccess('Product added to sale!');
+            showSuccess(data.message);
         } else {
             showError('Failed to add product: ' + data.message);
         }
@@ -2311,6 +2539,75 @@ body {
     font-weight: 600;
     color: #495057;
     border-bottom: 2px solid #e9ecef;
+}
+
+/* Product dropdown styling */
+#productDropdown {
+    border: 2px solid #e9ecef;
+    border-radius: 0.75rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    background: white;
+    z-index: 1050;
+    max-height: 400px;
+    overflow-y: auto;
+    position: absolute;
+    width: 100%;
+    top: 100%;
+    left: 0;
+    margin-top: 0.5rem;
+}
+
+#productDropdown .dropdown-item {
+    border-bottom: 1px solid #f8f9fa;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    padding: 0.75rem 1rem;
+}
+
+#productDropdown .dropdown-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(5px);
+}
+
+#productDropdown .dropdown-item:last-child {
+    border-bottom: none;
+}
+
+#productDropdown .dropdown-item img {
+    border: 1px solid #e9ecef;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
+}
+
+/* Make dropdown more visible */
+#productDropdown.show {
+    display: block !important;
+    animation: fadeInDown 0.3s ease-out;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Product image styling */
+.product-image-container {
+    position: relative;
+}
+
+#productImage {
+    border: 2px solid #e9ecef;
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+}
+
+#noImagePlaceholder {
+    border: 2px solid #e9ecef;
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
 }
 
 /* Badge enhancements */

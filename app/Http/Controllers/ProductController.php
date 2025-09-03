@@ -334,25 +334,80 @@ class ProductController extends Controller
         }
     }
 
-    public function getProductData()
+    public function getProductData(Request $request)
     {
-        $products = Product::with('productType')
-            ->select('kd_produk', 'nama_produk', 'harga_jual', 'stok_total', 'gambar_produk', 'kd_produk_jenis')
-            ->get();
+        try {
+            // Create cache key based on search parameters
+            $cacheKey = 'products_' . md5($request->get('search', '') . '_' . $request->get('per_page', 20) . '_' . $request->get('page', 1));
+            
+            // Check if we have cached results
+            $cachedResults = cache()->get($cacheKey);
+            if ($cachedResults) {
+                return response()->json($cachedResults);
+            }
+            
+            $query = Product::with('productType')
+                ->select('kd_produk', 'nama_produk', 'harga_jual', 'stok_total', 'gambar_produk', 'kd_produk_jenis', 'barcode', 'pemasok');
 
-        return response()->json([
-            'products' => $products->map(function($product) {
-                return [
-                    'id' => $product->kd_produk,
-                    'name' => $product->nama_produk,
-                    'price' => $product->harga_jual,
-                    'stock' => $product->stok_total, // Use stock from produk table
-                    'image' => $product->gambar_produk,
-                    'type' => $product->productType ? $product->productType->nama : 'N/A',
-                    'stock_status' => $product->stock_status,
-                    'stock_class' => $product->stock_status_class
-                ];
-            })
-        ]);
+            // Search functionality
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('nama_produk', 'like', '%' . $search . '%')
+                      ->orWhere('barcode', 'like', '%' . $search . '%')
+                      ->orWhere('kd_produk', 'like', '%' . $search . '%');
+                });
+            }
+
+            // Pagination
+            $perPage = $request->get('per_page', 20);
+            $products = $query->paginate($perPage);
+
+            // Optimize stock calculation with a single query
+            $productsWithStock = $products->items();
+            $productIds = collect($productsWithStock)->pluck('kd_produk')->toArray();
+            
+            if (!empty($productIds)) {
+                // Get all stock data in one query
+                $stockData = DB::table('stok')
+                    ->select('kd_produk', 
+                        DB::raw('SUM(masuk) as total_in'), 
+                        DB::raw('SUM(keluar) as total_out'))
+                    ->whereIn('kd_produk', $productIds)
+                    ->groupBy('kd_produk')
+                    ->get()
+                    ->keyBy('kd_produk');
+                
+                // Update products with calculated stock
+                foreach ($productsWithStock as $product) {
+                    if ($stockData->has($product->kd_produk)) {
+                        $stock = $stockData->get($product->kd_produk);
+                        $product->stok_total = ($stock->total_in ?? 0) - ($stock->total_out ?? 0);
+                    } else {
+                        // No stock records exist, use existing stok_total
+                        $product->stok_total = $product->stok_total ?? 0;
+                    }
+                }
+            }
+
+            $result = [
+                'success' => true,
+                'products' => $productsWithStock,
+                'current_page' => $products->currentPage(),
+                'last_page' => $products->lastPage(),
+                'per_page' => $products->perPage(),
+                'total' => $products->total()
+            ];
+            
+            // Cache results for 2 minutes
+            cache()->put($cacheKey, $result, 120);
+            
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load products: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
