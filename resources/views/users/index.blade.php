@@ -838,14 +838,6 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                @php
-                                                    $initials = strtoupper(substr($user->nama, 0, 1) . (strpos($user->nama, ' ') ? substr($user->nama, strpos($user->nama, ' ') + 1, 1) : ''));
-                                                    $avatarColors = ['bg-gradient-primary', 'bg-gradient-success', 'bg-gradient-warning', 'bg-gradient-danger'];
-                                                    $colorIndex = ord($user->nama[0]) % count($avatarColors);
-                                                @endphp
-                                                <div class="user-avatar {{ $avatarColors[$colorIndex] }} me-3">
-                                                    {{ $initials }}
-                                                </div>
                                                 <div>
                                                     <div class="fw-bold text-dark">{{ $user->nama }}</div>
                                                     <div class="text-muted small">ID: {{ $user->kd }}</div>
