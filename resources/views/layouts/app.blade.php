@@ -389,17 +389,12 @@
                     </a>
                 </div>
                 <div class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('sales') ? 'active' : '' }}" href="{{ route('sales') }}">
+                    <a class="nav-link {{ request()->routeIs('sale-details') ? 'active' : '' }}" href="{{ route('sale-details') }}">
                         <i class="fas fa-chart-line"></i>
                         <span>Sales</span>
                     </a>
                 </div>
-                <div class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('sale-details') ? 'active' : '' }}" href="{{ route('sale-details') }}">
-                        <i class="fas fa-receipt"></i>
-                        <span>Sale Details</span>
-                    </a>
-                </div>
+
                 <div class="nav-item">
                     <a class="nav-link {{ request()->routeIs('payment-methods.*') ? 'active' : '' }}" href="{{ route('payment-methods.index') }}">
                         <i class="fas fa-credit-card"></i>
@@ -410,6 +405,12 @@
                     <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
                         <i class="fas fa-users"></i>
                         <span>User Management</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('roles.*') ? 'active' : '' }}" href="{{ route('roles.index') }}">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Role Management</span>
                     </a>
                 </div>
                 @endif

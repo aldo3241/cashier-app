@@ -8,12 +8,32 @@ use Carbon\Carbon;
 
 class SalesController extends Controller
 {
+
+
     /**
-     * Display the sales index page
+     * Get sales statistics
      */
-    public function index()
+    public function getStats()
     {
-        return view('sales.index');
+        try {
+            $totalSales = DB::table('penjualan')->count();
+            $completedSales = DB::table('penjualan')->where('status_bayar', 'Lunas')->count();
+            $pendingSales = DB::table('penjualan')->where('status_bayar', 'Pending')->count();
+            $totalRevenue = DB::table('penjualan')->where('status_bayar', 'Lunas')->sum('total_harga');
+
+            return response()->json([
+                'success' => true,
+                'total_sales' => $totalSales,
+                'completed_sales' => $completedSales,
+                'pending_sales' => $pendingSales,
+                'total_revenue' => $totalRevenue
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load statistics: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

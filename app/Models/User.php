@@ -37,6 +37,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'role_id',
         'photo_profile',
         'dibuat_oleh',
     ];
@@ -106,19 +107,108 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user is admin
+     * Get the role that belongs to the user
      */
-    public function isAdmin()
+    public function role()
     {
-        return $this->role === 'admin';
+        return $this->belongsTo(Role::class);
     }
 
     /**
-     * Check if user is cashier
+     * Override role attribute to return relationship when role_id exists
+     */
+    public function getRoleAttribute($value)
+    {
+        // If we have a role_id, return the relationship object
+        if ($this->role_id) {
+            return $this->getRelationValue('role');
+        }
+        
+        // Otherwise return the old string value
+        return $value;
+    }
+
+    /**
+     * Check if user has a specific role
+     */
+    public function hasRole($role)
+    {
+        if (is_string($role)) {
+            // Check by role name (for backward compatibility)
+            if ($this->role_id) {
+                $roleModel = $this->role()->first();
+                if ($roleModel) {
+                    return $roleModel->name === $role;
+                }
+            }
+            // Fallback to old role column
+            return $this->attributes['role'] === $role;
+        }
+        
+        if (is_object($role)) {
+            return $this->role_id === $role->id;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Check if user is admin (backward compatibility)
+     */
+    public function isAdmin()
+    {
+        return $this->hasRole('admin');
+    }
+
+    /**
+     * Check if user is cashier (backward compatibility)
      */
     public function isCashier()
     {
-        return $this->role === 'cashier';
+        return $this->hasRole('cashier');
+    }
+
+    /**
+     * Check if user has a specific permission
+     */
+    public function hasPermission($permission)
+    {
+        if (!$this->role_id) {
+            return false;
+        }
+        
+        $role = $this->role()->first();
+        if (!$role) {
+            return false;
+        }
+        
+        return $role->hasPermission($permission);
+    }
+
+    /**
+     * Check if user has any of the given permissions
+     */
+    public function hasAnyPermission($permissions)
+    {
+        foreach ($permissions as $permission) {
+            if ($this->hasPermission($permission)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if user has all of the given permissions
+     */
+    public function hasAllPermissions($permissions)
+    {
+        foreach ($permissions as $permission) {
+            if (!$this->hasPermission($permission)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -126,10 +216,35 @@ class User extends Authenticatable
      */
     public function getRoleDisplayName()
     {
-        return match($this->role) {
+        // Check if user has a role relationship (new system)
+        if ($this->role_id) {
+            $role = $this->role()->first();
+            if ($role) {
+                return $role->display_name;
+            }
+        }
+        
+        // Fallback to old role system
+        return match($this->attributes['role'] ?? '') {
             'admin' => 'Administrator',
             'cashier' => 'Cashier',
             default => 'User'
         };
+    }
+
+    /**
+     * Get user role name
+     */
+    public function getRoleName()
+    {
+        // Check if user has a role relationship (new system)
+        if ($this->role_id) {
+            $role = $this->role()->first();
+            if ($role) {
+                return $role->name;
+            }
+        }
+        
+        return $this->attributes['role'] ?? 'user';
     }
 }

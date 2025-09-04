@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Role;
 
 class UserController extends Controller
 {
@@ -12,7 +13,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::all();
+        $users = User::with('role')->get();
         return view('users.index', compact('users'));
     }
 
@@ -21,7 +22,8 @@ class UserController extends Controller
      */
     public function create()
     {
-        return view('users.create');
+        $roles = Role::active()->with('permissions')->get();
+        return view('users.create', compact('roles'));
     }
 
     /**
@@ -33,8 +35,8 @@ class UserController extends Controller
             'nama' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:akun,username',
             'email' => 'required|email|max:255|unique:akun,email',
-            'password' => 'required|string|min:8',
-            'role' => 'required|in:admin,cashier',
+            'password' => 'required|string|min:8|confirmed',
+            'role_id' => 'required|exists:roles,id',
         ]);
 
         User::create([
@@ -42,7 +44,7 @@ class UserController extends Controller
             'username' => $request->username,
             'email' => $request->email,
             'password' => bcrypt($request->password),
-            'role' => $request->role,
+            'role_id' => $request->role_id,
             'dibuat_oleh' => auth()->user()->nama,
             'date_created' => now(),
             'date_updated' => now(),
@@ -56,6 +58,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
+        $user->load('role.permissions');
         return view('users.show', compact('user'));
     }
 
@@ -64,7 +67,9 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        return view('users.edit', compact('user'));
+        $roles = Role::active()->with('permissions')->get();
+        $user->load('role.permissions');
+        return view('users.edit', compact('user', 'roles'));
     }
 
     /**
@@ -76,14 +81,14 @@ class UserController extends Controller
             'nama' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:akun,username,' . $user->kd,
             'email' => 'required|email|max:255|unique:akun,email,' . $user->kd,
-            'role' => 'required|in:admin,cashier',
+            'role_id' => 'required|exists:roles,id',
         ]);
 
         $user->update([
             'nama' => $request->nama,
             'username' => $request->username,
             'email' => $request->email,
-            'role' => $request->role,
+            'role_id' => $request->role_id,
             'date_updated' => now(),
         ]);
 
@@ -102,5 +107,39 @@ class UserController extends Controller
 
         $user->delete();
         return redirect()->route('users.index')->with('success', 'User deleted successfully!');
+    }
+
+    /**
+     * Show the form for changing user password
+     */
+    public function changePassword(User $user)
+    {
+        return view('users.change-password', compact('user'));
+    }
+
+    /**
+     * Update the user's password
+     */
+    public function updatePassword(Request $request, User $user)
+    {
+        $isSelf = $user->kd === auth()->id();
+        
+        $request->validate([
+            'current_password' => $isSelf ? 'required' : 'nullable',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        // If changing own password, verify current password
+        if ($isSelf && !password_verify($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'Current password is incorrect.']);
+        }
+
+        $user->update([
+            'password' => bcrypt($request->password)
+        ]);
+
+        $message = $isSelf ? 'Your password has been updated successfully.' : "Password updated for {$user->nama}.";
+        
+        return redirect()->route('users.show', $user)->with('success', $message);
     }
 }

@@ -12,6 +12,8 @@ Route::get('/', function () {
 
 Auth::routes();
 
+
+
 // Protected routes - require authentication
 Route::middleware(['auth'])->group(function () {
     // Admin and Cashier can access home
@@ -19,7 +21,7 @@ Route::middleware(['auth'])->group(function () {
     
     // Admin only routes
     Route::middleware(['role:admin'])->group(function () {
-        Route::get('/sales', [App\Http\Controllers\SalesController::class, 'index'])->name('sales');
+
     });
 
     // Cashier routes (accessible by both admin and cashier)
@@ -34,15 +36,19 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/cashier/products', [App\Http\Controllers\CashierController::class, 'getProducts'])->name('cashier.products');
     Route::get('/cashier/product-types', [App\Http\Controllers\CashierController::class, 'getProductTypes'])->name('cashier.product-types');
 
-    // Penjualan Detail Management Routes (Admin only)
-    Route::middleware(['role:admin'])->group(function () {
+    // Penjualan Detail Management Routes (Admin and Cashier access)
+    Route::middleware(['role:admin,cashier'])->group(function () {
         Route::get('/cashier/sale/{saleId}/details', [App\Http\Controllers\CashierController::class, 'getSaleDetails'])->name('cashier.sale.details');
-        Route::put('/cashier/sale-item/{detailId}', [App\Http\Controllers\CashierController::class, 'updateSaleItem'])->name('cashier.sale-item.update');
-        Route::delete('/cashier/sale-item/{detailId}', [App\Http\Controllers\CashierController::class, 'removeSaleItem'])->name('cashier.sale-item.remove');
         Route::get('/cashier/sales-with-details', [App\Http\Controllers\CashierController::class, 'getAllSalesWithDetails'])->name('cashier.sales.with-details');
         Route::get('/sale-details', function() {
             return view('sales.sale-details');
         })->name('sale-details');
+    });
+
+    // Admin-only management routes
+    Route::middleware(['role:admin'])->group(function () {
+        Route::put('/cashier/sale-item/{detailId}', [App\Http\Controllers\CashierController::class, 'updateSaleItem'])->name('cashier.sale-item.update');
+        Route::delete('/cashier/sale-item/{detailId}', [App\Http\Controllers\CashierController::class, 'removeSaleItem'])->name('cashier.sale-item.remove');
 
         // Payment Methods Management Routes
         Route::get('/payment-methods', [App\Http\Controllers\KeuanganKotakController::class, 'index'])->name('payment-methods.index');
@@ -71,18 +77,34 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/users/{user}/edit', [App\Http\Controllers\UserController::class, 'edit'])->name('users.edit');
         Route::put('/users/{user}', [App\Http\Controllers\UserController::class, 'update'])->name('users.update');
         Route::delete('/users/{user}', [App\Http\Controllers\UserController::class, 'destroy'])->name('users.destroy');
+        Route::get('/users/{user}/change-password', [App\Http\Controllers\UserController::class, 'changePassword'])->name('users.change-password');
+        Route::patch('/users/{user}/update-password', [App\Http\Controllers\UserController::class, 'updatePassword'])->name('users.update-password');
+
+        // Role Management routes
+        Route::get('/roles', [App\Http\Controllers\RoleController::class, 'index'])->name('roles.index');
+        Route::get('/roles/create', [App\Http\Controllers\RoleController::class, 'create'])->name('roles.create');
+        Route::post('/roles', [App\Http\Controllers\RoleController::class, 'store'])->name('roles.store');
+        Route::get('/roles/{role}', [App\Http\Controllers\RoleController::class, 'show'])->name('roles.show');
+        Route::get('/roles/{role}/edit', [App\Http\Controllers\RoleController::class, 'edit'])->name('roles.edit');
+        Route::put('/roles/{role}', [App\Http\Controllers\RoleController::class, 'update'])->name('roles.update');
+        Route::delete('/roles/{role}', [App\Http\Controllers\RoleController::class, 'destroy'])->name('roles.destroy');
     });
 
     // Dashboard API routes (accessible by both admin and cashier)
     Route::get('/api/dashboard/stats', [App\Http\Controllers\HomeController::class, 'getDashboardStats'])->name('api.dashboard.stats');
-
-    // API Routes for Sales (Admin only)
-    Route::middleware(['role:admin'])->group(function () {
+    
+    // Sales API routes (accessible by both admin and cashier)
+    Route::middleware(['role:admin,cashier'])->group(function () {
+        Route::get('/api/sales/stats', [App\Http\Controllers\SalesController::class, 'getStats']);
         Route::get('/api/sales', [App\Http\Controllers\SalesController::class, 'getSales']);
         Route::get('/api/sales/{id}', [App\Http\Controllers\SalesController::class, 'getSaleDetails']);
+        Route::get('/api/sales/export', [App\Http\Controllers\SalesController::class, 'exportSales']);
+    });
+    
+    // Admin-only sales management
+    Route::middleware(['role:admin'])->group(function () {
         Route::put('/api/sale-items/{id}', [App\Http\Controllers\SalesController::class, 'updateSaleItem']);
         Route::delete('/api/sale-items/{id}', [App\Http\Controllers\SalesController::class, 'deleteSaleItem']);
-        Route::get('/api/sales/export', [App\Http\Controllers\SalesController::class, 'exportSales']);
 
         // API Routes for Payment Methods
         Route::get('/api/payment-methods', [App\Http\Controllers\PaymentMethodController::class, 'getPaymentMethods']);

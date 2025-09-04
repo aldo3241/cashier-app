@@ -26,22 +26,34 @@ class RoleMiddleware
             return $next($request);
         }
 
-        // Check specific role access
-        switch ($role) {
-            case 'admin':
-                if (!$user->isAdmin()) {
-                    abort(403, 'Access denied. Administrator privileges required.');
-                }
-                break;
-            case 'cashier':
-                if (!$user->isCashier()) {
-                    abort(403, 'Access denied. Cashier privileges required.');
-                }
-                break;
-            default:
-                abort(403, 'Invalid role specified.');
+        // Handle multiple roles (comma-separated)
+        $allowedRoles = explode(',', $role);
+        $userRole = $user->getRoleName();
+        
+        // Check if user has any of the allowed roles
+        foreach ($allowedRoles as $allowedRole) {
+            $allowedRole = trim($allowedRole);
+            
+            switch ($allowedRole) {
+                case 'admin':
+                    if ($user->isAdmin()) {
+                        return $next($request);
+                    }
+                    break;
+                case 'cashier':
+                    if ($user->isCashier()) {
+                        return $next($request);
+                    }
+                    break;
+                default:
+                    // Check if user's role matches the allowed role
+                    if ($userRole === $allowedRole) {
+                        return $next($request);
+                    }
+            }
         }
 
-        return $next($request);
+        // If we get here, user doesn't have any of the required roles
+        abort(403, 'Access denied. Required roles: ' . implode(', ', $allowedRoles));
     }
 }
