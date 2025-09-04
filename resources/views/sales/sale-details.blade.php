@@ -415,37 +415,39 @@
 
 @section('styles')
 <style>
-/* Custom Sales Page Styles */
+/* Custom Sales Page Styles - Matching Theme */
 .sale-card {
     transition: all 0.3s ease;
     border: 1px solid #e9ecef;
     border-radius: 12px;
     overflow: hidden;
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 .sale-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 12px 30px rgba(0,0,0,0.15);
-    border-color: #206bc4;
+    border-color: #2c3e50;
 }
 
-/* Table Improvements */
+/* Table Improvements - Matching Theme */
 .table-vcenter {
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    background: white;
 }
 
 .table-vcenter thead th {
-    background: linear-gradient(135deg, #206bc4 0%, #1a5aa3 100%);
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
     color: white;
     font-weight: 600;
     text-transform: uppercase;
     font-size: 0.75rem;
     letter-spacing: 0.5px;
     border: none;
-    padding: 1rem 0.75rem;
+    padding: 1.25rem 0.75rem;
 }
 
 .table-vcenter tbody tr {
@@ -454,12 +456,12 @@
 }
 
 .table-vcenter tbody tr:hover {
-    background-color: #f8f9fa;
-    transform: scale(1.01);
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    transform: scale(1.005);
 }
 
 .table-vcenter tbody td {
-    padding: 1rem 0.75rem;
+    padding: 1.25rem 0.75rem;
     vertical-align: middle;
     border: none;
 }
@@ -471,38 +473,137 @@
 .sale-status {
     font-size: 0.75rem;
     font-weight: 600;
-    padding: 0.375rem 0.875rem;
+    padding: 0.5rem 1rem;
     border-radius: 25px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
     transition: all 0.3s ease;
     display: inline-block;
-    min-width: 80px;
+    min-width: 90px;
     text-align: center;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
 }
 
 .sale-status:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
 }
 
+.sale-status:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+/* Button-like focus states */
+.sale-status:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.3), 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* Enhanced button appearance */
+.sale-status {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+
+
 .sale-status.completed {
-    background-color: #d1e7dd;
-    color: #0f5132;
-    border: 1px solid #badbcc;
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%) !important;
+    color: white !important;
+    border: 2px solid #27ae60 !important;
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.sale-status.completed::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.sale-status.completed:hover {
+    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%) !important;
+    border-color: #2ecc71 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2) !important;
+}
+
+.sale-status.completed:hover::before {
+    left: 100%;
 }
 
 .sale-status.pending {
-    background-color: #fff3cd;
-    color: #856404;
-    border: 1px solid #ffeaa7;
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%) !important;
+    color: white !important;
+    border: 2px solid #f39c12 !important;
+    box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.sale-status.pending::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.sale-status.pending:hover {
+    background: linear-gradient(135deg, #e67e22 0%, #f39c12 100%) !important;
+    border-color: #e67e22 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2) !important;
+}
+
+.sale-status.pending:hover::before {
+    left: 100%;
 }
 
 .sale-status.cancelled {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
+    color: white !important;
+    border: 2px solid #e74c3c !important;
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.sale-status.cancelled::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.sale-status.cancelled:hover {
+    background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%) !important;
+    border-color: #c0392b !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2) !important;
+}
+
+.sale-status.cancelled:hover::before {
+    left: 100%;
 }
 
 .sale-amount {
@@ -565,17 +666,19 @@
     padding: 1rem 1.5rem;
 }
 
-/* Stats Cards Animation */
+/* Stats Cards Animation - Matching Theme */
 .card-sm {
     transition: all 0.3s ease;
     border: none;
     border-radius: 12px;
     overflow: hidden;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
 }
 
 .card-sm:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
 }
 
 .card-sm .card-body {
@@ -583,31 +686,40 @@
 }
 
 .card-sm .avatar {
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.25rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .card-sm .font-weight-medium {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 700;
-    color: #206bc4;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
 }
 
 .card-sm .text-muted {
     font-size: 0.875rem;
     font-weight: 500;
+    color: #6c757d;
 }
 
-/* Filter Section */
+/* Filter Section - Matching Theme */
 .card-header {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-bottom: 1px solid #e9ecef;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    border-bottom: 1px solid #34495e;
     border-radius: 12px 12px 0 0;
+    color: white;
+}
+
+.card-header h3 {
+    color: white;
+    margin: 0;
 }
 
 .card {
@@ -615,18 +727,64 @@
     box-shadow: 0 4px 15px rgba(0,0,0,0.08);
     border: none;
     overflow: hidden;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
 }
 
 .form-control:focus {
-    border-color: #206bc4;
-    box-shadow: 0 0 0 0.2rem rgba(32, 107, 196, 0.25);
+    border-color: #2c3e50;
+    box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.25);
     border-radius: 8px;
 }
 
 .form-select:focus {
-    border-color: #206bc4;
-    box-shadow: 0 0 0 0.2rem rgba(32, 107, 196, 0.25);
+    border-color: #2c3e50;
+    box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.25);
     border-radius: 8px;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+/* Page Header Improvements - Matching Theme */
+.page-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.page-pretitle {
+    color: #6c757d;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.75rem;
+}
+
+.page-title {
+    color: #2c3e50;
+    font-weight: 700;
+    margin: 0.5rem 0;
+}
+
+.page-title i {
+    color: #2c3e50;
+}
+
+/* Badge Improvements */
+.badge {
+    font-weight: 600;
+    padding: 0.5rem 0.75rem;
+    border-radius: 20px;
+}
+
+.badge.bg-blue {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%) !important;
+    color: white;
 }
 
 /* Responsive Improvements */
@@ -647,9 +805,14 @@
         border-radius: 0.375rem !important;
         margin-bottom: 0.25rem;
     }
+    
+    .page-header {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
 }
 
-/* Empty State Improvements */
+/* Empty State Improvements - Matching Theme */
 .empty {
     padding: 3rem 1rem;
 }
@@ -661,13 +824,44 @@
 .empty-title {
     font-size: 1.25rem;
     font-weight: 600;
-    color: #495057;
+    color: #2c3e50;
     margin-bottom: 0.5rem;
 }
 
 .empty-subtitle {
     font-size: 1rem;
     margin-bottom: 1.5rem;
+    color: #6c757d;
+}
+
+/* Pagination Improvements - Matching Theme */
+.pagination .page-link {
+    border-radius: 8px;
+    margin: 0 2px;
+    border: 1px solid #e9ecef;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.pagination .page-link:hover {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    border-color: #2c3e50;
+    color: white;
+}
+
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    border-color: #2c3e50;
+    color: white;
+}
+
+/* Text Color Improvements */
+.text-muted {
+    color: #6c757d !important;
+}
+
+.font-weight-medium {
+    color: #2c3e50;
 }
 
 /* Pagination Improvements */
@@ -695,7 +889,7 @@
     box-shadow: 0 0 0 0.2rem rgba(32, 107, 196, 0.25);
 }
 
-/* Button Improvements */
+/* Button Improvements - Matching Theme */
 .btn {
     border-radius: 8px;
     font-weight: 500;
@@ -709,22 +903,33 @@
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #206bc4 0%, #1a5aa3 100%);
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
     border: none;
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, #1a5aa3 0%, #154a8a 100%);
+    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
 }
 
 .btn-outline-primary {
-    border-color: #206bc4;
-    color: #206bc4;
+    border-color: #2c3e50;
+    color: #2c3e50;
 }
 
 .btn-outline-primary:hover {
-    background-color: #206bc4;
-    border-color: #206bc4;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    border-color: #2c3e50;
+    color: white;
+}
+
+.btn-outline-warning {
+    border-color: #f39c12;
+    color: #f39c12;
+}
+
+.btn-outline-warning:hover {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+    border-color: #f39c12;
     color: white;
 }
 

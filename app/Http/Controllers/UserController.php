@@ -39,12 +39,16 @@ class UserController extends Controller
             'role_id' => 'required|exists:roles,id',
         ]);
 
+        // Get the role to set both role_id and role fields
+        $role = Role::find($request->role_id);
+        
         User::create([
             'nama' => $request->nama,
             'username' => $request->username,
             'email' => $request->email,
             'password' => bcrypt($request->password),
             'role_id' => $request->role_id,
+            'role' => $role ? $role->name : 'user', // Set the role field as well
             'dibuat_oleh' => auth()->user()->nama,
             'date_created' => now(),
             'date_updated' => now(),
@@ -84,11 +88,15 @@ class UserController extends Controller
             'role_id' => 'required|exists:roles,id',
         ]);
 
+        // Get the role to set both role_id and role fields
+        $role = Role::find($request->role_id);
+        
         $user->update([
             'nama' => $request->nama,
             'username' => $request->username,
             'email' => $request->email,
             'role_id' => $request->role_id,
+            'role' => $role ? $role->name : 'user', // Set the role field as well
             'date_updated' => now(),
         ]);
 

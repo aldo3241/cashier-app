@@ -321,9 +321,9 @@ function getMockData() {
         salesGrowth: 7.5,
         todayTransactions: 23,
         avgPerHour: 2.3,
-        totalProducts: 1247,
-        lowStockCount: 15,
-        pendingSales: 3,
+        totalProducts: 1995, // Updated to match actual data
+        lowStockCount: 809, // Updated to match actual data
+        pendingSales: 17, // Updated to match actual data
         urgentSales: 1,
         recentTransactions: [
             {
@@ -352,8 +352,14 @@ function getMockData() {
             {
                 type: 'warning',
                 title: 'Low stock alert',
-                message: 'Product "Widget A" is running low (5 items left)',
+                message: '809 products have low stock (< 5 items)',
                 time: '30 min ago'
+            },
+            {
+                type: 'warning',
+                title: 'Pending sales',
+                message: '17 sales are pending payment',
+                time: '15 min ago'
             },
             {
                 type: 'success',
@@ -491,7 +497,7 @@ function initializeCharts() {
     const salesChartOptions = {
         series: [{
             name: 'Sales',
-            data: [3000000, 2500000, 3200000, 2800000, 3500000, 4000000, 2500000]
+            data: [1800000, 2200000, 2500000, 2100000, 2800000, 3200000, 2500000]
         }],
         chart: {
             type: 'area',
