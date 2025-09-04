@@ -1,61 +1,267 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🏪 Cashier Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A comprehensive, modern cashier management system built with Laravel 11, featuring real-time analytics, user management, sales tracking, and inventory management.
 
-## About Laravel
+![Laravel](https://img.shields.io/badge/Laravel-11.x-red.svg)
+![PHP](https://img.shields.io/badge/PHP-8.1+-blue.svg)
+![MySQL](https://img.shields.io/badge/MySQL-8.0+-orange.svg)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-purple.svg)
+![License](https://img.shields.io/badge/License-MIT-green.svg)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## ✨ Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 🎯 **Core Functionality**
+- **User Management**: Complete CRUD operations with role-based access control
+- **Sales Management**: Track sales, transactions, and customer data
+- **Inventory Management**: Monitor product stock levels and low stock alerts
+- **Dashboard Analytics**: Real-time statistics and interactive charts
+- **Export Functionality**: CSV export for sales data and reports
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 🔐 **Security Features**
+- **Authentication**: Secure login/logout with bcrypt password hashing
+- **Authorization**: Role-based access control (Admin, Cashier, User)
+- **CSRF Protection**: All forms protected against CSRF attacks
+- **Input Validation**: Comprehensive server-side validation
+- **Security Headers**: XSS, clickjacking, and MIME type sniffing protection
+- **SQL Injection Prevention**: Parameterized queries and Eloquent ORM
 
-## Learning Laravel
+### 🎨 **User Experience**
+- **Modern UI/UX**: Clean, professional design with smooth animations
+- **Responsive Design**: Mobile-first approach, works on all devices
+- **Interactive Elements**: Hover effects, loading states, and transitions
+- **Color-Coded Status**: Intuitive visual indicators for different states
+- **Real-time Updates**: Live data refresh and notifications
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 📊 **Analytics & Reporting**
+- **Live Dashboard**: Real-time sales statistics and key metrics
+- **Growth Tracking**: Percentage changes and trend analysis
+- **Interactive Charts**: Sales trends and payment method distribution
+- **Smart Alerts**: Low stock notifications and pending sales alerts
+- **Export Reports**: CSV export functionality for data analysis
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## 🚀 Quick Start
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Prerequisites
+- PHP 8.1 or higher
+- Composer
+- MySQL 8.0 or higher
+- Node.js and NPM (for frontend assets)
 
-## Laravel Sponsors
+### Installation
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/cashier-management-system.git
+   cd cashier-management-system
+   ```
 
-### Premium Partners
+2. **Install dependencies**
+   ```bash
+   composer install
+   npm install
+   ```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+3. **Environment setup**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-## Contributing
+4. **Database configuration**
+   Update your `.env` file with database credentials:
+   ```env
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=cashier_system
+   DB_USERNAME=your_username
+   DB_PASSWORD=your_password
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+5. **Run migrations and seeders**
+   ```bash
+   php artisan migrate
+   php artisan db:seed
+   ```
 
-## Code of Conduct
+6. **Build frontend assets**
+   ```bash
+   npm run build
+   ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+7. **Start the development server**
+   ```bash
+   php artisan serve
+   ```
 
-## Security Vulnerabilities
+8. **Access the application**
+   Open your browser and navigate to `http://localhost:8000`
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Default Login Credentials
+- **Admin**: `admin` / `password`
+- **Cashier**: `cashier` / `password`
 
-## License
+## 🛠️ Technology Stack
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Backend
+- **Laravel 11**: PHP framework
+- **MySQL**: Database management
+- **Eloquent ORM**: Database abstraction
+- **Carbon**: Date/time manipulation
+- **Bcrypt**: Password hashing
+
+### Frontend
+- **Blade Templates**: Server-side rendering
+- **Bootstrap 5**: CSS framework
+- **Font Awesome**: Icons
+- **ApexCharts**: Interactive charts
+- **JavaScript ES6**: Modern JavaScript features
+
+### Security
+- **CSRF Tokens**: Cross-site request forgery protection
+- **Input Validation**: Server-side validation rules
+- **SQL Injection Prevention**: Parameterized queries
+- **XSS Protection**: Output escaping
+- **Security Headers**: HTTP security headers
+
+## 📊 Database Schema
+
+### Core Tables
+- **`akun`**: User accounts and authentication
+- **`roles`**: User roles and permissions
+- **`permissions`**: System permissions
+- **`role_permissions`**: Role-permission relationships
+- **`produk`**: Product inventory
+- **`penjualan`**: Sales transactions
+- **`penjualan_detail`**: Sales line items
+- **`metode_pembayaran`**: Payment methods
+
+## 🔧 Configuration
+
+### Environment Variables
+```env
+APP_NAME="Cashier Management System"
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=http://localhost:8000
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=cashier_system
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+
+CACHE_DRIVER=file
+SESSION_DRIVER=file
+QUEUE_CONNECTION=sync
+```
+
+## 🚀 Deployment
+
+### Production Checklist
+- [ ] Set `APP_ENV=production` and `APP_DEBUG=false`
+- [ ] Configure database credentials
+- [ ] Set up SSL certificate
+- [ ] Configure web server (Apache/Nginx)
+- [ ] Set proper file permissions
+- [ ] Run `php artisan config:cache`
+- [ ] Run `php artisan route:cache`
+- [ ] Run `php artisan view:cache`
+
+## 📈 Performance
+
+### Optimizations
+- **Database Indexing**: Optimized queries with proper indexes
+- **Caching**: 5-minute cache for dashboard statistics
+- **Lazy Loading**: Charts load after page initialization
+- **Pagination**: Large datasets paginated for better performance
+- **Asset Optimization**: Minified CSS and JavaScript
+
+## 🔒 Security
+
+### Implemented Security Measures
+- **Authentication**: Secure user authentication system
+- **Authorization**: Role-based access control
+- **CSRF Protection**: All forms protected
+- **Input Validation**: Server-side validation
+- **SQL Injection Prevention**: Parameterized queries
+- **XSS Protection**: Output escaping
+- **Security Headers**: Comprehensive HTTP security headers
+
+## 🧪 Testing
+
+### Manual Testing
+- ✅ User authentication and authorization
+- ✅ CRUD operations for all modules
+- ✅ Dashboard functionality
+- ✅ Responsive design testing
+- ✅ Error handling validation
+- ✅ Security feature testing
+
+## 📚 API Documentation
+
+### Authentication Endpoints
+```
+POST /login          - User login
+POST /logout         - User logout
+GET  /user          - Get current user
+```
+
+### User Management Endpoints
+```
+GET    /users           - List all users
+POST   /users           - Create new user
+GET    /users/{id}      - Get user details
+PUT    /users/{id}      - Update user
+DELETE /users/{id}      - Delete user
+```
+
+### Sales Management Endpoints
+```
+GET  /api/sales/stats     - Get sales statistics
+GET  /api/sales           - List sales with pagination
+GET  /api/sales/{id}      - Get sale details
+GET  /api/sales/export    - Export sales data
+```
+
+## 🤝 Contributing
+
+We welcome contributions! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Development Guidelines
+- Follow PSR-12 coding standards
+- Write comprehensive tests
+- Update documentation
+- Follow security best practices
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 👥 Authors
+
+- **Your Name** - *Initial work* - [YourGitHub](https://github.com/yourusername)
+
+## 🙏 Acknowledgments
+
+- Laravel community for the excellent framework
+- Bootstrap team for the responsive CSS framework
+- Font Awesome for the beautiful icons
+- ApexCharts for the interactive charts
+
+## 📞 Support
+
+For support, email support@yourcompany.com or create an issue in this repository.
+
+---
+
+**⭐ If you found this project helpful, please give it a star!**
+
+*Built with ❤️ using Laravel 11 and modern web technologies*
