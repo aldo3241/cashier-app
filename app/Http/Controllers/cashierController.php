@@ -2,23 +2,45 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Produk;
 use Illuminate\Http\Request;
 
 class cashierController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display cashier interface
      */
     public function index()
     {
-        $items = [
-            ['name' => 'Item 1', 'quantity' => 1],
-            ['name' => 'Item 2', 'quantity' => 2],
-            ['name' => 'Item 3', 'quantity' => 3],
-        ];
-        $total = 10.00;
+        // Get some featured products or recent products for initial display
+        $featuredProducts = Produk::inStock()
+            ->select([
+                'kd_produk as id',
+                'nama_produk as name', 
+                'harga_jual as price',
+                'kd_int',
+                'kd_ext',
+                'jenis as category',
+                'stok_total as stock'
+            ])
+            ->limit(8)
+            ->get()
+            ->map(function($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'price' => (float) $product->price,
+                    'barcode_int' => $product->kd_int,
+                    'barcode_ext' => $product->kd_ext,
+                    'barcode' => $product->kd_int ?: $product->kd_ext, // Primary barcode
+                    'category' => $product->category ?? 'General',
+                    'stock' => $product->stock
+                ];
+            });
 
-            return view('cashier.cashier', ['items' => $items, 'total' => $total]);
+        return view('cashier.cashier', [
+            'featuredProducts' => $featuredProducts
+        ]);
     }
 
     /**
