@@ -207,37 +207,69 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+        
+        /* Header Toggle Styles */
+        .header-bottom {
+            position: relative;
+        }
+        
+        .header-bottom.hidden {
+            transform: translateY(100%);
+        }
+        
+        .header-bottom.visible {
+            transform: translateY(0);
+        }
+        
+        #header-toggle {
+            z-index: 50;
+        }
+        
+        #toggle-icon.rotated {
+            transform: rotate(180deg);
+        }
     </style>
     </head>
 
 <body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
-    <!-- Bottom Header - Always Visible -->
-    <header id="main-header" class="header-bottom bg-white shadow-lg border-t border-gray-200">
+    <!-- Bottom Header - Collapsible -->
+    <header id="main-header" class="header-bottom bg-white shadow-lg border-t border-gray-200 transition-all duration-300 ease-in-out">
         <div class="px-6 py-4">
             <div class="flex justify-between items-center">
                 <!-- Left: User Info -->
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
-                        <span class="text-white font-bold text-sm">{{ substr(auth()->user()->nama ?? 'U', 0, 1) }}</span>
+                    <!-- Profile Dropdown -->
+                    <div class="relative">
+                        <button id="profile-dropdown-btn" class="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center hover:from-green-500 hover:to-blue-600 transition-all duration-200 cursor-pointer group" title="Profile Menu">
+                            <span class="text-white font-bold text-sm group-hover:scale-110 transition-transform duration-200">{{ substr(auth()->user()->nama ?? auth()->user()->username ?? 'U', 0, 1) }}</span>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div id="profile-dropdown" class="absolute left-0 top-full mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 hidden">
+                            <div class="px-4 py-3 border-b border-gray-100">
+                                <p class="text-sm font-medium text-gray-900">{{ auth()->user()->nama ?? auth()->user()->username ?? 'User' }}</p>
+                                <p class="text-xs text-gray-500 truncate">{{ auth()->user()->email ?? 'No email' }}</p>
+                            </div>
+                            <a href="{{ route('profile') }}" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                                <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                <span data-en="Profile Settings" data-id="Pengaturan Profil">Profile Settings</span>
+                            </a>
+                            <form method="POST" action="{{ route('logout') }}" class="block">
+                                @csrf
+                                <button type="submit" class="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                                    <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                    </svg>
+                                    <span data-en="Logout" data-id="Keluar">Logout</span>
+                                </button>
+                            </form>
+                        </div>
                     </div>
                     <div class="text-left">
-                        <div class="text-sm text-gray-500" data-en="Logged in as" data-id="Masuk sebagai">Logged in as</div>
-                        <div class="font-medium text-gray-800">{{ auth()->user()->nama ?? 'User' }}</div>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <a href="{{ route('profile') }}" class="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Profile">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                            </svg>
-                        </a>
-                        <form method="POST" action="{{ route('logout') }}" class="inline">
-                            @csrf
-                            <button type="submit" class="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Logout">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                                </svg>
-                            </button>
-                        </form>
+                        <div class="text-sm text-gray-500" data-en="Logged in as" data-id="Masuk sebagai">Masuk sebagai</div>
+                        <div class="font-medium text-gray-800">{{ auth()->user()->nama ?? auth()->user()->username ?? 'User' }}</div>
                     </div>
                 </div>
                 
@@ -249,8 +281,8 @@
                         </svg>
                     </div>
                     <div class="text-center">
-                        <h1 class="text-2xl font-bold text-gray-800">Inspizo Spiritosanto</h1>
-                        <p class="text-sm text-gray-500">Cashier System</p>
+                        <h1 class="text-2xl font-bold text-gray-800">   Spiritosanto</h1>
+                        <p class="text-sm text-gray-500">Inspizo Cashier System</p>
                     </div>
                 </div>
                 
@@ -272,6 +304,13 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Toggle Button -->
+        <button id="header-toggle" class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-t-lg transition-all duration-300 ease-in-out shadow-lg">
+            <svg id="toggle-icon" class="w-4 h-4 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
     </header>
 
     <!-- Main Content -->
@@ -293,9 +332,9 @@
                             <input
                                 type="text"
                                 id="product-search"
-                                placeholder="Search products or scan barcode (press Enter)..."
-                                data-en-placeholder="Search products or scan barcode (press Enter)..."
-                                data-id-placeholder="Cari produk atau scan barcode (tekan Enter)..."
+                                placeholder="Search products by name, barcode, or category..."
+                                data-en-placeholder="Search products by name, barcode, or category..."
+                                data-id-placeholder="Cari produk berdasarkan nama, barcode, atau kategori..."
                                 class="w-full text-xl font-medium text-gray-800 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue-500 pl-12 pr-4 py-4 bg-gray-50 rounded-lg"
                                 autocomplete="off"
                             >
@@ -352,34 +391,40 @@
             <!-- Right Panel - Order Summary & Actions -->
             <div class="lg:col-span-1 flex flex-col space-y-6">
                 
-                <!-- Order Summary -->
+                <!-- Invoice Info & Total -->
                 <div class="bg-gradient-to-br from-blue-600 to-purple-700 rounded-xl shadow-lg text-white">
                     <div class="p-6">
-                        <h3 class="text-xl font-bold mb-4" data-en="Order Summary" data-id="Ringkasan Pesanan">Order Summary</h3>
                         
-                        <div class="space-y-3">
-                            <div class="border-t border-white/20 pt-3">
-                                <div class="flex justify-between text-lg font-bold">
-                                    <span data-en="Total:" data-id="Total:">Total:</span>
-                                    <span id="total">$0.00</span>
-                                </div>
+                        <div class="space-y-4">
+                            <!-- Invoice Number -->
+                            <div>
+                                <div class="text-xs opacity-80" data-en="Invoice No:" data-id="No Faktur:">No Faktur:</div>
+                                <div class="text-sm font-bold" id="invoice-number">PJ250101000000</div>
+                            </div>
+                            
+                            <!-- Timestamp -->
+                            <div>
+                                <div class="text-xs opacity-80" data-en="Date & Time:" data-id="Tanggal & Waktu:">Tanggal & Waktu:</div>
+                                <div class="text-sm font-medium" id="invoice-timestamp">Loading...</div>
+                            </div>
+                            
+                            <!-- Total Price -->
+                            <div class="border-t border-white/20 pt-4 text-center">
+                                <div class="text-4xl font-bold" id="total">Rp 0</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Quick Actions -->
+                <!-- Customer Information -->
                 <div class="bg-white rounded-xl shadow-lg border border-gray-200">
                     <div class="p-6">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4" data-en="Quick Actions" data-id="Aksi Cepat">Quick Actions</h3>
-                        
-                        <div class="space-y-3">
-                            <button class="w-full bg-green-100 hover:bg-green-200 text-green-800 p-4 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-                                </svg>
-                                <span data-en="Print Receipt" data-id="Cetak Struk">Print Receipt</span>
-                            </button>
+                        <h3 class="text-lg font-bold text-gray-800 mb-4" data-en="Customer Information" data-id="Informasi Pelanggan">Informasi Pelanggan</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="customer-name" class="block text-sm font-medium text-gray-700 mb-2" data-en="Customer Name" data-id="Nama Pelanggan">Nama Pelanggan</label>
+                                <input type="text" id="customer-name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Masukkan nama pelanggan..." data-en="Enter customer name..." data-id="Masukkan nama pelanggan...">
+                            </div>
                             
                             <button id="switch-transaction-btn" class="w-full bg-orange-100 hover:bg-orange-200 text-orange-800 p-4 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -387,36 +432,42 @@
                                 </svg>
                                 <span data-en="Switch Transaction" data-id="Ganti Transaksi">Switch Transaction</span>
                             </button>
-                            
-                            <button class="w-full bg-purple-100 hover:bg-purple-200 text-purple-800 p-4 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                                </svg>
-                                <span data-en="Add Package" data-id="Tambah Paket">Add Package</span>
-                            </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Payment Actions -->
+
+
+                <!-- Quick Actions -->
                 <div class="bg-white rounded-xl shadow-lg border border-gray-200">
-                    <div class="p-6">
-                        <button id="checkout-btn" class="w-full bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white text-xl font-bold py-4 rounded-lg transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none" disabled>
-                            <div class="flex items-center justify-center space-x-2">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V8a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    <div class="p-6">                        
+                        <div class="space-y-3">
+                        <button onclick="clearCart()" class="w-full bg-red-100 hover:bg-red-200 text-red-800 p-4 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            <span data-en="Cancel Order" data-id="Batalkan Pesanan">Cancel Order</span>
+                        </button>
+                            <button class="w-full bg-green-100 hover:bg-green-200 text-green-800 p-4 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
                                 </svg>
-                                <span data-en="Process Payment" data-id="Proses Pembayaran">Process Payment</span>
-                            </div>
-                        </button>
-                        
-                        <button id="clear-cart-btn" class="w-full mt-3 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold transition-all">
-                            <span data-en="Clear Cart" data-id="Kosongkan Keranjang">Clear Cart</span>
-                        </button>
+                                <span data-en="Print Receipt" data-id="Cetak Struk">Print Receipt</span>
+                            </button>
+                            
+                            <button id="checkout-btn" class="w-full bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white text-xl font-bold py-4 rounded-lg transition-all transform hover:scale-105 shadow-lg">
+                                <div class="flex items-center justify-center space-x-2">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V8a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <span data-en="Process Payment" data-id="Proses Pelunasan">Process Payment</span>
+                                </div>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>  
+        </div>
     </main>
 
     <!-- Custom Modal -->
@@ -454,14 +505,45 @@
         let searchTimeout;
         let allTransactions = []; // Array untuk menyimpan semua transaksi
         let currentTransactionId = 1; // ID transaksi yang sedang aktif
+        let invoiceNumber = 'PJ250101000000'; // Nomor faktur saat ini
 
         // Update current time
         function updateTime() {
             const now = new Date();
             document.getElementById('current-time').textContent = now.toLocaleTimeString();
+            
+            // Update invoice timestamp
+            const timestampElement = document.getElementById('invoice-timestamp');
+            if (timestampElement) {
+                timestampElement.textContent = now.toLocaleString('id-ID', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            }
         }
         updateTime();
         setInterval(updateTime, 1000);
+
+        // Generate new invoice number
+        function generateInvoiceNumber() {
+            const now = new Date();
+            const year = String(now.getFullYear()).slice(-2); // 2 digit tahun
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hour = String(now.getHours()).padStart(2, '0');
+            const minute = String(now.getMinutes()).padStart(2, '0');
+            const second = String(now.getSeconds()).padStart(2, '0');
+            
+            invoiceNumber = `PJ${year}${month}${day}${hour}${minute}${second}`;
+            document.getElementById('invoice-number').textContent = invoiceNumber;
+        }
+
+        // Initialize invoice number
+        generateInvoiceNumber();
 
         // Product search functionality
         document.getElementById('product-search').addEventListener('input', function(e) {
@@ -478,14 +560,14 @@
             }, 300);
         });
 
-        // Barcode scanning functionality - Enter key handler
+        // Barcode scanning - Enter key handler
         document.getElementById('product-search').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                const query = e.target.value.trim();
+                const barcode = e.target.value.trim();
                 
-                if (query.length > 0) {
-                    handleBarcodeInput(query);
+                if (barcode.length > 0) {
+                    handleBarcodeInput(barcode);
                 }
             }
         });
@@ -547,15 +629,14 @@
         // Handle barcode input when Enter is pressed
         async function handleBarcodeInput(barcode) {
             const searchInput = document.getElementById('product-search');
-            const originalPlaceholder = searchInput.placeholder;
+            const originalValue = searchInput.value;
             
             try {
-                // Show loading indicator with visual feedback
-                searchInput.placeholder = getText('🔍 Searching barcode...', '🔍 Mencari barcode...');
+                // Show loading state
                 searchInput.disabled = true;
-                searchInput.style.backgroundColor = '#fef3c7'; // Light yellow background
-                searchInput.style.borderColor = '#f59e0b'; // Orange border
-
+                searchInput.style.backgroundColor = '#fef3c7';
+                searchInput.style.borderColor = '#f59e0b';
+                
                 // Hide suggestions
                 document.getElementById('search-suggestions').classList.add('hidden');
 
@@ -572,84 +653,100 @@
                 const result = await response.json();
                 
                 if (result.success && result.data) {
-                    // Product found - add to cart
-                    const addSuccess = await addProductToCart(result.data);
+                    const product = result.data;
                     
-                    if (addSuccess) {
-                        // Clear search input immediately
-                        searchInput.value = '';
-                        
-                        // Show success feedback
-                        showBarcodeSuccessAnimation(result.data.name);
-                        
-                        // Quick success flash
-                        searchInput.style.backgroundColor = '#dcfce7'; // Light green
-                        searchInput.style.borderColor = '#10b981'; // Green border
-                        
-                        setTimeout(() => {
-                            resetSearchInputStyle();
-                        }, 800);
+                    // Check stock
+                    if (product.stock <= 0) {
+                        showNotification(getText('Out of Stock', 'Stok Habis'), 'error');
+                        searchInput.style.backgroundColor = '#fef2f2';
+                        searchInput.style.borderColor = '#ef4444';
+                        return;
                     }
+
+                    // Check if already in cart
+                    const existingItem = cart.find(item => item.id === product.id);
+                    if (existingItem) {
+                        if (existingItem.quantity >= product.stock) {
+                            showNotification(getText('Stock limit reached', 'Batas stok tercapai'), 'error');
+                            searchInput.style.backgroundColor = '#fef2f2';
+                            searchInput.style.borderColor = '#ef4444';
+                            return;
+                        }
+                        existingItem.quantity += 1;
+                    } else {
+                        cart.push({ ...product, quantity: 1 });
+                    }
+
+                    // Success!
+                    updateCartDisplay();
+                    searchInput.value = '';
+                    
+                    // Show success feedback
+                    searchInput.style.backgroundColor = '#dcfce7';
+                    searchInput.style.borderColor = '#10b981';
+                    showNotification(getText(`Added: ${product.name}`, `Ditambahkan: ${product.name}`), 'success');
                     
                 } else {
-                    // Product not found - show error state
-                    searchInput.style.backgroundColor = '#fef2f2'; // Light red
-                    searchInput.style.borderColor = '#ef4444'; // Red border
-                    
-                    showModal(
-                        getText('Product Not Found', 'Produk Tidak Ditemukan'),
-                        getText(`No product found with barcode: ${barcode}`, `Tidak ada produk dengan barcode: ${barcode}`),
-                        () => {
-                            // After modal closes, select text and reset style
-                            setTimeout(() => {
-                                searchInput.select();
-                                resetSearchInputStyle();
-                            }, 100);
-                        },
-                        () => {
-                            // On cancel, also reset
-                            setTimeout(() => {
-                                searchInput.select();
-                                resetSearchInputStyle();
-                            }, 100);
-                        }
-                    );
+                    // Product not found
+                    searchInput.style.backgroundColor = '#fef2f2';
+                    searchInput.style.borderColor = '#ef4444';
+                    showNotification(getText('Product not found', 'Produk tidak ditemukan'), 'error');
+                    searchInput.select();
                 }
 
             } catch (error) {
-                console.error('Barcode search error:', error);
-                
-                // Error state styling
+                console.error('Barcode scan error:', error);
                 searchInput.style.backgroundColor = '#fef2f2';
                 searchInput.style.borderColor = '#ef4444';
-                
-                showModal(
-                    getText('Error', 'Error'),
-                    getText('Failed to search for product. Please try again.', 'Gagal mencari produk. Silakan coba lagi.'),
-                    () => {
-                        setTimeout(() => {
-                            resetSearchInputStyle();
-                            searchInput.select();
-                        }, 100);
-                    }
-                );
+                showNotification(getText('Scan failed', 'Scan gagal'), 'error');
             } finally {
-                // Always restore input state and focus
+                // Reset and refocus
                 searchInput.disabled = false;
-                searchInput.placeholder = originalPlaceholder;
-                
-                // Ensure focus returns to input for continuous scanning
                 setTimeout(() => {
+                    searchInput.style.backgroundColor = '';
+                    searchInput.style.borderColor = '';
                     searchInput.focus();
-                }, 100);
+                }, 1000);
             }
         }
 
-        // Reset search input styling to default
-        function resetSearchInputStyle() {
-            const searchInput = document.getElementById('product-search');
-            searchInput.style.backgroundColor = '';
-            searchInput.style.borderColor = '';
+        // Show notification toast
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+            
+            notification.innerHTML = `
+                <div class="flex items-center space-x-2 ${bgColor} text-white px-4 py-3 rounded-lg shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        ${type === 'success' 
+                            ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>'
+                            : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>'
+                        }
+                    </svg>
+                    <span class="font-medium">${message}</span>
+                </div>
+            `;
+            
+            notification.style.position = 'fixed';
+            notification.style.top = '100px';
+            notification.style.right = '20px';
+            notification.style.zIndex = '9999';
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateX(100%)';
+            notification.style.transition = 'all 0.3s ease';
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '1';
+                notification.style.transform = 'translateX(0)';
+            }, 10);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => notification.remove(), 300);
+            }, 2500);
         }
 
         // Format price to Indonesian Rupiah
@@ -664,46 +761,7 @@
             }
         });
 
-        // Add product to cart (used by barcode scanning)
-        async function addProductToCart(product) {
-            try {
-                // Check if product has enough stock
-                if (product.stock <= 0) {
-                    showModal(
-                        getText('Out of Stock', 'Stok Habis'),
-                        getText(`${product.name} is out of stock.`, `${product.name} sedang habis stok.`)
-                    );
-                    return false;
-                }
-
-                const existingItem = cart.find(item => item.id === product.id);
-                if (existingItem) {
-                    if (existingItem.quantity >= product.stock) {
-                        showModal(
-                            getText('Insufficient Stock', 'Stok Tidak Cukup'),
-                            getText(`Only ${product.stock} items available.`, `Hanya tersedia ${product.stock} item.`)
-                        );
-                        return false;
-                    }
-                    existingItem.quantity += 1;
-                } else {
-                    cart.push({ ...product, quantity: 1 });
-                }
-
-                updateCartDisplay();
-                return true;
-
-            } catch (error) {
-                console.error('Error adding product to cart:', error);
-                showModal(
-                    getText('Error', 'Error'),
-                    getText('Failed to add product to cart.', 'Gagal menambahkan produk ke keranjang.')
-                );
-                return false;
-            }
-        }
-
-        // Add to cart function (used by search suggestions)
+        // Add to cart function
         async function addToCart(productId) {
             try {
                 // First, get product details if not in featured products
@@ -788,6 +846,7 @@
                 cartCount.textContent = '0';
                 total.textContent = 'Rp 0';
                 checkoutBtn.disabled = true;
+                checkoutBtn.classList.add('opacity-50', 'cursor-not-allowed');
                 return;
             }
 
@@ -798,6 +857,7 @@
             cartCount.textContent = cart.length;
             total.textContent = `Rp ${formatPrice(totalAmount)}`;
             checkoutBtn.disabled = false;
+            checkoutBtn.classList.remove('opacity-50', 'cursor-not-allowed');
 
             // Render cart items
             cartItemsContainer.innerHTML = cart.map(item => `
@@ -832,8 +892,8 @@
             `).join('');
         }
 
-        // Update quantity (make it globally accessible)
-        window.updateQuantity = function(productId, change) {
+        // Update quantity
+        function updateQuantity(productId, change) {
             const item = cart.find(item => item.id === productId);
             if (!item) return;
 
@@ -845,25 +905,26 @@
             }
         }
 
-        // Remove from cart (make it globally accessible)
-        window.removeFromCart = function(productId) {
+        // Remove from cart
+        function removeFromCart(productId) {
             cart = cart.filter(item => item.id !== productId);
             updateCartDisplay();
         }
 
-        // Clear cart function
-        function clearCart() {
+        // Clear cart
+        document.querySelector('button[onclick="clearCart()"]')?.addEventListener('click', function() {
             showModal(
                 getText('Clear Cart', 'Kosongkan Keranjang'),
                 getText('Are you sure you want to clear the cart?', 'Apakah Anda yakin ingin mengosongkan keranjang?'),
                 function() {
                     // Confirm action - clear the cart
                     cart = [];
+                    generateInvoiceNumber(); // Generate nomor faktur baru
                     updateCartDisplay();
                 },
                 null // Cancel action - do nothing
             );
-        }
+        });
 
         // Checkout functionality
         document.getElementById('checkout-btn').addEventListener('click', function() {
@@ -936,90 +997,6 @@
         // Language helper function
         function getText(enText, idText) {
             return currentLanguage === 'id' ? idText : enText;
-        }
-
-        // Show success animation for barcode scanning
-        function showBarcodeSuccessAnimation(productName = '') {
-            const searchInput = document.getElementById('product-search');
-            
-            // Create success notification
-            const successNotification = document.createElement('div');
-            successNotification.innerHTML = `
-                <div class="flex items-center space-x-2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span class="font-medium">
-                        ${productName ? 
-                            getText(`Added: ${productName}`, `Ditambahkan: ${productName}`) : 
-                            getText('Product added to cart!', 'Produk ditambahkan ke keranjang!')
-                        }
-                    </span>
-                </div>
-            `;
-            
-            // Position the notification
-            successNotification.style.position = 'fixed';
-            successNotification.style.top = '20px';
-            successNotification.style.right = '20px';
-            successNotification.style.zIndex = '9999';
-            successNotification.style.opacity = '0';
-            successNotification.style.transform = 'translateX(100%)';
-            successNotification.style.transition = 'all 0.3s ease';
-            
-            // Add to body
-            document.body.appendChild(successNotification);
-            
-            // Animate in
-            setTimeout(() => {
-                successNotification.style.opacity = '1';
-                successNotification.style.transform = 'translateX(0)';
-            }, 50);
-            
-            // Animate out and remove
-            setTimeout(() => {
-                successNotification.style.opacity = '0';
-                successNotification.style.transform = 'translateX(100%)';
-                
-                setTimeout(() => {
-                    if (successNotification.parentElement) {
-                        successNotification.parentElement.removeChild(successNotification);
-                    }
-                }, 300);
-            }, 2500);
-            
-            // Also add a subtle checkmark to the input
-            const checkmark = document.createElement('div');
-            checkmark.innerHTML = `
-                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-            `;
-            checkmark.style.position = 'absolute';
-            checkmark.style.right = '50px';
-            checkmark.style.top = '50%';
-            checkmark.style.transform = 'translateY(-50%) scale(0)';
-            checkmark.style.zIndex = '10';
-            checkmark.style.pointerEvents = 'none';
-            checkmark.style.transition = 'all 0.2s ease';
-            
-            const searchContainer = searchInput.parentElement;
-            searchContainer.style.position = 'relative';
-            searchContainer.appendChild(checkmark);
-            
-            // Animate checkmark
-            setTimeout(() => {
-                checkmark.style.transform = 'translateY(-50%) scale(1)';
-            }, 100);
-            
-            setTimeout(() => {
-                checkmark.style.transform = 'translateY(-50%) scale(0)';
-                setTimeout(() => {
-                    if (checkmark.parentElement) {
-                        checkmark.parentElement.removeChild(checkmark);
-                    }
-                }, 200);
-            }, 800);
         }
         
         // Custom Modal Functions
@@ -1218,7 +1195,7 @@
                             <div>
                                 <div class="font-semibold">${transaction.customerInfo} ${isActive ? '(Active)' : ''}</div>
                                 <div class="text-sm text-gray-500">
-                                    ${transaction.items} items • $${transaction.total.toFixed(2)} • 
+                                    ${transaction.items} items • Rp${transaction.total.toFixed(2)} • 
                                     ${transaction.timestamp.toLocaleTimeString()}
                                 </div>
                             </div>
@@ -1270,6 +1247,7 @@
                 // Buat transaksi baru
                 currentTransactionId = Date.now();
                 cart = [];
+                generateInvoiceNumber(); // Generate nomor faktur baru
                 updateCartDisplay();
                 
                 showModal(
@@ -1292,8 +1270,58 @@
             }
         }
         
+        // Profile Dropdown Functionality
+        function toggleProfileDropdown() {
+            const dropdown = document.getElementById('profile-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        // Close dropdown when clicking outside
+        function closeProfileDropdown() {
+            const dropdown = document.getElementById('profile-dropdown');
+            dropdown.classList.add('hidden');
+        }
+
         // Add event listeners for print buttons and switch transaction
         document.addEventListener('DOMContentLoaded', function() {
+            // Profile dropdown functionality
+            const profileBtn = document.getElementById('profile-dropdown-btn');
+            if (profileBtn) {
+                profileBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleProfileDropdown();
+                });
+            }
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('#profile-dropdown') && !e.target.closest('#profile-dropdown-btn')) {
+                    closeProfileDropdown();
+                }
+            });
+
+            // Header Toggle Functionality
+            const headerToggle = document.getElementById('header-toggle');
+            const mainHeader = document.getElementById('main-header');
+            const toggleIcon = document.getElementById('toggle-icon');
+            let isHeaderVisible = true;
+            
+            if (headerToggle && mainHeader && toggleIcon) {
+                headerToggle.addEventListener('click', function() {
+                    if (isHeaderVisible) {
+                        // Hide header
+                        mainHeader.classList.add('hidden');
+                        toggleIcon.classList.add('rotated');
+                        isHeaderVisible = false;
+                    } else {
+                        // Show header
+                        mainHeader.classList.remove('hidden');
+                        toggleIcon.classList.remove('rotated');
+                        isHeaderVisible = true;
+                    }
+                });
+            }
+            
             // Auto focus on search input when page loads
             const searchInput = document.getElementById('product-search');
             if (searchInput) {
@@ -1319,51 +1347,6 @@
             if (switchBtn) {
                 switchBtn.addEventListener('click', switchTransaction);
             }
-            
-            // Clear cart button
-            const clearCartBtn = document.getElementById('clear-cart-btn');
-            if (clearCartBtn) {
-                clearCartBtn.addEventListener('click', clearCart);
-            }
-            
-            // Global keyboard shortcuts for better barcode scanning workflow
-            document.addEventListener('keydown', function(e) {
-                // F2 key to quickly focus search input from anywhere
-                if (e.key === 'F2') {
-                    e.preventDefault();
-                    const searchInput = document.getElementById('product-search');
-                    if (searchInput) {
-                        searchInput.focus();
-                        searchInput.select(); // Select all text for easy replacement
-                    }
-                }
-                
-                // Escape key to clear search and refocus
-                if (e.key === 'Escape') {
-                    const searchInput = document.getElementById('product-search');
-                    if (searchInput && document.activeElement === searchInput) {
-                        e.preventDefault();
-                        searchInput.value = '';
-                        document.getElementById('search-suggestions').classList.add('hidden');
-                        resetSearchInputStyle();
-                    }
-                }
-            });
-            
-            // Auto-refocus search input when clicking on empty areas (for continuous scanning)
-            document.addEventListener('click', function(e) {
-                // Don't refocus if clicking on interactive elements
-                const isInteractiveElement = e.target.closest('button, input, select, textarea, a, [onclick], .modal-overlay');
-                
-                if (!isInteractiveElement) {
-                    const searchInput = document.getElementById('product-search');
-                    if (searchInput && !searchInput.disabled) {
-                        setTimeout(() => {
-                            searchInput.focus();
-                        }, 50);
-                    }
-                }
-            });
         });
     </script>
     </body>

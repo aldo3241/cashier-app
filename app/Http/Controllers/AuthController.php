@@ -18,7 +18,7 @@ class AuthController extends Controller
     public function showLoginForm()
     {
         if (Auth::check()) {
-            return redirect()->route('cashier.index');
+            return redirect()->route('dashboard');
         }
         
         return view('auth.login');
@@ -88,7 +88,7 @@ class AuthController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
-        return redirect()->intended(route('cashier.index'));
+        return redirect()->intended(route('dashboard'));
     }
 
     /**

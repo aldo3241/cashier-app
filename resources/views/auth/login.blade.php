@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - FreshFood POS</title>
+    <title>Login - Inspizo Spiritosanto</title>
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
 </head>
@@ -17,7 +17,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                     </svg>
                 </div>
-                <h2 class="text-3xl font-bold text-gray-900">FreshFood POS</h2>
+                <h2 class="text-3xl font-bold text-gray-900">Inspizo Spiritosanto</h2>
                 <p class="mt-2 text-sm text-gray-600">Masuk ke akun Anda</p>
             </div>
 
