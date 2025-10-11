@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\cashierController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SalesReportController;
 use App\Http\Controllers\Api\ProdukController;
 
 // Public routes
@@ -23,6 +24,10 @@ Route::middleware('auth')->group(function () {
     
     // Dashboard routes (protected)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // Sales Report routes (protected)
+    Route::get('/sales/my-sales', [SalesReportController::class, 'mySales'])->name('sales.my-sales');
+    Route::get('/sales/all-sales', [SalesReportController::class, 'allSales'])->name('sales.all-sales');
     
     // Cashier routes (protected)
     Route::get('/cashier', [cashierController::class, 'index'])->name('cashier.index');
