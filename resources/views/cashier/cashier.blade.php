@@ -338,12 +338,18 @@
                                 class="w-full text-xl font-medium text-gray-800 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue-500 pl-12 pr-4 py-4 bg-gray-50 rounded-lg"
                                 autocomplete="off"
                             >
-                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center">
-                                <button class="p-2 text-gray-400 hover:text-blue-600 transition-colors" title="Print Receipt">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-                                    </svg>
-                                </button>
+                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                                    <rect x="2" y="6" width="1.5" height="12" rx="0.5"/>
+                                    <rect x="4.5" y="6" width="1" height="12" rx="0.5"/>
+                                    <rect x="6.5" y="6" width="2" height="12" rx="0.5"/>
+                                    <rect x="9.5" y="6" width="1" height="12" rx="0.5"/>
+                                    <rect x="11.5" y="6" width="1.5" height="12" rx="0.5"/>
+                                    <rect x="14" y="6" width="1" height="12" rx="0.5"/>
+                                    <rect x="16" y="6" width="2" height="12" rx="0.5"/>
+                                    <rect x="19" y="6" width="1" height="12" rx="0.5"/>
+                                    <rect x="21" y="6" width="1.5" height="12" rx="0.5"/>
+                                </svg>
                             </div>
                         </div>
                         
@@ -357,7 +363,7 @@
                 <!-- Shopping Cart -->
                 <div class="bg-white rounded-xl shadow-lg border border-gray-200 flex-1 flex flex-col">
                     <div class="p-6 border-b border-gray-200">
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between mb-4">
                             <h2 class="text-xl font-bold text-gray-800" data-en="Shopping Cart" data-id="Keranjang Belanja">Shopping Cart</h2>
                             <div class="flex items-center space-x-2">
                                 <span class="text-sm text-gray-500" data-en="Items:" data-id="Item:">Items:</span>
@@ -417,24 +423,39 @@
                 </div>
 
                 <!-- Customer Information -->
-                <div class="bg-white rounded-xl shadow-lg border border-gray-200">
-                    <div class="p-6">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4" data-en="Customer Information" data-id="Informasi Pelanggan">Informasi Pelanggan</h3>
-                        <div class="space-y-4">
+                <div class="bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl p-4 border-2 border-orange-200 shadow-sm">
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center shadow-md">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                            </div>
+                            <div class="text-xs font-medium text-orange-700 uppercase tracking-wide" data-en="Customer Information" data-id="Informasi Pelanggan">Customer Information</div>
+                        </div>
+                        
+                        <div class="space-y-2">
                             <div>
-                                <label for="customer-name" class="block text-sm font-medium text-gray-700 mb-2" data-en="Customer Name" data-id="Nama Pelanggan">Nama Pelanggan</label>
-                                <input type="text" id="customer-name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Masukkan nama pelanggan..." data-en="Enter customer name..." data-id="Masukkan nama pelanggan...">
+                                <div class="text-xs text-orange-600 font-medium" data-en="Customer No" data-id="No Pelanggan">No Pelanggan</div>
+                                <div id="customer-code-display" class="text-sm font-bold text-gray-800">Loading...</div>
                             </div>
                             
-                            <button id="switch-transaction-btn" class="w-full bg-orange-100 hover:bg-orange-200 text-orange-800 p-4 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
-                                </svg>
-                                <span data-en="Switch Transaction" data-id="Ganti Transaksi">Switch Transaction</span>
-                            </button>
+                            <div>
+                                <div class="text-xs text-orange-600 font-medium" data-en="Customer Name" data-id="Nama Pelanggan">Nama Pelanggan</div>
+                                <div id="customer-name-display" class="text-sm font-bold text-gray-800">Loading...</div>
+                            </div>
                         </div>
+                        
+                        <button id="change-customer-btn" class="w-full px-3 py-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-xs font-bold rounded-lg transition-all transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                            </svg>
+                            <span data-en="Change Transaction" data-id="Ganti Transaksi">Change Transaction</span>
+                        </button>
                     </div>
                 </div>
+
+
 
 
 
@@ -493,6 +514,60 @@
         </div>
     </div>
 
+    <!-- Customer Search Modal -->
+    <div id="customer-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[80vh] flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-medium text-gray-900" data-en="Select Customer" data-id="Pilih Pelanggan">Select Customer</h3>
+                <button onclick="closeCustomerModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="p-6">
+                <!-- Search Input -->
+                <div class="mb-4">
+                    <input 
+                        type="text" 
+                        id="customer-search-input"
+                        placeholder="Search customer by name, phone, or organization..."
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                </div>
+                
+                <!-- Default Customer Option -->
+                <div class="mb-4">
+                    <button onclick="selectDefaultCustomer()" class="w-full text-left p-4 border-2 border-blue-300 bg-blue-50 rounded-lg hover:bg-blue-100 transition-all">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                                #
+                            </div>
+                            <div class="ml-3 flex-1">
+                                <div class="font-semibold text-gray-800">#PLG1</div>
+                                <div class="text-sm text-gray-600" data-en="Walk-in Customer (Default)" data-id="Pelanggan Umum (Default)">Walk-in Customer (Default)</div>
+                            </div>
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </button>
+                </div>
+                
+                <!-- Search Results -->
+                <div id="customer-search-results" class="space-y-2 overflow-y-auto max-h-96">
+                    <div class="text-center py-8 text-gray-500">
+                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <p data-en="Search for customers" data-id="Cari pelanggan">Search for customers</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript -->
     <script>
         // CSRF Token for API calls
@@ -502,6 +577,12 @@
         let featuredProducts = @json($featuredProducts ?? []);
 
         let cart = [];
+        let currentCustomer = {
+            id: '#PLG1', // kd_pelanggan
+            name: 'Pelanggan', // Will be updated from database
+            display_name: 'Pelanggan',
+            is_default: true
+        };
         let searchTimeout;
         let allTransactions = []; // Array untuk menyimpan semua transaksi
         let currentTransactionId = 1; // ID transaksi yang sedang aktif
@@ -937,6 +1018,173 @@
             );
         });
 
+        // Customer selection functionality
+        function openCustomerModal() {
+            document.getElementById('customer-modal').classList.remove('hidden');
+            document.getElementById('customer-search-input').focus();
+        }
+
+        function closeCustomerModal() {
+            document.getElementById('customer-modal').classList.add('hidden');
+            document.getElementById('customer-search-input').value = '';
+            document.getElementById('customer-search-results').innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                    <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <p data-en="Search for customers" data-id="Cari pelanggan">Search for customers</p>
+                </div>
+            `;
+        }
+
+        async function selectDefaultCustomer() {
+            try {
+                const response = await fetch('/customers/default');
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success && result.data) {
+                        const customer = result.data;
+                        currentCustomer = {
+                            id: customer.id || customer.kd_pelanggan,
+                            name: customer.name || customer.nama_lengkap,
+                            display_name: customer.display_name || customer.name || customer.nama_lengkap,
+                            organization: customer.organization || customer.nama_lembaga,
+                            phone: customer.phone || customer.telp,
+                            is_default: true
+                        };
+                    } else {
+                        throw new Error('Invalid API response');
+                    }
+                } else {
+                    throw new Error('API request failed');
+                }
+            } catch (error) {
+                console.error('Error loading default customer:', error);
+                // Fallback to hardcoded default
+                currentCustomer = {
+                    id: '#PLG1',
+                    name: 'Pelanggan',
+                    display_name: 'Pelanggan',
+                    is_default: true
+                };
+            }
+            updateCustomerDisplay();
+            closeCustomerModal();
+        }
+
+        function selectCustomer(customer) {
+            currentCustomer = {
+                id: customer.id || customer.kd_pelanggan, // API returns both formats
+                name: customer.name || customer.nama_lengkap, // API returns both formats
+                display_name: customer.display_name || customer.name || customer.nama_lengkap,
+                organization: customer.organization || customer.nama_lembaga, // API returns both formats
+                phone: customer.phone || customer.telp, // API returns both formats
+                is_default: false
+            };
+            updateCustomerDisplay();
+            closeCustomerModal();
+        }
+
+        function updateCustomerDisplay() {
+            // Update the new customer information card
+            const customerCodeEl = document.getElementById('customer-code-display');
+            const customerNameDisplayEl = document.getElementById('customer-name-display');
+
+            if (currentCustomer.is_default) {
+                // Default customer (#PLG1)
+                customerCodeEl.textContent = currentCustomer.id || '#PLG1'; // kd_pelanggan
+                customerNameDisplayEl.textContent = currentCustomer.name || 'Pelanggan'; // nama_lengkap
+                customerCodeEl.className = 'text-sm font-bold text-gray-800';
+                customerNameDisplayEl.className = 'text-sm font-bold text-gray-800';
+            } else {
+                // Selected customer from database
+                customerCodeEl.textContent = currentCustomer.id; // kd_pelanggan
+
+                if (currentCustomer.organization) {
+                    // Organization customer - show company name (nama_lembaga) + contact person (nama_lengkap)
+                    customerNameDisplayEl.innerHTML = `
+                        <div class="text-orange-700">${currentCustomer.organization}</div>
+                        <div class="text-xs text-gray-600">${currentCustomer.name}</div>
+                    `;
+                } else {
+                    // Personal customer - show full name (nama_lengkap)
+                    customerNameDisplayEl.textContent = currentCustomer.name;
+                }
+
+                customerCodeEl.className = 'text-sm font-bold text-orange-800';
+                customerNameDisplayEl.className = 'text-sm font-bold text-orange-800';
+            }
+        }
+
+        async function searchCustomers(query) {
+            if (!query || query.length < 2) {
+                document.getElementById('customer-search-results').innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <p data-en="Type at least 2 characters to search" data-id="Ketik minimal 2 karakter untuk mencari">Type at least 2 characters to search</p>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/customers/search?q=${encodeURIComponent(query)}&limit=20`);
+                const data = await response.json();
+
+                if (data.success && data.data.length > 0) {
+                    const resultsHtml = data.data.map(customer => `
+                        <button onclick='selectCustomer(${JSON.stringify(customer)})' class="w-full text-left p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                                    ${customer.display_name ? customer.display_name.charAt(0).toUpperCase() : '?'}
+                                </div>
+                                <div class="ml-3 flex-1">
+                                    <div class="font-semibold text-gray-800">${customer.name}</div>
+                                    ${customer.organization ? `<div class="text-sm text-purple-600">${customer.organization}</div>` : ''}
+                                    ${customer.phone ? `<div class="text-xs text-gray-500">${customer.formatted_phone}</div>` : ''}
+                                </div>
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </div>
+                        </button>
+                    `).join('');
+                    
+                    document.getElementById('customer-search-results').innerHTML = resultsHtml;
+                } else {
+                    document.getElementById('customer-search-results').innerHTML = `
+                        <div class="text-center py-8 text-gray-500">
+                            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <p data-en="No customers found" data-id="Pelanggan tidak ditemukan">No customers found</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error searching customers:', error);
+                document.getElementById('customer-search-results').innerHTML = `
+                    <div class="text-center py-8 text-red-500">
+                        <p data-en="Error searching customers" data-id="Error mencari pelanggan">Error searching customers</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Customer search input event listener
+        let customerSearchTimeout;
+        document.getElementById('customer-search-input').addEventListener('input', function(e) {
+            clearTimeout(customerSearchTimeout);
+            customerSearchTimeout = setTimeout(() => {
+                searchCustomers(e.target.value);
+            }, 300);
+        });
+
+        // Change customer button event listener
+        document.getElementById('change-customer-btn').addEventListener('click', openCustomerModal);
+
         // Language switcher functionality
         let currentLanguage = 'id'; // Default to Indonesian
         
@@ -1282,8 +1530,52 @@
             dropdown.classList.add('hidden');
         }
 
+        // Load default customer data from database
+        async function loadDefaultCustomer() {
+            try {
+                const response = await fetch('/customers/default');
+
+                if (response.ok) {
+                    const result = await response.json();
+
+                    if (result.success && result.data) {
+                        const customer = result.data;
+                        currentCustomer = {
+                            id: customer.id || customer.kd_pelanggan,
+                            name: customer.name || customer.nama_lengkap,
+                            display_name: customer.display_name || customer.name || customer.nama_lengkap,
+                            organization: customer.organization || customer.nama_lembaga,
+                            phone: customer.phone || customer.telp,
+                            is_default: true
+                        };
+                        updateCustomerDisplay();
+                    } else {
+                        throw new Error('Invalid API response');
+                    }
+                } else {
+                    throw new Error('API request failed');
+                }
+            } catch (error) {
+                console.error('Error loading default customer:', error);
+                // Fallback to hardcoded default
+                currentCustomer = {
+                    id: '#PLG1',
+                    name: 'Pelanggan',
+                    display_name: 'Pelanggan',
+                    is_default: true
+                };
+                updateCustomerDisplay();
+            }
+        }
+
+        // Load default customer immediately when script loads
+        loadDefaultCustomer();
+
         // Add event listeners for print buttons and switch transaction
         document.addEventListener('DOMContentLoaded', function() {
+            // Load default customer data
+            loadDefaultCustomer();
+            
             // Profile dropdown functionality
             const profileBtn = document.getElementById('profile-dropdown-btn');
             if (profileBtn) {
@@ -1330,11 +1622,6 @@
                 }, 100); // Small delay to ensure page is fully loaded
             }
             
-            // Print button in search area
-            const searchPrintBtn = document.querySelector('button[title="Print Receipt"]');
-            if (searchPrintBtn) {
-                searchPrintBtn.addEventListener('click', printReceipt);
-            }
             
             // Print button in quick actions
             const quickPrintBtn = document.querySelector('button:has(span[data-en="Print Receipt"])');

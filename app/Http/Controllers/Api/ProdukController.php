@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Produk;
+use App\Models\ProdukJenis;
 use Illuminate\Http\Request;
 
 class ProdukController extends Controller
@@ -17,32 +18,22 @@ class ProdukController extends Controller
             $search = $request->get('q', '');
             $limit = $request->get('limit', 10);
 
-            $products = Produk::search($search)
+            $products = Produk::with('produkJenis')
+                ->search($search)
                 ->inStock()
-                ->select([
-                    'kd_produk as id',
-                    'nama_produk as name', 
-                    'harga_jual as price',
-                    'kd_int',
-                    'kd_ext',
-                    'jenis as category',
-                    'stok_total as stock',
-                    'satuan as unit',
-                    'gambar_produk as image'
-                ])
                 ->limit($limit)
                 ->get()
                 ->map(function($product) {
                     return [
-                        'id' => $product->id,
-                        'name' => $product->name,
-                        'price' => (float) $product->price,
+                        'id' => $product->kd_produk,
+                        'name' => $product->nama_produk,
+                        'price' => (float) $product->harga_jual,
                         'barcode_int' => $product->kd_int,
                         'barcode_ext' => $product->kd_ext,
                         'barcode' => $product->kd_int ?: $product->kd_ext, // Primary barcode
-                        'category' => $product->category ?? 'General',
-                        'stock' => $product->stock,
-                        'unit' => $product->unit ?? 'pcs',
+                        'category' => $product->category_name,
+                        'stock' => $product->stok_total,
+                        'unit' => $product->satuan ?? 'pcs',
                         'image_url' => $product->image_url
                     ];
                 });
@@ -68,9 +59,12 @@ class ProdukController extends Controller
         try {
             $barcode = $request->get('barcode');
             
-            $product = Produk::where('kd_int', $barcode)
-                ->orWhere('kd_ext', $barcode)
-                ->orWhere('kd_produk', $barcode)
+            $product = Produk::with('produkJenis')
+                ->where(function($query) use ($barcode) {
+                    $query->where('kd_int', $barcode)
+                        ->orWhere('kd_ext', $barcode)
+                        ->orWhere('kd_produk', $barcode);
+                })
                 ->inStock()
                 ->first();
 
@@ -90,7 +84,7 @@ class ProdukController extends Controller
                     'barcode_int' => $product->kd_int,
                     'barcode_ext' => $product->kd_ext,
                     'barcode' => $product->kd_int ?: $product->kd_ext, // Primary barcode
-                    'category' => $product->jenis ?? 'General',
+                    'category' => $product->category_name,
                     'stock' => $product->stok_total,
                     'unit' => $product->satuan ?? 'pcs',
                     'image_url' => $product->image_url
@@ -106,17 +100,27 @@ class ProdukController extends Controller
     }
 
     /**
-     * Get all categories
+     * Get all categories from produk_jenis table
      */
     public function getCategories()
     {
         try {
-            $categories = Produk::select('jenis as category')
-                ->whereNotNull('jenis')
-                ->where('jenis', '!=', '')
-                ->distinct()
-                ->pluck('category')
-                ->filter()
+            // Get categories from produk_jenis table with product count
+            $categories = ProdukJenis::withCount(['produks' => function($query) {
+                    $query->where('stok_total', '>', 0); // Only count products in stock
+                }])
+                ->orderByName()
+                ->get()
+                ->map(function($jenis) {
+                    return [
+                        'id' => $jenis->kd_produk_jenis,
+                        'name' => $jenis->nama,
+                        'product_count' => $jenis->produks_count
+                    ];
+                })
+                ->filter(function($category) {
+                    return $category['product_count'] > 0; // Only return categories with products
+                })
                 ->values();
 
             return response()->json([

@@ -109,5 +109,62 @@ class Produk extends Model
     {
         return $this->stok_total >= $quantity;
     }
+
+    /**
+     * Get the product type (jenis) for this product.
+     */
+    public function produkJenis()
+    {
+        return $this->belongsTo(ProdukJenis::class, 'kd_produk_jenis', 'kd_produk_jenis');
+    }
+
+    /**
+     * Get all stock entries for this product.
+     */
+    public function stoks()
+    {
+        return $this->hasMany(Stok::class, 'kd_produk', 'kd_produk');
+    }
+
+    /**
+     * Get current stock total from stok table.
+     */
+    public function getStokTotalAttribute()
+    {
+        $masuk = $this->stoks()->sum('masuk');
+        $keluar = $this->stoks()->sum('keluar');
+        
+        return $masuk - $keluar;
+    }
+
+    /**
+     * Check if product has sufficient stock.
+     */
+    public function hasStock($qty)
+    {
+        return $this->stok_total >= $qty;
+    }
+
+    /**
+     * Get all sales details for this product.
+     */
+    public function penjualanDetails()
+    {
+        return $this->hasMany(PenjualanDetail::class, 'kd_produk', 'kd_produk');
+    }
+
+    /**
+     * Get the category name (with fallback to jenis field).
+     */
+    public function getCategoryNameAttribute()
+    {
+        // Try to get from relationship first
+        if ($this->produkJenis) {
+            return $this->produkJenis->nama;
+        }
+        
+        // Fallback to jenis field
+        return $this->jenis ?? 'Uncategorized';
+    }
 }
 
