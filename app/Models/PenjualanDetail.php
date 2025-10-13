@@ -32,7 +32,7 @@ class PenjualanDetail extends Model
      *
      * @var bool
      */
-    public $incrementing = false;
+    public $incrementing = true;
 
     /**
      * Boot the model.
@@ -40,12 +40,6 @@ class PenjualanDetail extends Model
     protected static function boot()
     {
         parent::boot();
-        
-        static::creating(function ($model) {
-            if (empty($model->kd_penjualan_detail)) {
-                $model->kd_penjualan_detail = time() + rand(10000, 99999);
-            }
-        });
     }
 
     /**

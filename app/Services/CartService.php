@@ -39,7 +39,7 @@ class CartService
     public function createDraftCart($userId, $customerId = 1)
     {
         // Generate invoice number (kd_penjualan will be auto-generated)
-        $invoiceNumber = 'DRAFT' . time();
+        $invoiceNumber = 'PJ' . date('ymdHis');
 
         return Penjualan::create([
             'no_faktur_penjualan' => $invoiceNumber,
@@ -51,7 +51,7 @@ class CartService
             'lebih_bayar' => 0,
             'status_bayar' => 'Belum Lunas',
             'keuangan_kotak' => null,
-            'catatan' => 'Draft cart - not finalized',
+            'catatan' => null,
             'status_barang' => 'Draft',
             'dibuat_oleh' => $userId,
             'date_created' => now(),
@@ -224,21 +224,20 @@ class CartService
 
             $cart = $this->getActiveCart($userId, $customerId);
 
-            // Delete all cart items
+            // Delete all cart items first
             PenjualanDetail::where('kd_penjualan', $cart->kd_penjualan)->delete();
 
-            // Reset cart totals
-            $cart->sub_total = 0;
-            $cart->pajak = 0;
-            $cart->total_harga = 0;
-            $cart->total_bayar = 0;
-            $cart->lebih_bayar = 0;
-            $cart->date_updated = now();
-            $cart->save();
+            // Delete the cart record itself
+            $cart->delete();
 
             DB::commit();
 
-            return $this->getCartDetails($cart->kd_penjualan);
+            return [
+                'success' => true,
+                'message' => 'Cart cleared successfully',
+                'cart_id' => null,
+                'items' => []
+            ];
 
         } catch (\Exception $e) {
             DB::rollBack();

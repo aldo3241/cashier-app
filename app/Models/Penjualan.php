@@ -33,7 +33,7 @@ class Penjualan extends Model
      *
      * @var bool
      */
-    public $incrementing = false;
+    public $incrementing = true;
 
     /**
      * Indicates if the model should be timestamped.
@@ -111,12 +111,6 @@ class Penjualan extends Model
     {
         parent::boot();
         
-        static::creating(function ($model) {
-            if (empty($model->kd_penjualan)) {
-                $model->kd_penjualan = time() + rand(1000, 9999);
-            }
-        });
-
         // Delete related details when deleting a sale
         static::deleting(function ($model) {
             $model->penjualanDetails()->delete();
@@ -128,9 +122,7 @@ class Penjualan extends Model
      */
     public static function generateInvoiceNumber()
     {
-        $date = now()->format('ymd');
-        $time = now()->format('His');
-        return "PJ{$date}{$time}";
+        return 'PJ' . date('ymdHis');
     }
 
     /**
@@ -138,7 +130,7 @@ class Penjualan extends Model
      */
     public static function generateSaleId()
     {
-        return 'PJ' . time() . rand(100, 999);
+        return 'PJ' . date('ymdHis') . rand(100, 999);
     }
 
     /**

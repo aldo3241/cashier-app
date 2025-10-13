@@ -249,22 +249,22 @@
                             <div class="px-4 py-3 border-b border-gray-100">
                                 <p class="text-sm font-medium text-gray-900">{{ auth()->user()->nama ?? auth()->user()->username ?? 'User' }}</p>
                                 <p class="text-xs text-gray-500 truncate">{{ auth()->user()->email ?? 'No email' }}</p>
-                            </div>
+                    </div>
                             <a href="{{ route('profile') }}" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
                                 <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                </svg>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
                                 <span data-en="Profile Settings" data-id="Pengaturan Profil">Profile Settings</span>
-                            </a>
+                        </a>
                             <form method="POST" action="{{ route('logout') }}" class="block">
-                                @csrf
+                            @csrf
                                 <button type="submit" class="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
                                     <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                                    </svg>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                </svg>
                                     <span data-en="Logout" data-id="Keluar">Logout</span>
-                                </button>
-                            </form>
+                            </button>
+                        </form>
                         </div>
                     </div>
                     <div class="text-left">
@@ -349,7 +349,7 @@
                                     <rect x="16" y="6" width="2" height="12" rx="0.5"/>
                                     <rect x="19" y="6" width="1" height="12" rx="0.5"/>
                                     <rect x="21" y="6" width="1.5" height="12" rx="0.5"/>
-                                </svg>
+                                    </svg>
                             </div>
                         </div>
                         
@@ -448,10 +448,10 @@
                         
                         <button id="change-customer-btn" class="w-full px-3 py-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-xs font-bold rounded-lg transition-all transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
-                            </svg>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                                </svg>
                             <span data-en="Change Transaction" data-id="Ganti Transaksi">Change Transaction</span>
-                        </button>
+                            </button>
                     </div>
                 </div>
 
@@ -469,7 +469,7 @@
                             </svg>
                             <span data-en="Draft Transactions" data-id="Transaksi Draft">Draft Transactions</span>
                         </button>
-                        <button onclick="clearCart()" class="w-full bg-red-100 hover:bg-red-200 text-red-800 p-4 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all">
+                        <button id="cancel-order-btn" class="w-full bg-red-100 hover:bg-red-200 text-red-800 p-4 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
@@ -583,6 +583,7 @@
         let featuredProducts = @json($featuredProducts ?? []);
 
         let cart = [];
+        let currentInvoiceNumber = 'PJ250101000000'; // Default invoice number
         let currentCustomer = {
             id: 1, // kd_pelanggan (integer)
             name: 'Pelanggan', // Will be updated from database
@@ -899,6 +900,7 @@
             const cartCount = document.getElementById('cart-count');
             const total = document.getElementById('total');
             const checkoutBtn = document.getElementById('checkout-btn');
+            const invoiceNumber = document.getElementById('invoice-number');
 
             if (cart.length === 0) {
                 cartItemsContainer.innerHTML = `
@@ -923,6 +925,7 @@
             // Update display
             cartCount.textContent = cart.length;
             total.textContent = `Rp ${formatPrice(totalAmount)}`;
+            invoiceNumber.textContent = currentInvoiceNumber;
             checkoutBtn.disabled = false;
             checkoutBtn.classList.remove('opacity-50', 'cursor-not-allowed');
 
@@ -1027,19 +1030,9 @@
             updateCartDisplay();
         }
 
-        // Clear cart
-        document.querySelector('button[onclick="clearCart()"]')?.addEventListener('click', function() {
-            showModal(
-                getText('Clear Cart', 'Kosongkan Keranjang'),
-                getText('Are you sure you want to clear the cart?', 'Apakah Anda yakin ingin mengosongkan keranjang?'),
-                function() {
-                    // Confirm action - clear the cart
-                    cart = [];
-                    generateInvoiceNumber(); // Generate nomor faktur baru
-                    updateCartDisplay();
-                },
-                null // Cancel action - do nothing
-            );
+        // Clear cart with confirmation
+        document.getElementById('cancel-order-btn')?.addEventListener('click', function() {
+            showCancelTransactionModal();
         });
 
         // Checkout functionality
@@ -1280,6 +1273,52 @@
         // Language helper function
         function getText(enText, idText) {
             return currentLanguage === 'id' ? idText : enText;
+        }
+        
+        // Show cancel transaction confirmation modal
+        function showCancelTransactionModal() {
+            const modal = document.getElementById('custom-modal');
+            const titleElement = document.getElementById('modal-title-text');
+            const messageElement = document.getElementById('modal-message-text');
+            const confirmBtn = document.getElementById('modal-confirm-btn');
+            const cancelBtn = document.getElementById('modal-cancel-btn');
+            
+            titleElement.textContent = getText('Cancel Transaction', 'Batalkan Transaksi');
+            messageElement.textContent = getText(
+                'Are you sure you want to cancel this transaction? All items will be permanently deleted and you will be redirected to My Sales page.', 
+                'Apakah Anda yakin ingin membatalkan transaksi ini? Semua item akan dihapus secara permanen dan Anda akan dialihkan ke halaman Laporan Penjualan Saya.'
+            );
+            
+            // Update button text for cancel transaction
+            confirmBtn.textContent = getText('Yes, Cancel Transaction', 'Ya, Batalkan Transaksi');
+            confirmBtn.className = 'px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700';
+            cancelBtn.textContent = getText('No, Keep Transaction', 'Tidak, Pertahankan Transaksi');
+            cancelBtn.className = 'px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50';
+            
+            // Show modal with animation
+            modal.classList.add('show');
+            
+            // Event listeners
+            const handleConfirm = () => {
+                modal.classList.remove('show');
+                clearCart(); // Clear the cart using real-time system
+            };
+            
+            const handleCancel = () => {
+                modal.classList.remove('show');
+            };
+            
+            confirmBtn.onclick = handleConfirm;
+            cancelBtn.onclick = handleCancel;
+            
+            // Close on escape key
+            const handleEscape = (e) => {
+                if (e.key === 'Escape') {
+                    handleCancel();
+                    document.removeEventListener('keydown', handleEscape);
+                }
+            };
+            document.addEventListener('keydown', handleEscape);
         }
         
         // Custom Modal Functions
@@ -1652,7 +1691,9 @@
                     if (result.success && result.data) {
                         currentCartId = result.data.cart_id;
                         cart = result.data.items || [];
+                        currentInvoiceNumber = result.data.invoice_number || 'PJ250101000000';
                         console.log('Loaded cart items:', cart.length);
+                        console.log('Invoice number:', currentInvoiceNumber);
                         updateCartDisplay();
                     } else {
                         console.error('Invalid cart API response:', result);
@@ -1692,6 +1733,7 @@
                     if (result.success) {
                         cart = result.data.items || [];
                         currentCartId = result.data.cart_id;
+                        currentInvoiceNumber = result.data.invoice_number || currentInvoiceNumber;
                         updateCartDisplay();
                         showSuccessMessage('Item added to cart');
                     } else {
@@ -1759,8 +1801,13 @@
                     const result = await response.json();
                     if (result.success) {
                         cart = [];
+                        currentCartId = null;
+                        currentInvoiceNumber = 'PJ250101000000'; // Reset to default
                         updateCartDisplay();
-                        showSuccessMessage('Cart cleared');
+                        showSuccessMessage('Transaction cancelled. Redirecting to My Sales...');
+                        
+                        // Redirect to My Sales page immediately
+                        window.location.href = '/sales/my-sales';
                     } else {
                         showErrorMessage(result.message);
                     }
@@ -1864,6 +1911,9 @@
             // Event listeners
             document.getElementById('cancel-checkout').onclick = () => {
                 document.body.removeChild(modal);
+                // Redirect to My Sales page when cancelling checkout
+                showSuccessMessage('Checkout cancelled. Redirecting to My Sales...');
+                window.location.href = '/sales/my-sales';
             };
 
             document.getElementById('confirm-checkout').onclick = async () => {
@@ -1884,7 +1934,7 @@
                 }
             };
         }
-
+        
         // Add event listeners for print buttons and switch transaction
         document.addEventListener('DOMContentLoaded', function() {
             // Load default customer data
