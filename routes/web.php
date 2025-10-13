@@ -61,5 +61,54 @@ Route::middleware('auth')->group(function () {
         Route::get('/sales/{id}', [PenjualanController::class, 'show'])->name('api.sales.show');
         Route::get('/sales/payment-methods', [PenjualanController::class, 'getPaymentMethods'])->name('api.sales.payment-methods');
         Route::get('/sales/stats', [PenjualanController::class, 'getStats'])->name('api.sales.stats');
+        
+        // Cart APIs (Real-time cart system)
+        Route::get('/cart', [App\Http\Controllers\Api\CartController::class, 'getCart'])->name('api.cart.get');
+        Route::post('/cart/add', [App\Http\Controllers\Api\CartController::class, 'addToCart'])->name('api.cart.add');
+        Route::put('/cart/update', [App\Http\Controllers\Api\CartController::class, 'updateCartItem'])->name('api.cart.update');
+        Route::delete('/cart/remove', [App\Http\Controllers\Api\CartController::class, 'removeFromCart'])->name('api.cart.remove');
+        Route::post('/cart/clear', [App\Http\Controllers\Api\CartController::class, 'clearCart'])->name('api.cart.clear');
+        Route::post('/cart/checkout', [App\Http\Controllers\Api\CartController::class, 'checkout'])->name('api.cart.checkout');
+        Route::get('/cart/stats', [App\Http\Controllers\Api\CartController::class, 'getStats'])->name('api.cart.stats');
+        
+        // Draft transaction management
+        Route::get('/cart/drafts', [App\Http\Controllers\Api\CartController::class, 'getDraftTransactions'])->name('api.cart.drafts');
+        Route::post('/cart/switch-draft', [App\Http\Controllers\Api\CartController::class, 'switchToDraft'])->name('api.cart.switch-draft');
+        Route::delete('/cart/delete-draft', [App\Http\Controllers\Api\CartController::class, 'deleteDraft'])->name('api.cart.delete-draft');
+        
+        // Debug route
+        Route::get('/cart/debug', function() {
+            return response()->json([
+                'success' => true,
+                'message' => 'Cart API is working',
+                'user' => auth()->user() ? auth()->user()->name : 'Not authenticated',
+                'timestamp' => now()
+            ]);
+        })->name('api.cart.debug');
+        
+        // Debug draft transactions
+        Route::get('/cart/debug-drafts', function() {
+            $userId = auth()->user()->name ?? 'system';
+            $drafts = \App\Models\Penjualan::where('dibuat_oleh', $userId)
+                ->where('status_bayar', 'Belum Lunas')
+                ->where('status_barang', 'Draft')
+                ->get();
+            
+            return response()->json([
+                'success' => true,
+                'user' => $userId,
+                'total_drafts' => $drafts->count(),
+                'drafts' => $drafts->map(function($draft) {
+                    return [
+                        'id' => $draft->kd_penjualan,
+                        'invoice' => $draft->no_faktur_penjualan,
+                        'customer' => $draft->kd_pelanggan,
+                        'status_bayar' => $draft->status_bayar,
+                        'status_barang' => $draft->status_barang,
+                        'created' => $draft->date_created
+                    ];
+                })
+            ]);
+        })->name('api.cart.debug-drafts');
     });
 });

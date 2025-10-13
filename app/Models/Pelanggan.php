@@ -25,14 +25,14 @@ class Pelanggan extends Model
      *
      * @var string
      */
-    protected $keyType = 'string';
+    protected $keyType = 'int';
 
     /**
      * Indicates if the IDs are auto-incrementing.
      *
      * @var bool
      */
-    public $incrementing = false;
+    public $incrementing = true;
 
     /**
      * Indicates if the model should be timestamped.
@@ -182,7 +182,7 @@ class Pelanggan extends Model
      */
     public function isDefaultCustomer()
     {
-        return $this->kd_pelanggan === '#PLG1';
+        return $this->kd_pelanggan === 1;
     }
 
     /**
@@ -191,12 +191,13 @@ class Pelanggan extends Model
      */
     public static function getDefaultCustomer()
     {
-        $customer = static::find('#PLG1');
+        // Look for existing default customer (ID = 1)
+        $customer = static::find(1);
         
         if (!$customer) {
             // Create default customer if it doesn't exist
             $customer = static::create([
-                'kd_pelanggan' => '#PLG1',
+                'kd_pelanggan' => 1,
                 'panggilan' => 'Pelanggan',
                 'nama_lengkap' => 'Pelanggan Umum',
                 'nama_lembaga' => null,
@@ -222,7 +223,7 @@ class Pelanggan extends Model
      */
     public static function getDefaultCustomerCode()
     {
-        return '#PLG1';
+        return 1;
     }
 }
 

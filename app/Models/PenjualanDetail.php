@@ -25,7 +25,7 @@ class PenjualanDetail extends Model
      *
      * @var string
      */
-    protected $keyType = 'string';
+    protected $keyType = 'int';
 
     /**
      * Indicates if the IDs are auto-incrementing.
@@ -33,6 +33,20 @@ class PenjualanDetail extends Model
      * @var bool
      */
     public $incrementing = false;
+
+    /**
+     * Boot the model.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::creating(function ($model) {
+            if (empty($model->kd_penjualan_detail)) {
+                $model->kd_penjualan_detail = time() + rand(10000, 99999);
+            }
+        });
+    }
 
     /**
      * Indicates if the model should be timestamped.
@@ -59,7 +73,6 @@ class PenjualanDetail extends Model
         'harga_jual',
         'qty',
         'diskon',
-        'subtotal',
         'laba',
         'status_bayar',
         'catatan',
@@ -79,11 +92,18 @@ class PenjualanDetail extends Model
         'harga_jual' => 'decimal:2',
         'qty' => 'integer',
         'diskon' => 'decimal:2',
-        'subtotal' => 'decimal:2',
         'laba' => 'decimal:2',
         'date_created' => 'datetime',
         'date_updated' => 'datetime',
     ];
+
+    /**
+     * Get the subtotal attribute (calculated).
+     */
+    public function getSubtotalAttribute()
+    {
+        return ($this->harga_jual * $this->qty) - $this->diskon;
+    }
 
     /**
      * Get the sale that owns the detail.

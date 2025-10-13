@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Models\Penjualan;
+use App\Models\PenjualanDetail;
+use App\Models\Pelanggan;
+use Illuminate\Support\Facades\DB;
 
 class SalesReportController extends Controller
 {
@@ -14,8 +18,8 @@ class SalesReportController extends Controller
     {
         $user = auth()->user();
         
-        // Simulated sales data - replace with real database query when ready
-        $sales = $this->generateMockSalesData($user->kd, 'my');
+        // Fetch real sales data from database
+        $sales = $this->getRealSalesData($user->name ?? $user->username, 'my');
         
         return view('sales.my-sales', compact('sales', 'user'));
     }
@@ -27,53 +31,48 @@ class SalesReportController extends Controller
     {
         $user = auth()->user();
         
-        // Simulated sales data - replace with real database query when ready
-        $sales = $this->generateMockSalesData(null, 'all');
+        // Fetch real sales data from database
+        $sales = $this->getRealSalesData(null, 'all');
         
         return view('sales.all-sales', compact('sales', 'user'));
     }
     
     /**
-     * Generate mock sales data for demonstration
-     * Replace this with actual database queries when ready
+     * Get real sales data from database
      */
-    private function generateMockSalesData($userId = null, $type = 'my')
+    private function getRealSalesData($userId = null, $type = 'my')
     {
-        $sales = [];
-        $count = $type === 'my' ? rand(10, 20) : rand(30, 50);
+        $query = Penjualan::with(['penjualanDetails.produk', 'pelanggan'])
+            ->where('status_bayar', 'Lunas') // Only completed sales
+            ->where('status_barang', 'diterima langsung'); // Only completed deliveries
         
-        for ($i = 0; $i < $count; $i++) {
-            $date = Carbon::now()->subDays(rand(0, 30));
-            $amount = rand(50000, 500000);
-            $items = rand(1, 10);
-            
-            $cashiers = ['John Doe', 'Jane Smith', 'Mike Wilson', 'Sarah Johnson', 'David Lee'];
-            $cashier = $type === 'my' ? (auth()->user()->nama ?? auth()->user()->username) : $cashiers[array_rand($cashiers)];
-            
-            $paymentMethods = ['Cash', 'Debit Card', 'Credit Card', 'E-Wallet'];
-            $statuses = ['Completed', 'Completed', 'Completed', 'Refunded'];
-            
-            $sales[] = [
-                'id' => 'TXN' . str_pad($i + 1, 6, '0', STR_PAD_LEFT),
-                'date' => $date->format('Y-m-d'),
-                'time' => $date->format('H:i:s'),
-                'datetime' => $date->format('Y-m-d H:i:s'),
-                'cashier' => $cashier,
-                'items' => $items,
-                'amount' => $amount,
-                'formatted_amount' => 'Rp ' . number_format($amount, 0, ',', '.'),
-                'payment_method' => $paymentMethods[array_rand($paymentMethods)],
-                'status' => $statuses[array_rand($statuses)],
-                'customer' => rand(0, 1) ? 'Customer ' . rand(1000, 9999) : 'Walk-in'
-            ];
+        // Filter by user for "my sales"
+        if ($type === 'my' && $userId) {
+            $query->where('dibuat_oleh', $userId);
         }
         
-        // Sort by date descending
-        usort($sales, function($a, $b) {
-            return strtotime($b['datetime']) - strtotime($a['datetime']);
-        });
+        $sales = $query->orderBy('date_created', 'desc')->get();
         
-        return collect($sales);
+        return $sales->map(function ($sale) {
+            $itemCount = $sale->penjualanDetails->sum('qty');
+            $totalAmount = $sale->penjualanDetails->sum(function ($item) {
+                return ($item->harga_jual * $item->qty) - $item->diskon;
+            });
+            
+            return [
+                'id' => $sale->kd_penjualan,
+                'date' => $sale->date_created->format('Y-m-d'),
+                'time' => $sale->date_created->format('H:i:s'),
+                'datetime' => $sale->date_created->format('Y-m-d H:i:s'),
+                'cashier' => $sale->dibuat_oleh,
+                'items' => $itemCount,
+                'amount' => $totalAmount,
+                'formatted_amount' => 'Rp ' . number_format($totalAmount, 0, ',', '.'),
+                'payment_method' => $sale->keuangan_kotak ?? 'Tunai',
+                'status' => $sale->status_bayar === 'Lunas' ? 'Completed' : 'Pending',
+                'customer' => $sale->pelanggan ? $sale->pelanggan->nama_lengkap : 'Walk-in Customer'
+            ];
+        });
     }
 }
 

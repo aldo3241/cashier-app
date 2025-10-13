@@ -463,6 +463,12 @@
                 <div class="bg-white rounded-xl shadow-lg border border-gray-200">
                     <div class="p-6">                        
                         <div class="space-y-3">
+                        <button onclick="showDraftTransactions()" class="w-full bg-purple-100 hover:bg-purple-200 text-purple-800 p-4 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <span data-en="Draft Transactions" data-id="Transaksi Draft">Draft Transactions</span>
+                        </button>
                         <button onclick="clearCart()" class="w-full bg-red-100 hover:bg-red-200 text-red-800 p-4 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -578,11 +584,12 @@
 
         let cart = [];
         let currentCustomer = {
-            id: '#PLG1', // kd_pelanggan
+            id: 1, // kd_pelanggan (integer)
             name: 'Pelanggan', // Will be updated from database
             display_name: 'Pelanggan',
             is_default: true
         };
+        let currentCartId = null;
         let searchTimeout;
         let allTransactions = []; // Array untuk menyimpan semua transaksi
         let currentTransactionId = 1; // ID transaksi yang sedang aktif
@@ -871,30 +878,9 @@
                     }
                 }
 
-                // Check if product has enough stock
-                if (product.stock <= 0) {
-                    showModal(
-                        getText('Out of Stock', 'Stok Habis'),
-                        getText(`${product.name} is out of stock.`, `${product.name} sedang habis stok.`)
-                    );
-                    return;
-                }
+                // Use real-time cart API
+                await addToCartRealTime(product, 1);
 
-                const existingItem = cart.find(item => item.id === productId);
-                if (existingItem) {
-                    if (existingItem.quantity >= product.stock) {
-                        showModal(
-                            getText('Insufficient Stock', 'Stok Tidak Cukup'),
-                            getText(`Only ${product.stock} items available.`, `Hanya tersedia ${product.stock} item.`)
-                        );
-                        return;
-                    }
-                    existingItem.quantity += 1;
-                } else {
-                    cart.push({ ...product, quantity: 1 });
-                }
-
-                updateCartDisplay();
                 document.getElementById('product-search').value = '';
                 document.getElementById('search-suggestions').classList.add('hidden');
 
@@ -931,8 +917,8 @@
                 return;
             }
 
-            // Calculate total (no tax)
-            const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            // Calculate total from cart items
+            const totalAmount = cart.reduce((sum, item) => sum + (item.subtotal || 0), 0);
 
             // Update display
             cartCount.textContent = cart.length;
@@ -944,26 +930,26 @@
             cartItemsContainer.innerHTML = cart.map(item => `
                 <div class="cart-item grid grid-cols-12 gap-4 p-4 border-b border-gray-100">
                     <div class="col-span-5">
-                        <div class="font-medium text-gray-800">${item.name}</div>
-                        <div class="text-sm text-gray-500">${item.category}</div>
+                        <div class="font-medium text-gray-800">${item.nama_produk}</div>
+                        <div class="text-sm text-gray-500">${item.produk_jenis || 'General'}</div>
                     </div>
-                    <div class="col-span-2 text-right text-gray-600">Rp ${formatPrice(item.price)}</div>
+                    <div class="col-span-2 text-right text-gray-600">Rp ${formatPrice(item.harga_jual)}</div>
                     <div class="col-span-2 flex items-center justify-center space-x-2">
-                        <button class="quantity-btn w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center" onclick="updateQuantity('${item.id}', -1)">
+                        <button class="quantity-btn w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center" onclick="updateQuantityRealTime('${item.kd_produk}', ${item.qty - 1})">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
                             </svg>
                         </button>
-                        <span class="font-semibold w-8 text-center">${item.quantity}</span>
-                        <button class="quantity-btn w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center" onclick="updateQuantity('${item.id}', 1)">
+                        <span class="font-semibold w-8 text-center">${item.qty}</span>
+                        <button class="quantity-btn w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center" onclick="updateQuantityRealTime('${item.kd_produk}', ${item.qty + 1})">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
                         </button>
                     </div>
-                    <div class="col-span-2 text-right font-semibold text-gray-800">Rp ${formatPrice(item.price * item.quantity)}</div>
+                    <div class="col-span-2 text-right font-semibold text-gray-800">Rp ${formatPrice(item.subtotal)}</div>
                     <div class="col-span-1 flex items-center justify-center">
-                        <button class="text-red-500 hover:text-red-700 p-1" onclick="removeFromCart('${item.id}')">
+                        <button class="text-red-500 hover:text-red-700 p-1" onclick="removeFromCartRealTime('${item.kd_produk}')">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                             </svg>
@@ -973,16 +959,65 @@
             `).join('');
         }
 
-        // Update quantity
+        // Update quantity (legacy function - kept for compatibility)
         function updateQuantity(productId, change) {
             const item = cart.find(item => item.id === productId);
             if (!item) return;
 
             item.quantity += change;
             if (item.quantity <= 0) {
-                removeFromCart(productId);
+                removeFromCartRealTime(productId);
             } else {
                 updateCartDisplay();
+            }
+        }
+
+        // Real-time quantity update
+        async function updateQuantityRealTime(productId, newQty) {
+            if (newQty <= 0) {
+                await removeFromCartRealTime(productId);
+            } else {
+                await updateCartItem(productId, newQty);
+            }
+        }
+
+        // Real-time remove from cart
+        async function removeFromCartRealTime(productId) {
+            try {
+                const response = await fetch('/api/cart/remove', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        customer_id: currentCustomer.id
+                    })
+                });
+
+                console.log('Remove from cart response status:', response.status);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Remove from cart response:', result);
+                    
+                    if (result.success) {
+                        cart = result.data.items || [];
+                        updateCartDisplay();
+                        showSuccessMessage('Item removed from cart');
+                    } else {
+                        console.error('Remove from cart failed:', result.message);
+                        showErrorMessage(result.message);
+                    }
+                } else {
+                    const errorText = await response.text();
+                    console.error('Remove from cart API failed:', response.status, errorText);
+                    showErrorMessage('Failed to remove item from cart');
+                }
+            } catch (error) {
+                console.error('Error removing from cart:', error);
+                showErrorMessage('Error removing item from cart');
             }
         }
 
@@ -1008,14 +1043,14 @@
         });
 
         // Checkout functionality
-        document.getElementById('checkout-btn').addEventListener('click', function() {
+        document.getElementById('checkout-btn').addEventListener('click', async function() {
             if (cart.length === 0) return;
             
-            // Here you would implement the actual checkout process
-            showModal(
-                getText('Checkout', 'Checkout'),
-                getText('Checkout functionality will be implemented here!', 'Fitur checkout akan diimplementasikan di sini!')
-            );
+            // Calculate total
+            const totalAmount = cart.reduce((sum, item) => sum + (item.subtotal || 0), 0);
+            
+            // Show checkout modal with payment options
+            showCheckoutModal(totalAmount);
         });
 
         // Customer selection functionality
@@ -1039,7 +1074,7 @@
 
         async function selectDefaultCustomer() {
             try {
-                const response = await fetch('/customers/default');
+                const response = await fetch('/api/customers/default');
                 if (response.ok) {
                     const result = await response.json();
                     if (result.success && result.data) {
@@ -1062,7 +1097,7 @@
                 console.error('Error loading default customer:', error);
                 // Fallback to hardcoded default
                 currentCustomer = {
-                    id: '#PLG1',
+                    id: 1,
                     name: 'Pelanggan',
                     display_name: 'Pelanggan',
                     is_default: true
@@ -1091,11 +1126,11 @@
             const customerNameDisplayEl = document.getElementById('customer-name-display');
 
             if (currentCustomer.is_default) {
-                // Default customer (#PLG1)
-                customerCodeEl.textContent = currentCustomer.id || '#PLG1'; // kd_pelanggan
-                customerNameDisplayEl.textContent = currentCustomer.name || 'Pelanggan'; // nama_lengkap
-                customerCodeEl.className = 'text-sm font-bold text-gray-800';
-                customerNameDisplayEl.className = 'text-sm font-bold text-gray-800';
+                // Default customer (ID = 1)
+                customerCodeEl.textContent = '#PLG1'; // Display as #PLG1 for user
+                customerNameDisplayEl.textContent = currentCustomer.name || 'Pelanggan Umum'; // nama_lengkap
+                customerCodeEl.className = 'text-sm font-bold text-orange-600';
+                customerNameDisplayEl.className = 'text-sm font-bold text-orange-600';
             } else {
                 // Selected customer from database
                 customerCodeEl.textContent = currentCustomer.id; // kd_pelanggan
@@ -1533,10 +1568,13 @@
         // Load default customer data from database
         async function loadDefaultCustomer() {
             try {
-                const response = await fetch('/customers/default');
+                console.log('Loading default customer...');
+                const response = await fetch('/api/customers/default');
+                console.log('Customer API response status:', response.status);
 
                 if (response.ok) {
                     const result = await response.json();
+                    console.log('Customer API response:', result);
 
                     if (result.success && result.data) {
                         const customer = result.data;
@@ -1548,18 +1586,22 @@
                             phone: customer.phone || customer.telp,
                             is_default: true
                         };
+                        console.log('Updated currentCustomer:', currentCustomer);
                         updateCustomerDisplay();
                     } else {
+                        console.error('Invalid customer API response:', result);
                         throw new Error('Invalid API response');
                     }
                 } else {
+                    const errorText = await response.text();
+                    console.error('Customer API failed:', response.status, errorText);
                     throw new Error('API request failed');
                 }
             } catch (error) {
                 console.error('Error loading default customer:', error);
                 // Fallback to hardcoded default
                 currentCustomer = {
-                    id: '#PLG1',
+                    id: 1,
                     name: 'Pelanggan',
                     display_name: 'Pelanggan',
                     is_default: true
@@ -1570,6 +1612,278 @@
 
         // Load default customer immediately when script loads
         loadDefaultCustomer();
+        
+        // Load current cart
+        loadCurrentCart();
+        
+        // Debug API connectivity
+        testCartAPI();
+
+        // Debug function to test API connectivity
+        async function testCartAPI() {
+            try {
+                console.log('Testing cart API connectivity...');
+                const response = await fetch('/api/cart/debug');
+                console.log('Debug API response status:', response.status);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Debug API response:', result);
+                } else {
+                    const errorText = await response.text();
+                    console.error('Debug API failed:', response.status, errorText);
+                }
+            } catch (error) {
+                console.error('Error testing cart API:', error);
+            }
+        }
+
+        // Real-time Cart Functions
+        async function loadCurrentCart() {
+            try {
+                console.log('Loading current cart for customer:', currentCustomer.id);
+                const response = await fetch(`/api/cart?customer_id=${currentCustomer.id}`);
+                console.log('Cart API response status:', response.status);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Cart API response:', result);
+                    
+                    if (result.success && result.data) {
+                        currentCartId = result.data.cart_id;
+                        cart = result.data.items || [];
+                        console.log('Loaded cart items:', cart.length);
+                        updateCartDisplay();
+                    } else {
+                        console.error('Invalid cart API response:', result);
+                    }
+                } else {
+                    const errorText = await response.text();
+                    console.error('Cart API failed:', response.status, errorText);
+                }
+            } catch (error) {
+                console.error('Error loading cart:', error);
+            }
+        }
+
+        async function addToCartRealTime(product, qty = 1) {
+            try {
+                console.log('Adding to cart:', product, 'qty:', qty, 'customer:', currentCustomer.id);
+                console.log('Product ID to send:', product.id || product.kd_produk);
+                const response = await fetch('/api/cart/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({
+                        product_id: product.id || product.kd_produk,
+                        qty: qty,
+                        customer_id: currentCustomer.id
+                    })
+                });
+
+                console.log('Add to cart response status:', response.status);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Add to cart response:', result);
+                    
+                    if (result.success) {
+                        cart = result.data.items || [];
+                        currentCartId = result.data.cart_id;
+                        updateCartDisplay();
+                        showSuccessMessage('Item added to cart');
+                    } else {
+                        console.error('Add to cart failed:', result.message);
+                        showErrorMessage(result.message);
+                    }
+                } else {
+                    const errorText = await response.text();
+                    console.error('Add to cart API failed:', response.status, errorText);
+                    showErrorMessage('Failed to add item to cart');
+                }
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                showErrorMessage('Error adding item to cart');
+            }
+        }
+
+        async function updateCartItem(productId, qty) {
+            try {
+                const response = await fetch('/api/cart/update', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        qty: qty,
+                        customer_id: currentCustomer.id
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        cart = result.data.items || [];
+                        updateCartDisplay();
+                    } else {
+                        showErrorMessage(result.message);
+                    }
+                } else {
+                    showErrorMessage('Failed to update cart item');
+                }
+            } catch (error) {
+                console.error('Error updating cart item:', error);
+                showErrorMessage('Error updating cart item');
+            }
+        }
+
+
+        async function clearCart() {
+            try {
+                const response = await fetch('/api/cart/clear', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({
+                        customer_id: currentCustomer.id
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        cart = [];
+                        updateCartDisplay();
+                        showSuccessMessage('Cart cleared');
+                    } else {
+                        showErrorMessage(result.message);
+                    }
+                } else {
+                    showErrorMessage('Failed to clear cart');
+                }
+            } catch (error) {
+                console.error('Error clearing cart:', error);
+                showErrorMessage('Error clearing cart');
+            }
+        }
+
+        async function checkoutCart(paymentMethod, totalBayar, catatan = '') {
+            try {
+                const response = await fetch('/api/cart/checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({
+                        payment_method: paymentMethod,
+                        total_bayar: totalBayar,
+                        customer_id: currentCustomer.id,
+                        catatan: catatan
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        cart = [];
+                        currentCartId = null;
+                        updateCartDisplay();
+                        showSuccessMessage(`Checkout successful! Invoice: ${result.data.invoice_number}`);
+                        return result.data;
+                    } else {
+                        showErrorMessage(result.message);
+                        return null;
+                    }
+                } else {
+                    showErrorMessage('Checkout failed');
+                    return null;
+                }
+            } catch (error) {
+                console.error('Error during checkout:', error);
+                showErrorMessage('Error during checkout');
+                return null;
+            }
+        }
+
+        function showSuccessMessage(message) {
+            // You can implement a toast notification here
+            console.log('Success:', message);
+        }
+
+        function showErrorMessage(message) {
+            // You can implement a toast notification here
+            console.error('Error:', message);
+            alert(message); // Fallback to alert for now
+        }
+
+        // Checkout modal
+        function showCheckoutModal(totalAmount) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
+                    <h3 class="text-lg font-semibold mb-4">Checkout</h3>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
+                        <select id="payment-method" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="Tunai">Cash (Tunai)</option>
+                            <option value="TRF Rek BCA">Bank Transfer BCA</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Amount Paid</label>
+                        <input type="number" id="amount-paid" value="${totalAmount}" min="${totalAmount}" step="1000" 
+                               class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
+                        <textarea id="checkout-notes" rows="3" 
+                                  class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  placeholder="Add any notes..."></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button id="cancel-checkout" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">
+                            Cancel
+                        </button>
+                        <button id="confirm-checkout" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                            Complete Checkout
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            // Event listeners
+            document.getElementById('cancel-checkout').onclick = () => {
+                document.body.removeChild(modal);
+            };
+
+            document.getElementById('confirm-checkout').onclick = async () => {
+                const paymentMethod = document.getElementById('payment-method').value;
+                const amountPaid = parseFloat(document.getElementById('amount-paid').value);
+                const notes = document.getElementById('checkout-notes').value;
+
+                if (amountPaid < totalAmount) {
+                    alert('Amount paid cannot be less than total amount');
+                    return;
+                }
+
+                // Process checkout
+                const result = await checkoutCart(paymentMethod, amountPaid, notes);
+                if (result) {
+                    document.body.removeChild(modal);
+                    // Optionally show success message or redirect
+                }
+            };
+        }
 
         // Add event listeners for print buttons and switch transaction
         document.addEventListener('DOMContentLoaded', function() {
@@ -1635,6 +1949,168 @@
                 switchBtn.addEventListener('click', switchTransaction);
             }
         });
+
+        // Draft Transactions Management
+        async function showDraftTransactions() {
+            try {
+                const response = await fetch('/api/cart/drafts', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        displayDraftTransactions(result.data);
+                    } else {
+                        showErrorMessage(result.message);
+                    }
+                } else {
+                    showErrorMessage('Failed to load draft transactions');
+                }
+            } catch (error) {
+                console.error('Error loading draft transactions:', error);
+                showErrorMessage('Error loading draft transactions');
+            }
+        }
+
+        function displayDraftTransactions(drafts) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white rounded-lg p-6 w-4/5 max-w-4xl mx-4 max-h-[80vh] overflow-y-auto">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold">Draft Transactions</h3>
+                        <button id="close-drafts" class="text-gray-500 hover:text-gray-700">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="drafts-list" class="space-y-3">
+                        ${drafts.length === 0 ? 
+                            '<p class="text-gray-500 text-center py-8">No draft transactions found</p>' :
+                            drafts.map(draft => `
+                                <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                                    <div class="flex justify-between items-start">
+                                        <div class="flex-1">
+                                            <div class="flex items-center space-x-4 mb-2">
+                                                <span class="font-semibold text-gray-900">${draft.invoice_number}</span>
+                                                <span class="text-sm text-gray-500">${draft.customer_name}</span>
+                                                <span class="text-sm text-gray-500">${new Date(draft.created_at).toLocaleString()}</span>
+                                            </div>
+                                            <div class="flex items-center space-x-4 text-sm text-gray-600">
+                                                <span>Items: ${draft.item_count}</span>
+                                                <span>Total: Rp ${formatPrice(draft.total_harga)}</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex space-x-2">
+                                            <button onclick="switchToDraft(${draft.id})" class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm">
+                                                Resume
+                                            </button>
+                                            <button onclick="deleteDraft(${draft.id})" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')
+                        }
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            // Close modal
+            document.getElementById('close-drafts').addEventListener('click', () => {
+                document.body.removeChild(modal);
+            });
+
+            // Close on backdrop click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    document.body.removeChild(modal);
+                }
+            });
+        }
+
+        async function switchToDraft(draftId) {
+            try {
+                const response = await fetch('/api/cart/switch-draft', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({
+                        draft_id: draftId
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        // Update current cart with draft data
+                        cart = result.data.items || [];
+                        currentCartId = result.data.cart_id;
+                        updateCartDisplay();
+                        showSuccessMessage('Switched to draft transaction');
+                        
+                        // Close the modal
+                        const modal = document.querySelector('.fixed.inset-0.bg-black.bg-opacity-50');
+                        if (modal) {
+                            document.body.removeChild(modal);
+                        }
+                    } else {
+                        showErrorMessage(result.message);
+                    }
+                } else {
+                    showErrorMessage('Failed to switch to draft transaction');
+                }
+            } catch (error) {
+                console.error('Error switching to draft:', error);
+                showErrorMessage('Error switching to draft transaction');
+            }
+        }
+
+        async function deleteDraft(draftId) {
+            if (!confirm('Are you sure you want to delete this draft transaction?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/cart/delete-draft', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({
+                        draft_id: draftId
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        showSuccessMessage('Draft transaction deleted successfully');
+                        // Refresh the draft transactions list
+                        showDraftTransactions();
+                    } else {
+                        showErrorMessage(result.message);
+                    }
+                } else {
+                    showErrorMessage('Failed to delete draft transaction');
+                }
+            } catch (error) {
+                console.error('Error deleting draft:', error);
+                showErrorMessage('Error deleting draft transaction');
+            }
+        }
     </script>
     </body>
     </html>

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Penjualan extends Model
 {
@@ -25,7 +26,7 @@ class Penjualan extends Model
      *
      * @var string
      */
-    protected $keyType = 'string';
+    protected $keyType = 'int';
 
     /**
      * Indicates if the IDs are auto-incrementing.
@@ -104,6 +105,25 @@ class Penjualan extends Model
     }
 
     /**
+     * Boot the model.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::creating(function ($model) {
+            if (empty($model->kd_penjualan)) {
+                $model->kd_penjualan = time() + rand(1000, 9999);
+            }
+        });
+
+        // Delete related details when deleting a sale
+        static::deleting(function ($model) {
+            $model->penjualanDetails()->delete();
+        });
+    }
+
+    /**
      * Generate unique invoice number.
      */
     public static function generateInvoiceNumber()
@@ -171,5 +191,19 @@ class Penjualan extends Model
     public function scopeOrderByDate($query, $direction = 'desc')
     {
         return $query->orderBy('date_created', $direction);
+    }
+
+    /**
+     * Safely delete a sale with all its details.
+     */
+    public function deleteWithDetails()
+    {
+        DB::transaction(function () {
+            // Delete all related details first
+            $this->penjualanDetails()->delete();
+            
+            // Then delete the sale
+            $this->delete();
+        });
     }
 }

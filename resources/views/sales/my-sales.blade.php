@@ -106,6 +106,14 @@
     </header>
 
     <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 flex justify-end">
+        <a href="{{ route('cashier.index') }}" class="inline-flex items-center px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-lg font-bold rounded-lg shadow-lg transition-all duration-200">
+            <svg class="w-6 h-6 mr-2 -ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            <span data-en="New Transaction" data-id="Transaksi Baru">New Transaction</span>
+        </a>
+    </div>
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Stats Summary -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
