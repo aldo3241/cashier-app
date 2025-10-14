@@ -450,7 +450,7 @@
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                                 </svg>
-                            <span data-en="Change Transaction" data-id="Ganti Transaksi">Change Transaction</span>
+                            <span data-en="Change Customer" data-id="Ganti Pelanggan">Change Customer</span>
                             </button>
                     </div>
                 </div>
@@ -465,9 +465,9 @@
                         <div class="space-y-3">
                         <button onclick="showDraftTransactions()" class="w-full bg-purple-100 hover:bg-purple-200 text-purple-800 p-4 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                             </svg>
-                            <span data-en="Draft Transactions" data-id="Transaksi Draft">Draft Transactions</span>
+                            <span data-en="Switch Transaction" data-id="Ganti Transaksi">Ganti Transaksi</span>
                         </button>
                         <button id="cancel-order-btn" class="w-full bg-red-100 hover:bg-red-200 text-red-800 p-4 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1050,6 +1050,8 @@
         function openCustomerModal() {
             document.getElementById('customer-modal').classList.remove('hidden');
             document.getElementById('customer-search-input').focus();
+            // Load all customers when modal opens
+            searchCustomers('');
         }
 
         function closeCustomerModal() {
@@ -1146,14 +1148,51 @@
 
         async function searchCustomers(query) {
             if (!query || query.length < 2) {
-                document.getElementById('customer-search-results').innerHTML = `
-                    <div class="text-center py-8 text-gray-500">
-                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                        <p data-en="Type at least 2 characters to search" data-id="Ketik minimal 2 karakter untuk mencari">Type at least 2 characters to search</p>
-                    </div>
-                `;
+                // Show all customers when no search query
+                try {
+                    const response = await fetch(`/api/customers/search?q=&limit=50`);
+                    const data = await response.json();
+
+                    if (data.success && data.data.length > 0) {
+                        const resultsHtml = data.data.map(customer => `
+                            <button onclick='selectCustomer(${JSON.stringify(customer)})' class="w-full text-left p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                                        ${customer.display_name ? customer.display_name.charAt(0).toUpperCase() : '?'}
+                                    </div>
+                                    <div class="ml-3 flex-1">
+                                        <div class="font-semibold text-gray-800">${customer.name}</div>
+                                        ${customer.organization ? `<div class="text-sm text-purple-600">${customer.organization}</div>` : ''}
+                                        ${customer.phone ? `<div class="text-xs text-gray-500">${customer.formatted_phone}</div>` : ''}
+                                    </div>
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </div>
+                            </button>
+                        `).join('');
+                        document.getElementById('customer-search-results').innerHTML = resultsHtml;
+                    } else {
+                        document.getElementById('customer-search-results').innerHTML = `
+                            <div class="text-center py-8 text-gray-500">
+                                <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                                <p data-en="No customers found" data-id="Tidak ada pelanggan ditemukan">No customers found</p>
+                            </div>
+                        `;
+                    }
+                } catch (error) {
+                    console.error('Error loading customers:', error);
+                    document.getElementById('customer-search-results').innerHTML = `
+                        <div class="text-center py-8 text-gray-500">
+                            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            <p data-en="Error loading customers" data-id="Error memuat pelanggan">Error loading customers</p>
+                        </div>
+                    `;
+                }
                 return;
             }
 
@@ -2031,44 +2070,88 @@
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
             modal.innerHTML = `
-                <div class="bg-white rounded-lg p-6 w-4/5 max-w-4xl mx-4 max-h-[80vh] overflow-y-auto">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-semibold">Draft Transactions</h3>
-                        <button id="close-drafts" class="text-gray-500 hover:text-gray-700">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
+                <div class="bg-white rounded-lg shadow-lg w-4/5 max-w-4xl mx-4 max-h-[80vh] overflow-y-auto">
+                    <!-- Header -->
+                    <div class="bg-purple-100 border-b border-purple-200 p-4">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-purple-200 rounded-full flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-purple-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-purple-800">Ganti Transaksi</h3>
+                                    <p class="text-purple-600 text-sm">Pilih transaksi yang ingin dilanjutkan</p>
+                                </div>
+                            </div>
+                            <button id="close-drafts" class="text-purple-600 hover:text-purple-800 transition-colors p-2 rounded-lg hover:bg-purple-200">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                    <div id="drafts-list" class="space-y-3">
+
+                    <!-- Content -->
+                    <div class="p-4">
                         ${drafts.length === 0 ? 
-                            '<p class="text-gray-500 text-center py-8">No draft transactions found</p>' :
-                            drafts.map(draft => `
-                                <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
-                                    <div class="flex justify-between items-start">
-                                        <div class="flex-1">
-                                            <div class="flex items-center space-x-4 mb-2">
-                                                <span class="font-semibold text-gray-900">${draft.invoice_number}</span>
-                                                <span class="text-sm text-gray-500">${draft.customer_name}</span>
-                                                <span class="text-sm text-gray-500">${new Date(draft.created_at).toLocaleString()}</span>
+                            `<div class="text-center py-8">
+                                <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                    </svg>
+                                </div>
+                                <h4 class="text-lg font-semibold text-gray-700 mb-2">Tidak Ada Transaksi Draft</h4>
+                                <p class="text-gray-500">Belum ada transaksi yang disimpan sebagai draft.</p>
+                            </div>` :
+                            `<div class="space-y-3">
+                                ${drafts.map(draft => `
+                                    <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-all">
+                                        <div class="flex justify-between items-start">
+                                            <div class="flex-1">
+                                                <div class="flex items-center space-x-4 mb-2">
+                                                    <span class="font-semibold text-gray-900">${draft.invoice_number}</span>
+                                                    <span class="text-sm text-gray-500">${draft.customer_name}</span>
+                                                    <span class="text-sm text-gray-500">${new Date(draft.created_at).toLocaleString()}</span>
+                                                </div>
+                                                <div class="flex items-center space-x-4 text-sm text-gray-600">
+                                                    <span>Items: ${draft.item_count}</span>
+                                                    <span>Total: Rp ${formatPrice(draft.total_harga)}</span>
+                                                </div>
                                             </div>
-                                            <div class="flex items-center space-x-4 text-sm text-gray-600">
-                                                <span>Items: ${draft.item_count}</span>
-                                                <span>Total: Rp ${formatPrice(draft.total_harga)}</span>
+                                            <div class="flex space-x-2">
+                                                <button onclick="switchToDraft(${draft.id})" class="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg hover:text-blue-900 text-sm font-semibold flex items-center space-x-1 transition-all">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                    </svg>
+                                                    <span>Lanjutkan</span>
+                                                </button>
+                                                <button onclick="deleteDraft(${draft.id})" class="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg hover:text-red-900 text-sm font-semibold flex items-center space-x-1 transition-all">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                    </svg>
+                                                    <span>Hapus</span>
+                                                </button>
                                             </div>
-                                        </div>
-                                        <div class="flex space-x-2">
-                                            <button onclick="switchToDraft(${draft.id})" class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm">
-                                                Resume
-                                            </button>
-                                            <button onclick="deleteDraft(${draft.id})" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm">
-                                                Delete
-                                            </button>
                                         </div>
                                     </div>
-                                </div>
-                            `).join('')
+                                `).join('')}
+                            </div>`
                         }
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="bg-gray-50 px-4 py-3 border-t border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <div class="text-sm text-gray-500">
+                                Total: <span class="font-semibold">${drafts.length}</span> transaksi draft
+                            </div>
+                            <button onclick="startNewTransaction()" 
+                                    class="px-4 py-2 bg-green-100 hover:bg-green-200 text-green-800 rounded-lg font-semibold transition-all">
+                                Transaksi Baru
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -2159,6 +2242,29 @@
             } catch (error) {
                 console.error('Error deleting draft:', error);
                 showErrorMessage('Error deleting draft transaction');
+            }
+        }
+
+        async function startNewTransaction() {
+            try {
+                // Clear current cart
+                await clearCart();
+                
+                // Close the modal
+                const modal = document.querySelector('.fixed.inset-0');
+                if (modal) {
+                    document.body.removeChild(modal);
+                }
+                
+                // Show success message
+                showSuccessMessage('Transaksi baru dimulai');
+                
+                // Reset to default customer
+                await selectDefaultCustomer();
+                
+            } catch (error) {
+                console.error('Error starting new transaction:', error);
+                showErrorMessage('Error starting new transaction');
             }
         }
     </script>

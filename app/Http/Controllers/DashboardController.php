@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Produk;
 use App\Models\User;
+use App\Models\Penjualan;
+use App\Models\Pelanggan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -28,8 +30,7 @@ class DashboardController extends Controller
     }
     
     /**
-     * Get dashboard data without modifying database
-     * We'll simulate sales data since we can't modify DB
+     * Get dashboard data from database
      */
     private function getDashboardData($user, $today, $tomorrow)
     {
@@ -37,11 +38,9 @@ class DashboardController extends Controller
         $totalProducts = Produk::count();
         $lowStockProducts = Produk::where('stok_total', '<=', 5)->count();
         
-        
-        // Simulate sales data (since we can't modify DB)
-        // In a real scenario, you'd have a sales/transactions table
-        $mySalesToday = $this->getSimulatedSales($user->kd, $today);
-        $allSalesToday = $this->getSimulatedAllSales($today);
+        // Get real sales data from penjualan table
+        $mySalesToday = $this->getMySalesToday($user, $today, $tomorrow);
+        $allSalesToday = $this->getAllSalesToday($today, $tomorrow);
         
         return [
             'total_products' => $totalProducts,
@@ -73,57 +72,66 @@ class DashboardController extends Controller
     }
     
     /**
-     * Simulate sales data (replace with real data when available)
+     * Get my sales today from database
      */
-    private function getSimulatedSales($userId, $date)
+    private function getMySalesToday($user, $today, $tomorrow)
     {
-        // This is simulation - in real app, you'd query sales table
-        $baseAmount = rand(200000, 800000);
-        $transactionCount = rand(5, 15);
+        $sales = Penjualan::where('dibuat_oleh', $user->name ?? $user->username ?? 'system')
+            ->where('status_bayar', 'Lunas')
+            ->where('status_barang', 'diterima langsung')
+            ->whereBetween('date_created', [$today, $tomorrow])
+            ->get();
+        
+        $totalAmount = $sales->sum('total_harga');
+        $transactionCount = $sales->count();
         
         return [
-            'amount' => $baseAmount,
+            'amount' => $totalAmount,
             'transactions' => $transactionCount,
-            'formatted_amount' => 'Rp ' . number_format($baseAmount, 0, ',', '.')
-        ];
-    }
-    
-    private function getSimulatedAllSales($date)
-    {
-        // Simulate all cashiers' sales
-        $baseAmount = rand(800000, 2000000);
-        $transactionCount = rand(20, 50);
-        
-        return [
-            'amount' => $baseAmount,
-            'transactions' => $transactionCount,
-            'formatted_amount' => 'Rp ' . number_format($baseAmount, 0, ',', '.')
+            'formatted_amount' => 'Rp ' . number_format($totalAmount, 0, ',', '.')
         ];
     }
     
     /**
-     * Get recent transactions (simulated)
+     * Get all sales today from database
+     */
+    private function getAllSalesToday($today, $tomorrow)
+    {
+        $sales = Penjualan::where('status_bayar', 'Lunas')
+            ->where('status_barang', 'diterima langsung')
+            ->whereBetween('date_created', [$today, $tomorrow])
+            ->get();
+        
+        $totalAmount = $sales->sum('total_harga');
+        $transactionCount = $sales->count();
+        
+        return [
+            'amount' => $totalAmount,
+            'transactions' => $transactionCount,
+            'formatted_amount' => 'Rp ' . number_format($totalAmount, 0, ',', '.')
+        ];
+    }
+    
+    /**
+     * Get recent transactions from database
      */
     private function getRecentTransactions()
     {
-        // Simulate recent transactions
-        $transactions = [];
-        for ($i = 0; $i < 5; $i++) {
-            $transactions[] = [
-                'id' => 'TXN' . str_pad(rand(1000, 9999), 4, '0', STR_PAD_LEFT),
-                'amount' => rand(50000, 300000),
-                'time' => Carbon::now()->subMinutes(rand(5, 120))->format('H:i'),
-                'cashier' => ['John', 'Sarah', 'Mike', 'Lisa'][rand(0, 3)]
-            ];
-        }
+        $transactions = Penjualan::where('status_bayar', 'Lunas')
+            ->where('status_barang', 'diterima langsung')
+            ->with('pelanggan')
+            ->orderBy('date_created', 'desc')
+            ->limit(5)
+            ->get();
         
-        return collect($transactions)->map(function($txn) {
+        return $transactions->map(function($transaction) {
             return [
-                'id' => $txn['id'],
-                'amount' => $txn['amount'],
-                'formatted_amount' => 'Rp ' . number_format($txn['amount'], 0, ',', '.'),
-                'time' => $txn['time'],
-                'cashier' => $txn['cashier']
+                'id' => $transaction->no_faktur_penjualan,
+                'amount' => $transaction->total_harga,
+                'formatted_amount' => 'Rp ' . number_format($transaction->total_harga, 0, ',', '.'),
+                'time' => $transaction->date_created->format('H:i'),
+                'cashier' => $transaction->dibuat_oleh ?? 'System',
+                'customer' => $transaction->pelanggan ? $transaction->pelanggan->nama_lengkap : 'Pelanggan Umum'
             ];
         });
     }

@@ -18,11 +18,20 @@ class PelangganController extends Controller
             $search = $request->get('q', '');
             $limit = $request->get('limit', 10);
 
-            $customers = Pelanggan::search($search)
-                ->orderByName()
-                ->limit($limit)
-                ->get()
-                ->map(function($customer) {
+            if (empty($search)) {
+                // If no search query, return all customers
+                $customers = Pelanggan::orderByName()
+                    ->limit($limit)
+                    ->get();
+            } else {
+                // If search query provided, use search scope
+                $customers = Pelanggan::search($search)
+                    ->orderByName()
+                    ->limit($limit)
+                    ->get();
+            }
+
+            $customers = $customers->map(function($customer) {
                     return [
                         'id' => $customer->kd_pelanggan,
                         'kd_pelanggan' => $customer->kd_pelanggan,

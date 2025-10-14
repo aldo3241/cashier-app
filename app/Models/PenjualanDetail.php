@@ -55,7 +55,6 @@ class PenjualanDetail extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'kd_penjualan_detail',
         'kd_penjualan',
         'kd_produk',
         'nama_produk',
@@ -145,10 +144,12 @@ class PenjualanDetail extends Model
 
     /**
      * Generate unique detail ID.
+     * Note: This method is deprecated. Use auto-increment instead.
      */
     public static function generateDetailId()
     {
-        return 'PD' . time() . rand(100, 999);
+        // Deprecated: Use auto-increment instead
+        return null;
     }
 
     /**
@@ -169,7 +170,6 @@ class PenjualanDetail extends Model
         }
 
         $detail = static::create([
-            'kd_penjualan_detail' => static::generateDetailId(),
             'kd_penjualan' => $penjualanId,
             'kd_produk' => $cartItem['kd_produk'],
             'nama_produk' => $cartItem['nama'],

@@ -118,7 +118,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm text-gray-600" data-en="Total Transactions" data-id="Total Transaksi">Total Transactions</p>
-                        <p class="text-2xl font-bold text-gray-900">{{ $sales->count() }}</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ $sales->total() }}</p>
                     </div>
                 </div>
             </div>
@@ -172,6 +172,17 @@
                 <h2 class="text-xl font-semibold text-gray-800" data-en="Sales Transactions" data-id="Transaksi Penjualan">Sales Transactions</h2>
             </div>
             
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="text-center py-8 hidden">
+                <div class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-blue-500 hover:bg-blue-400 transition ease-in-out duration-150 cursor-not-allowed">
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span data-en="Loading transactions..." data-id="Memuat transaksi...">Loading transactions...</span>
+                </div>
+            </div>
+            
             <div class="overflow-x-auto">
                 <table id="salesTable" class="display responsive nowrap" style="width:100%">
                     <thead>
@@ -208,6 +219,26 @@
                     </tbody>
                 </table>
             </div>
+            
+            <!-- Pagination Links -->
+            @if($sales->hasPages())
+            <div class="px-6 py-4 border-t border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div class="text-sm text-gray-700">
+                        <span data-en="Showing" data-id="Menampilkan">Showing</span>
+                        <span class="font-medium">{{ $sales->firstItem() }}</span>
+                        <span data-en="to" data-id="sampai">to</span>
+                        <span class="font-medium">{{ $sales->lastItem() }}</span>
+                        <span data-en="of" data-id="dari">of</span>
+                        <span class="font-medium">{{ $sales->total() }}</span>
+                        <span data-en="results" data-id="hasil">results</span>
+                    </div>
+                    <div class="flex space-x-2">
+                        {{ $sales->links() }}
+                    </div>
+                </div>
+            </div>
+            @endif
         </div>
     </main>
 
@@ -244,12 +275,18 @@
             }
         }
 
-        // Initialize DataTable
+        // Initialize DataTable with performance optimizations
         $(document).ready(function() {
-            $('#salesTable').DataTable({
+            // Show loading indicator
+            $('#loadingIndicator').removeClass('hidden');
+            
+            // Initialize DataTable
+            var table = $('#salesTable').DataTable({
                 responsive: true,
                 pageLength: 25,
                 order: [[1, 'desc'], [2, 'desc']], // Sort by date and time descending
+                deferRender: true, // Defer rendering for better performance
+                processing: true, // Show processing indicator
                 language: {
                     search: "_INPUT_",
                     searchPlaceholder: "Search transactions...",
@@ -262,11 +299,21 @@
                         last: "Last",
                         next: "Next",
                         previous: "Previous"
-                    }
+                    },
+                    processing: "Loading transactions..."
                 },
                 columnDefs: [
-                    { className: "text-center", targets: [4, 8] }
-                ]
+                    { className: "text-center", targets: [4, 8] },
+                    { orderable: false, targets: [7, 8] } // Disable sorting on customer and status columns
+                ],
+                dom: 'lrtip', // Remove search box and length menu for better performance
+                scrollX: true, // Enable horizontal scrolling for mobile
+                scrollCollapse: true,
+                pagingType: 'simple_numbers', // Use simple pagination for better performance
+                initComplete: function() {
+                    // Hide loading indicator when table is ready
+                    $('#loadingIndicator').addClass('hidden');
+                }
             });
             
             // Initialize language
