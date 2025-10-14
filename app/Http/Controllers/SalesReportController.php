@@ -18,8 +18,8 @@ class SalesReportController extends Controller
     {
         $user = auth()->user();
         
-        // Fetch real sales data from database
-        $sales = $this->getRealSalesData($user->name ?? $user->username, 'my');
+        // Fetch both completed and incomplete sales data from database
+        $sales = $this->getMySalesData($user->name ?? $user->username);
         
         return view('sales.my-sales', compact('sales', 'user'));
     }
@@ -41,6 +41,41 @@ class SalesReportController extends Controller
         return view('sales.all-sales', compact('sales', 'user'));
     }
     
+    /**
+     * Get my sales data (both completed and incomplete)
+     */
+    private function getMySalesData($userId)
+    {
+        $query = Penjualan::with(['penjualanDetails.produk', 'pelanggan'])
+            ->where('dibuat_oleh', $userId)
+            ->whereIn('status_bayar', ['Lunas', 'Belum Lunas']); // Include both completed and incomplete
+        
+        $sales = $query->orderBy('date_created', 'desc')->get();
+        
+        return $sales->map(function ($sale) {
+            $itemCount = $sale->penjualanDetails->sum('qty');
+            $totalAmount = $sale->penjualanDetails->sum(function ($item) {
+                return ($item->harga_jual * $item->qty) - $item->diskon;
+            });
+            
+            return [
+                'id' => $sale->kd_penjualan,
+                'date' => $sale->date_created->format('Y-m-d'),
+                'time' => $sale->date_created->format('H:i:s'),
+                'datetime' => $sale->date_created->format('Y-m-d H:i:s'),
+                'cashier' => $sale->dibuat_oleh,
+                'items' => $itemCount,
+                'amount' => $totalAmount,
+                'formatted_amount' => 'Rp ' . number_format($totalAmount, 0, ',', '.'),
+                'payment_method' => $sale->keuangan_kotak ?? 'Tunai',
+                'status' => $sale->status_bayar === 'Lunas' ? 'Completed' : 'Belum Lunas',
+                'status_bayar' => $sale->status_bayar,
+                'customer' => $sale->pelanggan ? $sale->pelanggan->nama_lengkap : 'Walk-in Customer',
+                'invoice_number' => $sale->no_faktur_penjualan
+            ];
+        });
+    }
+
     /**
      * Get real sales data from database
      */

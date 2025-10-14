@@ -25,14 +25,14 @@ class Stok extends Model
      *
      * @var string
      */
-    protected $keyType = 'string';
+    protected $keyType = 'int';
 
     /**
      * Indicates if the IDs are auto-incrementing.
      *
      * @var bool
      */
-    public $incrementing = false;
+    public $incrementing = true;
 
     /**
      * Indicates if the model should be timestamped.
@@ -47,11 +47,10 @@ class Stok extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'kd_stok',
         'kd_produk',
         'masuk',
         'keluar',
-        'klarifikasi',
+        'klasifikasi',
         'no_ref',
         'catatan',
         'date_created',
@@ -91,14 +90,13 @@ class Stok extends Model
     /**
      * Add stock entry (masuk).
      */
-    public static function addStock($kd_produk, $qty, $klarifikasi = 'Manual', $no_ref = null, $catatan = null, $dibuat_oleh = 'system')
+    public static function addStock($kd_produk, $qty, $klasifikasi = 'Manual', $no_ref = null, $catatan = null, $dibuat_oleh = 'system')
     {
         return static::create([
-            'kd_stok' => 'STK' . time() . rand(100, 999),
             'kd_produk' => $kd_produk,
             'masuk' => $qty,
             'keluar' => 0,
-            'klarifikasi' => $klarifikasi,
+            'klasifikasi' => $klasifikasi,
             'no_ref' => $no_ref,
             'catatan' => $catatan,
             'dibuat_oleh' => $dibuat_oleh,
@@ -110,14 +108,13 @@ class Stok extends Model
     /**
      * Reduce stock entry (keluar).
      */
-    public static function reduceStock($kd_produk, $qty, $klarifikasi = 'Penjualan', $no_ref = null, $catatan = null, $dibuat_oleh = 'system')
+    public static function reduceStock($kd_produk, $qty, $klasifikasi = 'Penjualan', $no_ref = null, $catatan = null, $dibuat_oleh = 'system')
     {
         return static::create([
-            'kd_stok' => 'STK' . time() . rand(100, 999),
             'kd_produk' => $kd_produk,
             'masuk' => 0,
             'keluar' => $qty,
-            'klarifikasi' => $klarifikasi,
+            'klasifikasi' => $klasifikasi,
             'no_ref' => $no_ref,
             'catatan' => $catatan,
             'dibuat_oleh' => $dibuat_oleh,

@@ -463,7 +463,7 @@
                 <div class="bg-white rounded-xl shadow-lg border border-gray-200">
                     <div class="p-6">                        
                         <div class="space-y-3">
-                        <button onclick="showDraftTransactions()" class="w-full bg-purple-100 hover:bg-purple-200 text-purple-800 p-4 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all">
+                        <button onclick="console.log('Ganti Transaksi button clicked'); showDraftTransactions()" class="w-full bg-purple-100 hover:bg-purple-200 text-purple-800 p-4 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                             </svg>
@@ -920,7 +920,11 @@
             }
 
             // Calculate total from cart items
-            const totalAmount = cart.reduce((sum, item) => sum + (item.subtotal || 0), 0);
+            const totalAmount = cart.reduce((sum, item) => {
+                // Calculate subtotal if not available
+                const subtotal = item.subtotal || ((item.harga_jual * item.qty) - (item.diskon || 0));
+                return sum + subtotal;
+            }, 0);
 
             // Update display
             cartCount.textContent = cart.length;
@@ -1040,7 +1044,11 @@
             if (cart.length === 0) return;
             
             // Calculate total
-            const totalAmount = cart.reduce((sum, item) => sum + (item.subtotal || 0), 0);
+            const totalAmount = cart.reduce((sum, item) => {
+                // Calculate subtotal if not available
+                const subtotal = item.subtotal || ((item.harga_jual * item.qty) - (item.diskon || 0));
+                return sum + subtotal;
+            }, 0);
             
             // Debug logging
             console.log('Cart items for checkout:', cart);
@@ -1707,8 +1715,20 @@
         // Load default customer immediately when script loads
         loadDefaultCustomer();
         
-        // Load current cart
-        loadCurrentCart();
+        // Check if continuing an existing transaction first
+        @if(isset($continueTransaction) && $continueTransaction)
+            loadContinueTransaction(@json($continueTransaction));
+        @elseif(isset($startNewTransaction) && $startNewTransaction)
+            // Start a completely new transaction - don't load existing carts
+            console.log('Starting new transaction - skipping cart load');
+            cart = [];
+            currentCartId = null;
+            currentInvoiceNumber = 'PJ' + new Date().getTime();
+            updateCartDisplay();
+        @else
+            // Only load current cart if not continuing a transaction or starting a new one
+            loadCurrentCart();
+        @endif
         
         // Debug API connectivity
         testCartAPI();
@@ -1748,6 +1768,8 @@
                         cart = result.data.items || [];
                         currentInvoiceNumber = result.data.invoice_number || 'PJ250101000000';
                         console.log('Loaded cart items:', cart.length);
+                        console.log('Cart items data:', cart);
+                        console.log('Current cart ID:', currentCartId);
                         console.log('Invoice number:', currentInvoiceNumber);
                         updateCartDisplay();
                     } else {
@@ -1764,7 +1786,7 @@
 
         async function addToCartRealTime(product, qty = 1) {
             try {
-                console.log('Adding to cart:', product, 'qty:', qty, 'customer:', currentCustomer.id);
+                console.log('Adding to cart:', product, 'qty:', qty, 'customer:', currentCustomer.id, 'cartId:', currentCartId);
                 console.log('Product ID to send:', product.id || product.kd_produk);
                 const response = await fetch('/api/cart/add', {
                     method: 'POST',
@@ -1775,7 +1797,8 @@
                     body: JSON.stringify({
                         product_id: product.id || product.kd_produk,
                         qty: qty,
-                        customer_id: currentCustomer.id
+                        customer_id: currentCustomer.id,
+                        cart_id: currentCartId // Include current cart ID for continued transactions
                     })
                 });
 
@@ -1789,6 +1812,8 @@
                         cart = result.data.items || [];
                         currentCartId = result.data.cart_id;
                         currentInvoiceNumber = result.data.invoice_number || currentInvoiceNumber;
+                        console.log('Added to cart - New cart ID:', currentCartId);
+                        console.log('Added to cart - Items count:', cart.length);
                         updateCartDisplay();
                         showSuccessMessage('Item added to cart');
                     } else {
@@ -1841,6 +1866,7 @@
 
         async function clearCart() {
             try {
+                console.log('Clearing cart - customer:', currentCustomer.id, 'cartId:', currentCartId);
                 const response = await fetch('/api/cart/clear', {
                     method: 'POST',
                     headers: {
@@ -1848,12 +1874,14 @@
                         'X-CSRF-TOKEN': csrfToken
                     },
                     body: JSON.stringify({
-                        customer_id: currentCustomer.id
+                        customer_id: currentCustomer.id,
+                        cart_id: currentCartId // Include current cart ID for continued transactions
                     })
                 });
 
                 if (response.ok) {
                     const result = await response.json();
+                    console.log('Clear cart response:', result);
                     if (result.success) {
                         cart = [];
                         currentCartId = null;
@@ -1864,10 +1892,13 @@
                         // Redirect to My Sales page immediately
                         window.location.href = '/sales/my-sales';
                     } else {
+                        console.error('Clear cart failed:', result.message);
                         showErrorMessage(result.message);
                     }
                 } else {
-                    showErrorMessage('Failed to clear cart');
+                    const errorText = await response.text();
+                    console.error('Clear cart API failed:', response.status, errorText);
+                    showErrorMessage('Failed to clear cart: ' + response.status);
                 }
             } catch (error) {
                 console.error('Error clearing cart:', error);
@@ -1877,19 +1908,25 @@
 
         async function checkoutCart(paymentMethod, totalBayar, catatan = '', statusBarang = 'diterima langsung') {
             try {
+                const checkoutData = {
+                    payment_method: paymentMethod,
+                    total_bayar: totalBayar,
+                    customer_id: currentCustomer.id,
+                    catatan: catatan,
+                    status_barang: statusBarang
+                };
+                
+                console.log('Sending checkout data:', checkoutData);
+                console.log('Current cart ID for checkout:', currentCartId);
+                console.log('Cart items for checkout:', cart);
+                
                 const response = await fetch('/api/cart/checkout', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': csrfToken
                     },
-                    body: JSON.stringify({
-                        payment_method: paymentMethod,
-                        total_bayar: totalBayar,
-                        customer_id: currentCustomer.id,
-                        catatan: catatan,
-                        status_barang: statusBarang
-                    })
+                    body: JSON.stringify(checkoutData)
                 });
 
                 if (response.ok) {
@@ -1898,14 +1935,18 @@
                         cart = [];
                         currentCartId = null;
                         updateCartDisplay();
-                        showSuccessMessage(`Checkout successful! Invoice: ${result.data.invoice_number}`);
+                        
+                        // Show checkout success modal with change money
+                        showCheckoutSuccessModal(result.data, totalBayar);
                         return result.data;
                     } else {
                         showErrorMessage(result.message);
                         return null;
                     }
                 } else {
-                    showErrorMessage('Checkout failed');
+                    const errorText = await response.text();
+                    console.error('Checkout API failed:', response.status, errorText);
+                    showErrorMessage(`Checkout failed: ${response.status} - ${errorText}`);
                     return null;
                 }
             } catch (error) {
@@ -1924,6 +1965,173 @@
             // You can implement a toast notification here
             console.error('Error:', message);
             alert(message); // Fallback to alert for now
+        }
+
+        // Load continue transaction
+        function loadContinueTransaction(transactionData) {
+            console.log('Loading continue transaction:', transactionData);
+            
+            try {
+                // Set the current cart ID
+                currentCartId = transactionData.kd_penjualan;
+                console.log('Set current cart ID:', currentCartId);
+                
+                // Set the invoice number from the transaction
+                currentInvoiceNumber = transactionData.no_faktur_penjualan || 'PJ' + new Date().getTime();
+                console.log('Set invoice number:', currentInvoiceNumber);
+                
+                // Update customer information
+                if (transactionData.pelanggan) {
+                    currentCustomer = {
+                        id: transactionData.pelanggan.kd_pelanggan,
+                        name: transactionData.pelanggan.nama_lengkap,
+                        code: transactionData.pelanggan.kd_pelanggan
+                    };
+                    console.log('Updated customer:', currentCustomer);
+                    updateCustomerDisplay();
+                } else {
+                    console.log('No customer data found in transaction');
+                }
+                
+                // Load cart items
+                console.log('Transaction data structure:', transactionData);
+                console.log('Penjualan details:', transactionData.penjualan_details);
+                
+                if (transactionData.penjualan_details && transactionData.penjualan_details.length > 0) {
+                    console.log('First detail item:', transactionData.penjualan_details[0]);
+                    
+                    const cartItems = transactionData.penjualan_details.map(detail => {
+                        console.log('Mapping detail:', detail);
+                        console.log('Detail fields:', {
+                            kd_produk: detail.kd_produk,
+                            nama_produk: detail.nama_produk,
+                            harga_jual: detail.harga_jual,
+                            qty: detail.qty
+                        });
+                        
+                        return {
+                            kd_produk: detail.kd_produk,
+                            nama_produk: detail.nama_produk,
+                            harga_jual: parseFloat(detail.harga_jual) || 0,
+                            qty: parseInt(detail.qty) || 0,
+                            diskon: parseFloat(detail.diskon) || 0,
+                            subtotal: (parseFloat(detail.harga_jual) * parseInt(detail.qty)) - (parseFloat(detail.diskon) || 0),
+                            produk_jenis: detail.produk_jenis || 'General'
+                        };
+                    });
+                    
+                    cart = cartItems;
+                    console.log('Loaded cart items:', cart);
+                    updateCartDisplay();
+                } else {
+                    console.log('No cart items found in transaction');
+                    cart = [];
+                    updateCartDisplay();
+                }
+                
+                // Show notification
+                showNotification('Transaction loaded successfully! You can now continue editing.', 'success');
+                
+            } catch (error) {
+                console.error('Error loading continue transaction:', error);
+                showNotification('Error loading transaction: ' + error.message, 'error');
+            }
+        }
+
+        // Show checkout success modal with change money
+        function showCheckoutSuccessModal(transactionData, amountPaid) {
+            const changeMoney = amountPaid - transactionData.total_harga;
+            
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white rounded-lg shadow-lg w-full max-w-md mx-4">
+                    <!-- Header -->
+                    <div class="px-6 py-4 border-b border-gray-200 bg-green-50">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800" data-en="Transaction Successful" data-id="Transaksi Berhasil">Transaction Successful</h3>
+                                <p class="text-sm text-green-600" data-en="Payment completed successfully" data-id="Pembayaran berhasil diselesaikan">Payment completed successfully</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="p-6 space-y-4">
+                        <!-- Invoice Number -->
+                        <div class="text-center">
+                            <p class="text-sm text-gray-500" data-en="Invoice Number" data-id="Nomor Faktur">Invoice Number</p>
+                            <p class="text-lg font-bold text-gray-800">${transactionData.invoice_number}</p>
+                        </div>
+
+                        <!-- Transaction Details -->
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="text-gray-600" data-en="Total Amount" data-id="Jumlah Total">Total Amount</span>
+                                <span class="font-semibold">Rp ${formatPrice(transactionData.total_harga)}</span>
+                            </div>
+                            
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="text-gray-600" data-en="Amount Paid" data-id="Jumlah Bayar">Amount Paid</span>
+                                <span class="font-semibold">Rp ${formatPrice(amountPaid)}</span>
+                            </div>
+                            
+                            <div class="flex justify-between items-center py-3 bg-blue-50 rounded-lg px-4">
+                                <span class="text-lg font-semibold text-blue-800" data-en="Change Money" data-id="Kembalian">Change Money</span>
+                                <span class="text-xl font-bold text-blue-900">Rp ${formatPrice(changeMoney)}</span>
+                            </div>
+                        </div>
+
+                        <!-- Additional Info -->
+                        <div class="text-center text-sm text-gray-500">
+                            <p data-en="Transaction completed at" data-id="Transaksi selesai pada">Transaction completed at</p>
+                            <p class="font-medium">${new Date().toLocaleString('id-ID')}</p>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="px-6 py-4 border-t border-gray-200 flex justify-center">
+                        <button id="close-success-modal" class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors" data-en="Close" data-id="Tutup">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            // Update language for the modal
+            updateLanguage();
+
+            // Close modal event
+            document.getElementById('close-success-modal').onclick = () => {
+                document.body.removeChild(modal);
+                // Redirect to My Sales page
+                window.location.href = '/sales/my-sales';
+            };
+
+            // Close modal when clicking outside
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    document.body.removeChild(modal);
+                    // Redirect to My Sales page
+                    window.location.href = '/sales/my-sales';
+                }
+            };
+
+            // Auto close after 10 seconds
+            setTimeout(() => {
+                if (document.body.contains(modal)) {
+                    document.body.removeChild(modal);
+                    // Redirect to My Sales page
+                    window.location.href = '/sales/my-sales';
+                }
+            }, 10000);
         }
 
         // Load payment methods from API
@@ -1970,44 +2178,61 @@
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
             modal.innerHTML = `
-                <div class="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
-                    <h3 class="text-lg font-semibold mb-4" data-en="Checkout" data-id="Checkout">Checkout</h3>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2" data-en="Payment Method" data-id="Metode Pembayaran">Payment Method</label>
-                        <select id="payment-method" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            ${paymentMethods.map(method => `<option value="${method.name}">${method.name}</option>`).join('')}
-                        </select>
+                <div class="bg-white rounded-lg shadow-lg w-full max-w-md mx-4">
+                    <!-- Header -->
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800" data-en="Checkout" data-id="Checkout">Checkout</h3>
                     </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            <span data-en="Item Status" data-id="Status Barang">Status Barang</span> <span class="text-red-500">*</span>
-                        </label>
-                        <div class="space-y-2">
-                            <label class="flex items-center">
-                                <input type="radio" name="status-barang" value="diterima langsung" checked 
-                                       class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 focus:ring-purple-500 focus:ring-2">
-                                <span class="ml-2 text-sm font-medium text-gray-700" data-en="received directly" data-id="diterima langsung">diterima langsung</span>
+
+                    <!-- Content -->
+                    <div class="p-6 space-y-4">
+                        <!-- Payment Method -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" data-en="Payment Method" data-id="Metode Pembayaran">Payment Method</label>
+                            <select id="payment-method" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                ${paymentMethods.map(method => `<option value="${method.name}">${method.name}</option>`).join('')}
+                            </select>
+                        </div>
+
+                        <!-- Item Status -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <span data-en="Item Status" data-id="Status Barang">Status Barang</span> 
+                                <span class="text-red-500">*</span>
                             </label>
-                            <label class="flex items-center">
-                                <input type="radio" name="status-barang" value="dikirimkan ekspedisi" 
-                                       class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 focus:ring-purple-500 focus:ring-2">
-                                <span class="ml-2 text-sm font-medium text-gray-700" data-en="sent by expedition" data-id="dikirimkan ekspedisi">dikirimkan ekspedisi</span>
-                            </label>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="radio" name="status-barang" value="diterima langsung" checked 
+                                           class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 focus:ring-purple-500 focus:ring-2">
+                                    <span class="ml-2 text-sm font-medium text-gray-700" data-en="received directly" data-id="diterima langsung">diterima langsung</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="status-barang" value="dikirimkan ekspedisi" 
+                                           class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 focus:ring-purple-500 focus:ring-2">
+                                    <span class="ml-2 text-sm font-medium text-gray-700" data-en="sent by expedition" data-id="dikirimkan ekspedisi">dikirimkan ekspedisi</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Amount Paid -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" data-en="Amount Paid" data-id="Jumlah Bayar">Amount Paid</label>
+                            <input type="number" id="amount-paid" value="0" min="0" step="1000" 
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <p class="text-sm text-gray-500 mt-1" data-en="Total amount: Rp" data-id="Jumlah total: Rp">Total amount: Rp ${formatPrice(totalAmount)}</p>
+                        </div>
+
+                        <!-- Notes -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" data-en="Notes (Optional)" data-id="Catatan (Opsional)">Notes (Optional)</label>
+                            <textarea id="checkout-notes" rows="3" 
+                                      class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                                      data-placeholder-en="Add any notes..." data-placeholder-id="Tambahkan catatan..."></textarea>
                         </div>
                     </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2" data-en="Amount Paid" data-id="Jumlah Bayar">Amount Paid</label>
-                        <input type="number" id="amount-paid" value="0" min="0" step="1000" 
-                               class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <p class="text-sm text-gray-500 mt-1" data-en="Total amount: Rp" data-id="Jumlah total: Rp">Total amount: Rp ${formatPrice(totalAmount)}</p>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2" data-en="Notes (Optional)" data-id="Catatan (Opsional)">Notes (Optional)</label>
-                        <textarea id="checkout-notes" rows="3" 
-                                  class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                  data-placeholder-en="Add any notes..." data-placeholder-id="Tambahkan catatan..."></textarea>
-                    </div>
-                    <div class="flex justify-end space-x-3">
+
+                    <!-- Footer -->
+                    <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
                         <button id="cancel-checkout" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50" data-en="Cancel" data-id="Batal">
                             Cancel
                         </button>
@@ -2116,7 +2341,9 @@
 
         // Draft Transactions Management
         async function showDraftTransactions() {
+            console.log('showDraftTransactions() called from:', new Error().stack);
             try {
+                console.log('Loading draft transactions...');
                 const response = await fetch('/api/cart/drafts', {
                     method: 'GET',
                     headers: {
@@ -2125,14 +2352,21 @@
                     }
                 });
 
+                console.log('Draft transactions response status:', response.status);
+                
                 if (response.ok) {
                     const result = await response.json();
+                    console.log('Draft transactions result:', result);
                     if (result.success) {
                         displayDraftTransactions(result.data);
                     } else {
+                        console.error('Draft transactions API error:', result.message);
                         showErrorMessage(result.message);
                     }
                 } else {
+                    console.error('Draft transactions API failed with status:', response.status);
+                    const errorText = await response.text();
+                    console.error('Error response:', errorText);
                     showErrorMessage('Failed to load draft transactions');
                 }
             } catch (error) {

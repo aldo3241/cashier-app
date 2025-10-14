@@ -34,6 +34,24 @@ class CartService
     }
 
     /**
+     * Get specific cart by ID for continuing transactions
+     */
+    public function getCartById($cartId, $userId)
+    {
+        $cart = Penjualan::where('kd_penjualan', $cartId)
+            ->where('dibuat_oleh', $userId)
+            ->where('status_bayar', 'Belum Lunas')
+            ->with(['penjualanDetails.produk', 'pelanggan'])
+            ->first();
+
+        if (!$cart) {
+            throw new \Exception('Transaction not found or already completed');
+        }
+
+        return $cart;
+    }
+
+    /**
      * Create a new draft cart
      */
     public function createDraftCart($userId, $customerId = 1)
@@ -62,13 +80,17 @@ class CartService
     /**
      * Add item to cart
      */
-    public function addToCart($userId, $customerId, $productId, $qty = 1)
+    public function addToCart($userId, $customerId, $productId, $qty = 1, $cartId = null)
     {
         try {
             DB::beginTransaction();
 
-            // Get or create cart
-            $cart = $this->getActiveCart($userId, $customerId);
+            // Get specific cart if provided, otherwise get or create active cart
+            if ($cartId) {
+                $cart = $this->getCartById($cartId, $userId);
+            } else {
+                $cart = $this->getActiveCart($userId, $customerId);
+            }
 
             // Get product details
             $produk = Produk::find($productId);
@@ -217,12 +239,17 @@ class CartService
     /**
      * Clear entire cart
      */
-    public function clearCart($userId, $customerId)
+    public function clearCart($userId, $customerId, $cartId = null)
     {
         try {
             DB::beginTransaction();
 
-            $cart = $this->getActiveCart($userId, $customerId);
+            // Get specific cart if provided, otherwise get active cart
+            if ($cartId) {
+                $cart = $this->getCartById($cartId, $userId);
+            } else {
+                $cart = $this->getActiveCart($userId, $customerId);
+            }
 
             // Delete all cart items first
             PenjualanDetail::where('kd_penjualan', $cart->kd_penjualan)->delete();

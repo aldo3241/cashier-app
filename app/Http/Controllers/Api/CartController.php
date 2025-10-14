@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\CartService;
+use App\Models\Penjualan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -22,7 +23,21 @@ class CartController extends Controller
     public function getCart(Request $request)
     {
         try {
-            $userId = Auth::user()->name ?? 'system';
+            $user = Auth::user();
+            $userId = $user ? ($user->username ?? $user->name ?? $user->email ?? 'system') : 'system';
+            
+            // Debug logging for checkout
+            if ($request->isMethod('post') && $request->routeIs('api.cart.checkout')) {
+                \Log::info('Checkout user debug', [
+                    'user_authenticated' => Auth::check(),
+                    'user' => $user ? $user->toArray() : null,
+                    'user_name' => $user->name ?? 'null',
+                    'user_nama' => $user->nama ?? 'null',
+                    'user_username' => $user->username ?? 'null',
+                    'user_email' => $user->email ?? 'null',
+                    'final_user_id' => $userId
+                ]);
+            }
             $customerId = $request->get('customer_id', 1);
 
             $cart = $this->cartService->getActiveCart($userId, $customerId);
@@ -50,14 +65,30 @@ class CartController extends Controller
                 'product_id' => 'required',
                 'qty' => 'required|integer|min:1',
                 'customer_id' => 'nullable',
+                'cart_id' => 'nullable|integer',
             ]);
 
-            $userId = Auth::user()->name ?? 'system';
+            $user = Auth::user();
+            $userId = $user ? ($user->username ?? $user->name ?? $user->email ?? 'system') : 'system';
+            
+            // Debug logging for checkout
+            if ($request->isMethod('post') && $request->routeIs('api.cart.checkout')) {
+                \Log::info('Checkout user debug', [
+                    'user_authenticated' => Auth::check(),
+                    'user' => $user ? $user->toArray() : null,
+                    'user_name' => $user->name ?? 'null',
+                    'user_nama' => $user->nama ?? 'null',
+                    'user_username' => $user->username ?? 'null',
+                    'user_email' => $user->email ?? 'null',
+                    'final_user_id' => $userId
+                ]);
+            }
             $customerId = $request->get('customer_id', 1);
             $productId = $request->product_id;
             $qty = $request->qty;
+            $cartId = $request->get('cart_id');
 
-            $cartDetails = $this->cartService->addToCart($userId, $customerId, $productId, $qty);
+            $cartDetails = $this->cartService->addToCart($userId, $customerId, $productId, $qty, $cartId);
 
             return response()->json([
                 'success' => true,
@@ -85,7 +116,21 @@ class CartController extends Controller
                 'customer_id' => 'nullable',
             ]);
 
-            $userId = Auth::user()->name ?? 'system';
+            $user = Auth::user();
+            $userId = $user ? ($user->username ?? $user->name ?? $user->email ?? 'system') : 'system';
+            
+            // Debug logging for checkout
+            if ($request->isMethod('post') && $request->routeIs('api.cart.checkout')) {
+                \Log::info('Checkout user debug', [
+                    'user_authenticated' => Auth::check(),
+                    'user' => $user ? $user->toArray() : null,
+                    'user_name' => $user->name ?? 'null',
+                    'user_nama' => $user->nama ?? 'null',
+                    'user_username' => $user->username ?? 'null',
+                    'user_email' => $user->email ?? 'null',
+                    'final_user_id' => $userId
+                ]);
+            }
             $customerId = $request->get('customer_id', 1);
             $productId = $request->product_id;
             $qty = $request->qty;
@@ -117,7 +162,21 @@ class CartController extends Controller
                 'customer_id' => 'nullable',
             ]);
 
-            $userId = Auth::user()->name ?? 'system';
+            $user = Auth::user();
+            $userId = $user ? ($user->username ?? $user->name ?? $user->email ?? 'system') : 'system';
+            
+            // Debug logging for checkout
+            if ($request->isMethod('post') && $request->routeIs('api.cart.checkout')) {
+                \Log::info('Checkout user debug', [
+                    'user_authenticated' => Auth::check(),
+                    'user' => $user ? $user->toArray() : null,
+                    'user_name' => $user->name ?? 'null',
+                    'user_nama' => $user->nama ?? 'null',
+                    'user_username' => $user->username ?? 'null',
+                    'user_email' => $user->email ?? 'null',
+                    'final_user_id' => $userId
+                ]);
+            }
             $customerId = $request->get('customer_id', 1);
             $productId = $request->product_id;
 
@@ -143,10 +202,25 @@ class CartController extends Controller
     public function clearCart(Request $request)
     {
         try {
-            $userId = Auth::user()->name ?? 'system';
+            $user = Auth::user();
+            $userId = $user ? ($user->username ?? $user->name ?? $user->email ?? 'system') : 'system';
+            
+            // Debug logging for checkout
+            if ($request->isMethod('post') && $request->routeIs('api.cart.checkout')) {
+                \Log::info('Checkout user debug', [
+                    'user_authenticated' => Auth::check(),
+                    'user' => $user ? $user->toArray() : null,
+                    'user_name' => $user->name ?? 'null',
+                    'user_nama' => $user->nama ?? 'null',
+                    'user_username' => $user->username ?? 'null',
+                    'user_email' => $user->email ?? 'null',
+                    'final_user_id' => $userId
+                ]);
+            }
             $customerId = $request->get('customer_id', 1);
+            $cartId = $request->get('cart_id');
 
-            $cartDetails = $this->cartService->clearCart($userId, $customerId);
+            $cartDetails = $this->cartService->clearCart($userId, $customerId, $cartId);
 
             return response()->json([
                 'success' => true,
@@ -176,7 +250,21 @@ class CartController extends Controller
                 'status_barang' => 'required|string|in:diterima langsung,dikirimkan ekspedisi',
             ]);
 
-            $userId = Auth::user()->name ?? 'system';
+            $user = Auth::user();
+            $userId = $user ? ($user->username ?? $user->name ?? $user->email ?? 'system') : 'system';
+            
+            // Debug logging for checkout
+            if ($request->isMethod('post') && $request->routeIs('api.cart.checkout')) {
+                \Log::info('Checkout user debug', [
+                    'user_authenticated' => Auth::check(),
+                    'user' => $user ? $user->toArray() : null,
+                    'user_name' => $user->name ?? 'null',
+                    'user_nama' => $user->nama ?? 'null',
+                    'user_username' => $user->username ?? 'null',
+                    'user_email' => $user->email ?? 'null',
+                    'final_user_id' => $userId
+                ]);
+            }
             $customerId = $request->get('customer_id', 1);
             $paymentMethod = $request->payment_method;
             $totalBayar = $request->total_bayar;
@@ -205,7 +293,21 @@ class CartController extends Controller
     public function getStats(Request $request)
     {
         try {
-            $userId = Auth::user()->name ?? 'system';
+            $user = Auth::user();
+            $userId = $user ? ($user->username ?? $user->name ?? $user->email ?? 'system') : 'system';
+            
+            // Debug logging for checkout
+            if ($request->isMethod('post') && $request->routeIs('api.cart.checkout')) {
+                \Log::info('Checkout user debug', [
+                    'user_authenticated' => Auth::check(),
+                    'user' => $user ? $user->toArray() : null,
+                    'user_name' => $user->name ?? 'null',
+                    'user_nama' => $user->nama ?? 'null',
+                    'user_username' => $user->username ?? 'null',
+                    'user_email' => $user->email ?? 'null',
+                    'final_user_id' => $userId
+                ]);
+            }
             $customerId = $request->get('customer_id', 1);
 
             $cart = $this->cartService->getActiveCart($userId, $customerId);
@@ -236,7 +338,9 @@ class CartController extends Controller
     public function getDraftTransactions()
     {
         try {
-            $userId = Auth::user()->name ?? 'system';
+            $user = Auth::user();
+            $userId = $user ? ($user->username ?? $user->name ?? $user->email ?? 'system') : 'system';
+            
             $drafts = $this->cartService->getDraftTransactions($userId);
 
             return response()->json([
@@ -262,7 +366,21 @@ class CartController extends Controller
                 'draft_id' => 'required|integer',
             ]);
 
-            $userId = Auth::user()->name ?? 'system';
+            $user = Auth::user();
+            $userId = $user ? ($user->username ?? $user->name ?? $user->email ?? 'system') : 'system';
+            
+            // Debug logging for checkout
+            if ($request->isMethod('post') && $request->routeIs('api.cart.checkout')) {
+                \Log::info('Checkout user debug', [
+                    'user_authenticated' => Auth::check(),
+                    'user' => $user ? $user->toArray() : null,
+                    'user_name' => $user->name ?? 'null',
+                    'user_nama' => $user->nama ?? 'null',
+                    'user_username' => $user->username ?? 'null',
+                    'user_email' => $user->email ?? 'null',
+                    'final_user_id' => $userId
+                ]);
+            }
             $draftId = $request->draft_id;
 
             $cartDetails = $this->cartService->switchToDraft($userId, $draftId);
@@ -291,7 +409,21 @@ class CartController extends Controller
                 'draft_id' => 'required|integer',
             ]);
 
-            $userId = Auth::user()->name ?? 'system';
+            $user = Auth::user();
+            $userId = $user ? ($user->username ?? $user->name ?? $user->email ?? 'system') : 'system';
+            
+            // Debug logging for checkout
+            if ($request->isMethod('post') && $request->routeIs('api.cart.checkout')) {
+                \Log::info('Checkout user debug', [
+                    'user_authenticated' => Auth::check(),
+                    'user' => $user ? $user->toArray() : null,
+                    'user_name' => $user->name ?? 'null',
+                    'user_nama' => $user->nama ?? 'null',
+                    'user_username' => $user->username ?? 'null',
+                    'user_email' => $user->email ?? 'null',
+                    'final_user_id' => $userId
+                ]);
+            }
             $draftId = $request->draft_id;
 
             $this->cartService->deleteDraft($userId, $draftId);
@@ -306,6 +438,35 @@ class CartController extends Controller
                 'success' => false,
                 'message' => 'Error deleting draft: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Continue an incomplete transaction
+     */
+    public function continueTransaction($transactionId)
+    {
+        try {
+            $userId = Auth::user()->username ?? Auth::user()->name ?? 'system';
+            
+            // Find the transaction
+            $transaction = Penjualan::with(['penjualanDetails', 'pelanggan'])
+                ->where('kd_penjualan', $transactionId)
+                ->where('dibuat_oleh', $userId)
+                ->where('status_bayar', 'Belum Lunas')
+                ->first();
+
+            if (!$transaction) {
+                // Return a redirect response instead of JSON for better UX
+                return redirect()->route('sales.my-sales')->with('error', 'Transaction not found or already completed');
+            }
+
+            // Redirect to cashier with the transaction loaded
+            return redirect()->route('cashier.index', ['continue' => $transactionId]);
+
+        } catch (\Exception $e) {
+            // Return a redirect response instead of JSON for better UX
+            return redirect()->route('sales.my-sales')->with('error', 'Error continuing transaction: ' . $e->getMessage());
         }
     }
 }

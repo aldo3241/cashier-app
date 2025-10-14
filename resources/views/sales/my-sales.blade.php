@@ -68,6 +68,11 @@
             background-color: #fee2e2;
             color: #991b1b;
         }
+        
+        .status-belum-lunas {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
@@ -107,7 +112,7 @@
 
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 flex justify-end">
-        <a href="{{ route('cashier.index') }}" class="inline-flex items-center px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-lg font-bold rounded-lg shadow-lg transition-all duration-200">
+        <a href="{{ route('cashier.index', ['new' => 1]) }}" class="inline-flex items-center px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-lg font-bold rounded-lg shadow-lg transition-all duration-200">
             <svg class="w-6 h-6 mr-2 -ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
@@ -115,6 +120,20 @@
         </a>
     </div>
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Error Messages -->
+        @if(session('error'))
+        <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <span class="block sm:inline">{{ session('error') }}</span>
+        </div>
+        @endif
+
+        <!-- Success Messages -->
+        @if(session('success'))
+        <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+            <span class="block sm:inline">{{ session('success') }}</span>
+        </div>
+        @endif
+
         <!-- Stats Summary -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div class="bg-white rounded-lg shadow p-6">
@@ -184,7 +203,7 @@
                 <table id="salesTable" class="display responsive nowrap" style="width:100%">
                     <thead>
                         <tr>
-                            <th data-en="Transaction ID" data-id="ID Transaksi">Transaction ID</th>
+                            <th data-en="Invoice Number" data-id="No Faktur">Invoice Number</th>
                             <th data-en="Date" data-id="Tanggal">Date</th>
                             <th data-en="Time" data-id="Waktu">Time</th>
                             <th data-en="Items" data-id="Item">Items</th>
@@ -192,12 +211,13 @@
                             <th data-en="Payment Method" data-id="Metode Pembayaran">Payment Method</th>
                             <th data-en="Customer" data-id="Pelanggan">Customer</th>
                             <th data-en="Status" data-id="Status">Status</th>
+                            <th data-en="Actions" data-id="Aksi">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($sales as $sale)
                         <tr>
-                            <td><span class="font-mono font-semibold text-blue-600">{{ $sale['id'] }}</span></td>
+                            <td><span class="font-mono text-sm text-gray-700">{{ $sale['invoice_number'] }}</span></td>
                             <td>{{ $sale['date'] }}</td>
                             <td>{{ $sale['time'] }}</td>
                             <td class="text-center">{{ $sale['items'] }}</td>
@@ -208,6 +228,20 @@
                                 <span class="status-badge status-{{ strtolower($sale['status']) }}">
                                     {{ $sale['status'] }}
                                 </span>
+                            </td>
+                            <td class="text-center">
+                                @if($sale['status_bayar'] === 'Belum Lunas')
+                                    <a href="{{ route('api.cart.continue', $sale['id']) }}" 
+                                       class="inline-flex items-center px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors"
+                                       data-en="Continue Transaction" data-id="Lanjutkan Transaksi">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <span data-en="Continue" data-id="Lanjutkan">Continue</span>
+                                    </a>
+                                @else
+                                    <span class="text-gray-400 text-sm" data-en="Completed" data-id="Selesai">Completed</span>
+                                @endif
                             </td>
                         </tr>
                         @endforeach
@@ -276,7 +310,7 @@
                     }
                 },
                 columnDefs: [
-                    { className: "text-center", targets: [3, 7] }
+                    { className: "text-center", targets: [3, 7, 8] }
                 ]
             });
             

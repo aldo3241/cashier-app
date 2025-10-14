@@ -219,26 +219,6 @@
                     </tbody>
                 </table>
             </div>
-            
-            <!-- Pagination Links -->
-            @if($sales->hasPages())
-            <div class="px-6 py-4 border-t border-gray-200">
-                <div class="flex items-center justify-between">
-                    <div class="text-sm text-gray-700">
-                        <span data-en="Showing" data-id="Menampilkan">Showing</span>
-                        <span class="font-medium">{{ $sales->firstItem() }}</span>
-                        <span data-en="to" data-id="sampai">to</span>
-                        <span class="font-medium">{{ $sales->lastItem() }}</span>
-                        <span data-en="of" data-id="dari">of</span>
-                        <span class="font-medium">{{ $sales->total() }}</span>
-                        <span data-en="results" data-id="hasil">results</span>
-                    </div>
-                    <div class="flex space-x-2">
-                        {{ $sales->links() }}
-                    </div>
-                </div>
-            </div>
-            @endif
         </div>
     </main>
 

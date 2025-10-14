@@ -113,5 +113,8 @@ Route::middleware('auth')->group(function () {
                 })
             ]);
         })->name('api.cart.debug-drafts');
+        
+        // Continue transaction
+        Route::get('/cart/continue/{transactionId}', [App\Http\Controllers\Api\CartController::class, 'continueTransaction'])->name('api.cart.continue');
     });
 });

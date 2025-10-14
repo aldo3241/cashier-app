@@ -10,7 +10,7 @@ class cashierController extends Controller
     /**
      * Display cashier interface
      */
-    public function index()
+    public function index(Request $request)
     {
         // Get some featured products or recent products for initial display
         $featuredProducts = Produk::inStock()
@@ -38,8 +38,34 @@ class cashierController extends Controller
                 ];
             });
 
+        // Check if continuing an existing transaction
+        $continueTransactionId = $request->get('continue');
+        $startNewTransaction = $request->get('new');
+        $continueTransaction = null;
+        
+        if ($continueTransactionId) {
+            $userId = auth()->user()->username ?? auth()->user()->name ?? 'system';
+            $continueTransaction = \App\Models\Penjualan::with(['penjualanDetails', 'pelanggan'])
+                ->where('kd_penjualan', $continueTransactionId)
+                ->where('dibuat_oleh', $userId)
+                ->where('status_bayar', 'Belum Lunas')
+                ->first();
+            
+            // Debug logging
+            \Log::info('Continue Transaction Debug', [
+                'transaction_id' => $continueTransactionId,
+                'user_id' => $userId,
+                'transaction_found' => $continueTransaction ? true : false,
+                'transaction_data' => $continueTransaction ? $continueTransaction->toArray() : null,
+                'penjualan_details_count' => $continueTransaction ? $continueTransaction->penjualanDetails->count() : 0,
+                'first_detail' => $continueTransaction && $continueTransaction->penjualanDetails->count() > 0 ? $continueTransaction->penjualanDetails->first()->toArray() : null
+            ]);
+        }
+
         return view('cashier.cashier', [
-            'featuredProducts' => $featuredProducts
+            'featuredProducts' => $featuredProducts,
+            'continueTransaction' => $continueTransaction,
+            'startNewTransaction' => $startNewTransaction
         ]);
     }
 
