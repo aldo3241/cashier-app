@@ -314,7 +314,7 @@ class CartService
     /**
      * Convert cart to completed sale
      */
-    public function checkoutCart($userId, $customerId, $paymentMethod, $totalBayar, $catatan = null)
+    public function checkoutCart($userId, $customerId, $paymentMethod, $totalBayar, $catatan = null, $statusBarang = 'diterima langsung')
     {
         try {
             DB::beginTransaction();
@@ -335,7 +335,7 @@ class CartService
             $cart->status_bayar = 'Lunas';
             $cart->keuangan_kotak = $paymentMethod;
             $cart->catatan = $catatan;
-            $cart->status_barang = 'diterima langsung';
+            $cart->status_barang = $statusBarang;
             $cart->date_updated = now();
             $cart->save();
 

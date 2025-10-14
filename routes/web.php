@@ -62,6 +62,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/sales/payment-methods', [PenjualanController::class, 'getPaymentMethods'])->name('api.sales.payment-methods');
         Route::get('/sales/stats', [PenjualanController::class, 'getStats'])->name('api.sales.stats');
         
+        // Payment Methods API
+        Route::get('/payment-methods', [PenjualanController::class, 'getPaymentMethods'])->name('api.payment-methods');
+        
         // Cart APIs (Real-time cart system)
         Route::get('/cart', [App\Http\Controllers\Api\CartController::class, 'getCart'])->name('api.cart.get');
         Route::post('/cart/add', [App\Http\Controllers\Api\CartController::class, 'addToCart'])->name('api.cart.add');

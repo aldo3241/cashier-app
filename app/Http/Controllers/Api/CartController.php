@@ -173,6 +173,7 @@ class CartController extends Controller
                 'total_bayar' => 'required|numeric|min:0',
                 'customer_id' => 'nullable',
                 'catatan' => 'nullable|string',
+                'status_barang' => 'required|string|in:diterima langsung,dikirimkan ekspedisi',
             ]);
 
             $userId = Auth::user()->name ?? 'system';
@@ -180,8 +181,9 @@ class CartController extends Controller
             $paymentMethod = $request->payment_method;
             $totalBayar = $request->total_bayar;
             $catatan = $request->get('catatan');
+            $statusBarang = $request->get('status_barang', 'diterima langsung');
 
-            $result = $this->cartService->checkoutCart($userId, $customerId, $paymentMethod, $totalBayar, $catatan);
+            $result = $this->cartService->checkoutCart($userId, $customerId, $paymentMethod, $totalBayar, $catatan, $statusBarang);
 
             return response()->json([
                 'success' => true,

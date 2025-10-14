@@ -1042,6 +1042,10 @@
             // Calculate total
             const totalAmount = cart.reduce((sum, item) => sum + (item.subtotal || 0), 0);
             
+            // Debug logging
+            console.log('Cart items for checkout:', cart);
+            console.log('Calculated total amount:', totalAmount);
+            
             // Show checkout modal with payment options
             showCheckoutModal(totalAmount);
         });
@@ -1277,11 +1281,23 @@
             
             // Update search placeholder
             const searchInput = document.getElementById('product-search');
-            if (currentLanguage === 'id') {
-                searchInput.placeholder = searchInput.getAttribute('data-id-placeholder');
-            } else {
-                searchInput.placeholder = searchInput.getAttribute('data-en-placeholder');
+            if (searchInput) {
+                if (currentLanguage === 'id') {
+                    searchInput.placeholder = searchInput.getAttribute('data-id-placeholder');
+                } else {
+                    searchInput.placeholder = searchInput.getAttribute('data-en-placeholder');
+                }
             }
+            
+            // Update textarea placeholders
+            const textareas = document.querySelectorAll('textarea[data-placeholder-en], textarea[data-placeholder-id]');
+            textareas.forEach(textarea => {
+                if (currentLanguage === 'id') {
+                    textarea.placeholder = textarea.getAttribute('data-placeholder-id');
+                } else {
+                    textarea.placeholder = textarea.getAttribute('data-placeholder-en');
+                }
+            });
             
             // Update cart empty messages
             updateCartEmptyMessages();
@@ -1859,7 +1875,7 @@
             }
         }
 
-        async function checkoutCart(paymentMethod, totalBayar, catatan = '') {
+        async function checkoutCart(paymentMethod, totalBayar, catatan = '', statusBarang = 'diterima langsung') {
             try {
                 const response = await fetch('/api/cart/checkout', {
                     method: 'POST',
@@ -1871,7 +1887,8 @@
                         payment_method: paymentMethod,
                         total_bayar: totalBayar,
                         customer_id: currentCustomer.id,
-                        catatan: catatan
+                        catatan: catatan,
+                        status_barang: statusBarang
                     })
                 });
 
@@ -1909,36 +1926,92 @@
             alert(message); // Fallback to alert for now
         }
 
+        // Load payment methods from API
+        async function loadPaymentMethods() {
+            try {
+                const response = await fetch('/api/payment-methods', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        return result.data;
+                    }
+                }
+                
+                // Fallback to default payment methods if API fails
+                return [
+                    { id: '1', name: 'Tunai' },
+                    { id: '2', name: 'BRI-TRFSa EDC BCA' }
+                ];
+            } catch (error) {
+                console.error('Error loading payment methods:', error);
+                // Fallback to default payment methods
+                return [
+                    { id: '1', name: 'Tunai' },
+                    { id: '2', name: 'BRI-TRFSa EDC BCA' }
+                ];
+            }
+        }
+
         // Checkout modal
-        function showCheckoutModal(totalAmount) {
+        async function showCheckoutModal(totalAmount) {
+            // Debug logging
+            console.log('showCheckoutModal called with totalAmount:', totalAmount);
+            
+            // Load payment methods from API
+            const paymentMethods = await loadPaymentMethods();
+            
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
             modal.innerHTML = `
                 <div class="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
-                    <h3 class="text-lg font-semibold mb-4">Checkout</h3>
+                    <h3 class="text-lg font-semibold mb-4" data-en="Checkout" data-id="Checkout">Checkout</h3>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2" data-en="Payment Method" data-id="Metode Pembayaran">Payment Method</label>
                         <select id="payment-method" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="Tunai">Cash (Tunai)</option>
-                            <option value="TRF Rek BCA">Bank Transfer BCA</option>
+                            ${paymentMethods.map(method => `<option value="${method.name}">${method.name}</option>`).join('')}
                         </select>
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Amount Paid</label>
-                        <input type="number" id="amount-paid" value="${totalAmount}" min="${totalAmount}" step="1000" 
-                               class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <span data-en="Item Status" data-id="Status Barang">Status Barang</span> <span class="text-red-500">*</span>
+                        </label>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="radio" name="status-barang" value="diterima langsung" checked 
+                                       class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 focus:ring-purple-500 focus:ring-2">
+                                <span class="ml-2 text-sm font-medium text-gray-700" data-en="received directly" data-id="diterima langsung">diterima langsung</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="status-barang" value="dikirimkan ekspedisi" 
+                                       class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 focus:ring-purple-500 focus:ring-2">
+                                <span class="ml-2 text-sm font-medium text-gray-700" data-en="sent by expedition" data-id="dikirimkan ekspedisi">dikirimkan ekspedisi</span>
+                            </label>
+                        </div>
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2" data-en="Amount Paid" data-id="Jumlah Bayar">Amount Paid</label>
+                        <input type="number" id="amount-paid" value="0" min="0" step="1000" 
+                               class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p class="text-sm text-gray-500 mt-1" data-en="Total amount: Rp" data-id="Jumlah total: Rp">Total amount: Rp ${formatPrice(totalAmount)}</p>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2" data-en="Notes (Optional)" data-id="Catatan (Opsional)">Notes (Optional)</label>
                         <textarea id="checkout-notes" rows="3" 
                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                  placeholder="Add any notes..."></textarea>
+                                  data-placeholder-en="Add any notes..." data-placeholder-id="Tambahkan catatan..."></textarea>
                     </div>
                     <div class="flex justify-end space-x-3">
-                        <button id="cancel-checkout" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">
+                        <button id="cancel-checkout" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50" data-en="Cancel" data-id="Batal">
                             Cancel
                         </button>
-                        <button id="confirm-checkout" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                        <button id="confirm-checkout" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700" data-en="Complete Checkout" data-id="Selesaikan Checkout">
                             Complete Checkout
                         </button>
                     </div>
@@ -1947,26 +2020,28 @@
 
             document.body.appendChild(modal);
 
+            // Update language for the modal
+            updateLanguage();
+
             // Event listeners
             document.getElementById('cancel-checkout').onclick = () => {
                 document.body.removeChild(modal);
-                // Redirect to My Sales page when cancelling checkout
-                showSuccessMessage('Checkout cancelled. Redirecting to My Sales...');
-                window.location.href = '/sales/my-sales';
+                // Just close the modal, don't redirect
             };
 
             document.getElementById('confirm-checkout').onclick = async () => {
                 const paymentMethod = document.getElementById('payment-method').value;
                 const amountPaid = parseFloat(document.getElementById('amount-paid').value);
                 const notes = document.getElementById('checkout-notes').value;
+                const statusBarang = document.querySelector('input[name="status-barang"]:checked').value;
 
                 if (amountPaid < totalAmount) {
-                    alert('Amount paid cannot be less than total amount');
+                    alert('Amount paid cannot be less than total amount. Please enter at least Rp ' + formatPrice(totalAmount));
                     return;
                 }
 
                 // Process checkout
-                const result = await checkoutCart(paymentMethod, amountPaid, notes);
+                const result = await checkoutCart(paymentMethod, amountPaid, notes, statusBarang);
                 if (result) {
                     document.body.removeChild(modal);
                     // Optionally show success message or redirect
