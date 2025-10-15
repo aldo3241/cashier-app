@@ -73,6 +73,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/cart/clear', [App\Http\Controllers\Api\CartController::class, 'clearCart'])->name('api.cart.clear');
         Route::post('/cart/checkout', [App\Http\Controllers\Api\CartController::class, 'checkout'])->name('api.cart.checkout');
         Route::get('/cart/stats', [App\Http\Controllers\Api\CartController::class, 'getStats'])->name('api.cart.stats');
+        Route::post('/cart/fresh', [App\Http\Controllers\Api\CartController::class, 'createFreshTransaction'])->name('api.cart.fresh');
         
         // Draft transaction management
         Route::get('/cart/drafts', [App\Http\Controllers\Api\CartController::class, 'getDraftTransactions'])->name('api.cart.drafts');
@@ -116,5 +117,12 @@ Route::middleware('auth')->group(function () {
         
         // Continue transaction
         Route::get('/cart/continue/{transactionId}', [App\Http\Controllers\Api\CartController::class, 'continueTransaction'])->name('api.cart.continue');
+        
+        // Financial mutation details
+        Route::get('/keuangan/{id}', [App\Http\Controllers\Api\KeuanganController::class, 'show'])->name('api.keuangan.show');
+        Route::get('/keuangan/by-invoice/{invoiceNumber}', [App\Http\Controllers\Api\KeuanganController::class, 'getByInvoice'])->name('api.keuangan.by-invoice');
+        
+        // Stock mutation details
+        Route::get('/stock/by-invoice/{invoiceNumber}', [App\Http\Controllers\Api\StokController::class, 'getByInvoice'])->name('api.stock.by-invoice');
     });
 });

@@ -1290,10 +1290,10 @@
             // Update search placeholder
             const searchInput = document.getElementById('product-search');
             if (searchInput) {
-                if (currentLanguage === 'id') {
-                    searchInput.placeholder = searchInput.getAttribute('data-id-placeholder');
-                } else {
-                    searchInput.placeholder = searchInput.getAttribute('data-en-placeholder');
+            if (currentLanguage === 'id') {
+                searchInput.placeholder = searchInput.getAttribute('data-id-placeholder');
+            } else {
+                searchInput.placeholder = searchInput.getAttribute('data-en-placeholder');
                 }
             }
             
@@ -1719,12 +1719,9 @@
         @if(isset($continueTransaction) && $continueTransaction)
             loadContinueTransaction(@json($continueTransaction));
         @elseif(isset($startNewTransaction) && $startNewTransaction)
-            // Start a completely new transaction - don't load existing carts
-            console.log('Starting new transaction - skipping cart load');
-            cart = [];
-            currentCartId = null;
-            currentInvoiceNumber = 'PJ' + new Date().getTime();
-            updateCartDisplay();
+            // Start a completely new transaction - create fresh cart
+            console.log('Starting new transaction - creating fresh cart');
+            startFreshTransaction();
         @else
             // Only load current cart if not continuing a transaction or starting a new one
             loadCurrentCart();
@@ -2554,22 +2551,102 @@
             }
         }
 
-        async function startNewTransaction() {
+        async function startFreshTransaction() {
             try {
-                // Clear current cart
-                await clearCart();
+                console.log('Creating fresh transaction on page load...');
                 
-                // Close the modal
-                const modal = document.querySelector('.fixed.inset-0');
-                if (modal) {
-                    document.body.removeChild(modal);
+                // Create a fresh transaction via API
+                const response = await fetch('/api/cart/fresh', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({
+                        customer_id: currentCustomer.id
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Fresh transaction created:', result);
+                    
+                    if (result.success) {
+                        // Update cart state with new transaction
+                        currentCartId = result.data.kd_penjualan;
+                        currentInvoiceNumber = result.data.no_faktur_penjualan;
+                        cart = [];
+                        updateCartDisplay();
+                        console.log('Fresh transaction loaded successfully');
+                    } else {
+                        console.error('Failed to create fresh transaction:', result.message);
+                        // Fallback to manual creation
+                        cart = [];
+                        currentCartId = null;
+                        currentInvoiceNumber = 'PJ' + new Date().getTime();
+                        updateCartDisplay();
+                    }
+                } else {
+                    console.error('Error creating fresh transaction');
+                    // Fallback to manual creation
+                    cart = [];
+                    currentCartId = null;
+                    currentInvoiceNumber = 'PJ' + new Date().getTime();
+                    updateCartDisplay();
                 }
                 
-                // Show success message
-                showSuccessMessage('Transaksi baru dimulai');
+            } catch (error) {
+                console.error('Error starting fresh transaction:', error);
+                // Fallback to manual creation
+                cart = [];
+                currentCartId = null;
+                currentInvoiceNumber = 'PJ' + new Date().getTime();
+                updateCartDisplay();
+            }
+        }
+
+        async function startNewTransaction() {
+            try {
+                console.log('Starting fresh transaction...');
                 
-                // Reset to default customer
-                await selectDefaultCustomer();
+                // Create a fresh transaction via API
+                const response = await fetch('/api/cart/fresh', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({
+                        customer_id: currentCustomer.id
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Fresh transaction created:', result);
+                    
+                    if (result.success) {
+                        // Update cart state with new transaction
+                        currentCartId = result.data.kd_penjualan;
+                        currentInvoiceNumber = result.data.no_faktur_penjualan;
+                        cart = [];
+                        updateCartDisplay();
+                        
+                        // Close the modal
+                        const modal = document.querySelector('.fixed.inset-0');
+                        if (modal) {
+                            document.body.removeChild(modal);
+                        }
+                        
+                        showSuccessMessage('Transaksi baru dimulai');
+                    } else {
+                        showErrorMessage(result.message || 'Failed to start new transaction');
+                    }
+                } else {
+                    const errorText = await response.text();
+                    console.error('Error creating fresh transaction:', errorText);
+                    showErrorMessage('Failed to start new transaction');
+                }
                 
             } catch (error) {
                 console.error('Error starting new transaction:', error);

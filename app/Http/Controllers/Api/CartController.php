@@ -357,6 +357,40 @@ class CartController extends Controller
     }
 
     /**
+     * Create a fresh new transaction (for new transactions)
+     */
+    public function createFreshTransaction(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not authenticated'
+                ], 401);
+            }
+
+            $userId = $user->username ?? $user->name ?? $user->email ?? 'system';
+            $customerId = $request->get('customer_id', 1);
+
+            // Create a fresh cart (don't look for existing ones)
+            $cart = $this->cartService->createFreshCart($userId, $customerId);
+
+            return response()->json([
+                'success' => true,
+                'data' => $cart,
+                'message' => 'Fresh transaction created successfully'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error creating fresh transaction: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Switch to a specific draft transaction
      */
     public function switchToDraft(Request $request)

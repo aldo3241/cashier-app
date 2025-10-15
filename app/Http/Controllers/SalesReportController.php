@@ -31,12 +31,9 @@ class SalesReportController extends Controller
     {
         $user = auth()->user();
         
-        // Get pagination parameters
-        $perPage = $request->get('per_page', 50); // Default 50 records per page
-        $page = $request->get('page', 1);
-        
-        // Fetch real sales data from database with pagination
-        $sales = $this->getRealSalesDataPaginated(null, 'all', $perPage, $page);
+        // For DataTable server-side processing, we'll load all data and let DataTable handle pagination
+        // This is more efficient for large datasets
+        $sales = $this->getRealSalesDataPaginated(null, 'all', 1000, 1); // Load up to 1000 records
         
         return view('sales.all-sales', compact('sales', 'user'));
     }
@@ -58,6 +55,13 @@ class SalesReportController extends Controller
                 return ($item->harga_jual * $item->qty) - $item->diskon;
             });
             
+            // Get financial mutation ID for completed sales
+            $keuanganId = null;
+            if ($sale->status_bayar === 'Lunas' && $sale->no_faktur_penjualan) {
+                $keuangan = \App\Models\Keuangan::where('referensi', $sale->no_faktur_penjualan)->first();
+                $keuanganId = $keuangan ? $keuangan->kd_keuangan : null;
+            }
+            
             return [
                 'id' => $sale->kd_penjualan,
                 'date' => $sale->date_created->format('Y-m-d'),
@@ -71,7 +75,8 @@ class SalesReportController extends Controller
                 'status' => $sale->status_bayar === 'Lunas' ? 'Completed' : 'Belum Lunas',
                 'status_bayar' => $sale->status_bayar,
                 'customer' => $sale->pelanggan ? $sale->pelanggan->nama_lengkap : 'Walk-in Customer',
-                'invoice_number' => $sale->no_faktur_penjualan
+                'invoice_number' => $sale->no_faktur_penjualan,
+                'keuangan_id' => $keuanganId
             ];
         });
     }
@@ -120,8 +125,7 @@ class SalesReportController extends Controller
     private function getRealSalesDataPaginated($userId = null, $type = 'all', $perPage = 50, $page = 1)
     {
         $query = Penjualan::with(['penjualanDetails', 'pelanggan'])
-            ->where('status_bayar', 'Lunas') // Only completed sales
-            ->where('status_barang', 'diterima langsung'); // Only completed deliveries
+            ->whereIn('status_bayar', ['Lunas', 'Belum Lunas']); // Include both completed and incomplete sales
         
         // Filter by user for "my sales"
         if ($type === 'my' && $userId) {
@@ -139,6 +143,13 @@ class SalesReportController extends Controller
                 return ($item->harga_jual * $item->qty) - $item->diskon;
             });
             
+            // Get financial mutation ID for completed sales
+            $keuanganId = null;
+            if ($sale->status_bayar === 'Lunas' && $sale->no_faktur_penjualan) {
+                $keuangan = \App\Models\Keuangan::where('referensi', $sale->no_faktur_penjualan)->first();
+                $keuanganId = $keuangan ? $keuangan->kd_keuangan : null;
+            }
+            
             return [
                 'id' => $sale->kd_penjualan,
                 'date' => $sale->date_created->format('Y-m-d'),
@@ -149,8 +160,11 @@ class SalesReportController extends Controller
                 'amount' => $totalAmount,
                 'formatted_amount' => 'Rp ' . number_format($totalAmount, 0, ',', '.'),
                 'payment_method' => $sale->keuangan_kotak ?? 'Tunai',
-                'status' => $sale->status_bayar === 'Lunas' ? 'Completed' : 'Pending',
-                'customer' => $sale->pelanggan ? $sale->pelanggan->nama_lengkap : 'Walk-in Customer'
+                'status' => $sale->status_bayar === 'Lunas' ? 'Completed' : 'Belum Lunas',
+                'status_bayar' => $sale->status_bayar,
+                'customer' => $sale->pelanggan ? $sale->pelanggan->nama_lengkap : 'Walk-in Customer',
+                'invoice_number' => $sale->no_faktur_penjualan,
+                'keuangan_id' => $keuanganId
             ];
         });
         

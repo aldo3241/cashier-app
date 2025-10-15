@@ -34,6 +34,15 @@ class CartService
     }
 
     /**
+     * Create a new fresh cart (for new transactions)
+     */
+    public function createFreshCart($userId, $customerId = 1)
+    {
+        // Always create a new draft cart, don't look for existing ones
+        return $this->createDraftCart($userId, $customerId);
+    }
+
+    /**
      * Get specific cart by ID for continuing transactions
      */
     public function getCartById($cartId, $userId)
@@ -385,6 +394,9 @@ class CartService
                     $userId
                 );
             }
+
+            // Create financial mutation (mutasi keuangan)
+            \App\Models\Keuangan::createSaleMutation($cart);
 
             DB::commit();
 
