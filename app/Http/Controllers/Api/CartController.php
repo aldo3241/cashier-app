@@ -114,6 +114,7 @@ class CartController extends Controller
                 'product_id' => 'required',
                 'qty' => 'required|integer|min:0',
                 'customer_id' => 'nullable',
+                'cart_id' => 'nullable|integer',
             ]);
 
             $user = Auth::user();
@@ -132,10 +133,11 @@ class CartController extends Controller
                 ]);
             }
             $customerId = $request->get('customer_id', 1);
+            $cartId = $request->get('cart_id');
             $productId = $request->product_id;
             $qty = $request->qty;
 
-            $cartDetails = $this->cartService->updateCartItem($userId, $customerId, $productId, $qty);
+            $cartDetails = $this->cartService->updateCartItem($userId, $customerId, $productId, $qty, $cartId);
 
             return response()->json([
                 'success' => true,
@@ -160,6 +162,7 @@ class CartController extends Controller
             $request->validate([
                 'product_id' => 'required',
                 'customer_id' => 'nullable',
+                'cart_id' => 'nullable|integer',
             ]);
 
             $user = Auth::user();
@@ -178,9 +181,10 @@ class CartController extends Controller
                 ]);
             }
             $customerId = $request->get('customer_id', 1);
+            $cartId = $request->get('cart_id');
             $productId = $request->product_id;
 
-            $cartDetails = $this->cartService->removeFromCart($userId, $customerId, $productId);
+            $cartDetails = $this->cartService->removeFromCart($userId, $customerId, $productId, $cartId);
 
             return response()->json([
                 'success' => true,
@@ -246,6 +250,7 @@ class CartController extends Controller
                 'payment_method' => 'required|string',
                 'total_bayar' => 'required|numeric|min:0',
                 'customer_id' => 'nullable',
+                'cart_id' => 'nullable|integer',
                 'catatan' => 'nullable|string',
                 'status_barang' => 'required|string|in:diterima langsung,dikirimkan ekspedisi',
             ]);
@@ -266,12 +271,13 @@ class CartController extends Controller
                 ]);
             }
             $customerId = $request->get('customer_id', 1);
+            $cartId = $request->get('cart_id');
             $paymentMethod = $request->payment_method;
             $totalBayar = $request->total_bayar;
             $catatan = $request->get('catatan');
             $statusBarang = $request->get('status_barang', 'diterima langsung');
 
-            $result = $this->cartService->checkoutCart($userId, $customerId, $paymentMethod, $totalBayar, $catatan, $statusBarang);
+            $result = $this->cartService->checkoutCart($userId, $customerId, $paymentMethod, $totalBayar, $catatan, $statusBarang, $cartId);
 
             return response()->json([
                 'success' => true,

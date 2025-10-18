@@ -171,5 +171,33 @@ class SalesReportController extends Controller
         // Return paginated collection
         return $sales->setCollection($transformedSales);
     }
+    
+    /**
+     * Show transaction details page
+     */
+    public function transactionDetails($id)
+    {
+        $user = auth()->user();
+        
+        // Get the transaction
+        $transaction = Penjualan::with(['penjualanDetails.produk', 'pelanggan'])
+            ->where('kd_penjualan', $id)
+            ->first();
+            
+        if (!$transaction) {
+            abort(404, 'Transaction not found');
+        }
+        
+        // Get financial mutation
+        $keuangan = \App\Models\Keuangan::where('referensi', $transaction->no_faktur_penjualan)->first();
+        
+        // Get stock mutations
+        $stokMutations = \App\Models\Stok::with('produk')
+            ->where('no_ref', $transaction->no_faktur_penjualan)
+            ->orderBy('date_created', 'desc')
+            ->get();
+        
+        return view('sales.transaction-details', compact('transaction', 'keuangan', 'stokMutations', 'user'));
+    }
 }
 

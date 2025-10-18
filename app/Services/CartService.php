@@ -91,9 +91,8 @@ class CartService
      */
     public function addToCart($userId, $customerId, $productId, $qty = 1, $cartId = null)
     {
-        try {
-            DB::beginTransaction();
-
+        return DB::transaction(function() use ($userId, $customerId, $productId, $qty, $cartId) {
+            
             // Get specific cart if provided, otherwise get or create active cart
             if ($cartId) {
                 $cart = $this->getCartById($cartId, $userId);
@@ -101,16 +100,15 @@ class CartService
                 $cart = $this->getActiveCart($userId, $customerId);
             }
 
-            // Get product details
-            $produk = Produk::find($productId);
+            // Lock the product for stock validation to prevent race conditions
+            $produk = Produk::lockForUpdate()->find($productId);
             if (!$produk) {
                 throw new \Exception('Product not found');
             }
 
-            // Check stock availability
-            $currentStock = Stok::getCurrentStock($productId);
-            if ($currentStock < $qty) {
-                throw new \Exception("Insufficient stock. Available: {$currentStock}, Requested: {$qty}");
+            // Check stock availability using the locked product
+            if ($produk->stok_total < $qty) {
+                throw new \Exception("Insufficient stock. Available: {$produk->stok_total}, Requested: {$qty}");
             }
 
             // Check if item already exists in cart
@@ -122,9 +120,9 @@ class CartService
                 // Update existing item
                 $newQty = $existingItem->qty + $qty;
                 
-                // Check stock again with new total
-                if ($currentStock < $newQty) {
-                    throw new \Exception("Insufficient stock. Available: {$currentStock}, Requested: {$newQty}");
+                // Check stock again with new total using locked product
+                if ($produk->stok_total < $newQty) {
+                    throw new \Exception("Insufficient stock. Available: {$produk->stok_total}, Requested: {$newQty}");
                 }
 
                 $existingItem->qty = $newQty;
@@ -158,34 +156,37 @@ class CartService
             // Recalculate cart totals
             $this->recalculateCart($cart->kd_penjualan);
 
-            DB::commit();
-
             return $this->getCartDetails($cart->kd_penjualan);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        });
     }
 
     /**
      * Update item quantity in cart
      */
-    public function updateCartItem($userId, $customerId, $productId, $qty)
+    public function updateCartItem($userId, $customerId, $productId, $qty, $cartId = null)
     {
-        try {
-            DB::beginTransaction();
-
-            $cart = $this->getActiveCart($userId, $customerId);
+        return DB::transaction(function() use ($userId, $customerId, $productId, $qty, $cartId) {
+            
+            // Get specific cart if provided, otherwise get active cart
+            if ($cartId) {
+                $cart = $this->getCartById($cartId, $userId);
+            } else {
+                $cart = $this->getActiveCart($userId, $customerId);
+            }
             
             if ($qty <= 0) {
-                return $this->removeFromCart($userId, $customerId, $productId);
+                return $this->removeFromCart($userId, $customerId, $productId, $cartId);
             }
 
-            // Check stock availability
-            $currentStock = Stok::getCurrentStock($productId);
-            if ($currentStock < $qty) {
-                throw new \Exception("Insufficient stock. Available: {$currentStock}, Requested: {$qty}");
+            // Lock the product for stock validation to prevent race conditions
+            $produk = Produk::lockForUpdate()->find($productId);
+            if (!$produk) {
+                throw new \Exception('Product not found');
+            }
+
+            // Check stock availability using the locked product
+            if ($produk->stok_total < $qty) {
+                throw new \Exception("Insufficient stock. Available: {$produk->stok_total}, Requested: {$qty}");
             }
 
             $item = PenjualanDetail::where('kd_penjualan', $cart->kd_penjualan)
@@ -204,25 +205,23 @@ class CartService
             // Recalculate cart totals
             $this->recalculateCart($cart->kd_penjualan);
 
-            DB::commit();
-
             return $this->getCartDetails($cart->kd_penjualan);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        });
     }
 
     /**
      * Remove item from cart
      */
-    public function removeFromCart($userId, $customerId, $productId)
+    public function removeFromCart($userId, $customerId, $productId, $cartId = null)
     {
-        try {
-            DB::beginTransaction();
-
-            $cart = $this->getActiveCart($userId, $customerId);
+        return DB::transaction(function() use ($userId, $customerId, $productId, $cartId) {
+            
+            // Get specific cart if provided, otherwise get active cart
+            if ($cartId) {
+                $cart = $this->getCartById($cartId, $userId);
+            } else {
+                $cart = $this->getActiveCart($userId, $customerId);
+            }
 
             $item = PenjualanDetail::where('kd_penjualan', $cart->kd_penjualan)
                 ->where('kd_produk', $productId)
@@ -235,14 +234,8 @@ class CartService
             // Recalculate cart totals
             $this->recalculateCart($cart->kd_penjualan);
 
-            DB::commit();
-
             return $this->getCartDetails($cart->kd_penjualan);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        });
     }
 
     /**
@@ -350,41 +343,48 @@ class CartService
     /**
      * Convert cart to completed sale
      */
-    public function checkoutCart($userId, $customerId, $paymentMethod, $totalBayar, $catatan = null, $statusBarang = 'diterima langsung')
+    public function checkoutCart($userId, $customerId, $paymentMethod, $totalBayar, $catatan = null, $statusBarang = 'diterima langsung', $cartId = null)
     {
-        try {
-            DB::beginTransaction();
-
-            $cart = $this->getActiveCart($userId, $customerId);
+        return DB::transaction(function() use ($userId, $customerId, $paymentMethod, $totalBayar, $catatan, $statusBarang, $cartId) {
+            
+            // 1. Lock and get the last transaction ID to prevent duplicates
+            $lastTransaction = Penjualan::lockForUpdate()->latest('kd_penjualan')->first();
+            $newId = $lastTransaction ? $lastTransaction->kd_penjualan + 1 : 1;
+            
+            // 2. Generate unique invoice number with locked ID
+            $finalInvoiceNumber = 'PJ' . date('ymdHis') . str_pad($newId, 4, '0', STR_PAD_LEFT);
+            
+            // 3. Get specific cart if provided, otherwise get active cart
+            if ($cartId) {
+                $cart = $this->getCartById($cartId, $userId);
+            } else {
+                $cart = $this->getActiveCart($userId, $customerId);
+            }
 
             if ($cart->penjualanDetails->count() == 0) {
                 throw new \Exception('Cart is empty');
             }
 
-            // Generate final invoice number
-            $finalInvoiceNumber = Penjualan::generateInvoiceNumber();
-
-            // Update cart to completed sale
-            $cart->no_faktur_penjualan = $finalInvoiceNumber;
-            $cart->total_bayar = $totalBayar;
-            $cart->lebih_bayar = $totalBayar - $cart->total_harga;
-            $cart->status_bayar = 'Lunas';
-            $cart->keuangan_kotak = $paymentMethod;
-            $cart->catatan = $catatan;
-            $cart->status_barang = $statusBarang;
-            $cart->date_updated = now();
-            $cart->save();
-
-            // Update all detail items
-            PenjualanDetail::where('kd_penjualan', $cart->kd_penjualan)
-                ->update([
-                    'status_bayar' => 'Lunas',
-                    'no_faktur_penjualan' => $finalInvoiceNumber,
-                    'date_updated' => now(),
-                ]);
-
-            // Reduce stock for all items
+            // 4. Validate and update stock for all items with locking
             foreach ($cart->penjualanDetails as $item) {
+                // Lock the product for stock update to prevent race conditions
+                $product = Produk::lockForUpdate()->find($item->kd_produk);
+                
+                if (!$product) {
+                    throw new \Exception("Product not found: {$item->kd_produk}");
+                }
+                
+                // Check stock availability
+                if ($product->stok_total < $item->qty) {
+                    throw new \Exception("Insufficient stock for product {$product->nama_produk}. Available: {$product->stok_total}, Required: {$item->qty}");
+                }
+                
+                // Update stock atomically
+                $product->stok_total -= $item->qty;
+                $product->date_updated = now();
+                $product->save();
+                
+                // Create stock mutation record
                 Stok::reduceStock(
                     $item->kd_produk,
                     $item->qty,
@@ -395,10 +395,27 @@ class CartService
                 );
             }
 
-            // Create financial mutation (mutasi keuangan)
-            \App\Models\Keuangan::createSaleMutation($cart);
+            // 5. Update cart to completed sale
+            $cart->no_faktur_penjualan = $finalInvoiceNumber;
+            $cart->total_bayar = $totalBayar;
+            $cart->lebih_bayar = $totalBayar - $cart->total_harga;
+            $cart->status_bayar = 'Lunas';
+            $cart->keuangan_kotak = $paymentMethod;
+            $cart->catatan = $catatan;
+            $cart->status_barang = $statusBarang;
+            $cart->date_updated = now();
+            $cart->save();
 
-            DB::commit();
+            // 6. Update all detail items
+            PenjualanDetail::where('kd_penjualan', $cart->kd_penjualan)
+                ->update([
+                    'status_bayar' => 'Lunas',
+                    'no_faktur_penjualan' => $finalInvoiceNumber,
+                    'date_updated' => now(),
+                ]);
+
+            // 7. Create financial mutation (mutasi keuangan)
+            \App\Models\Keuangan::createSaleMutation($cart);
 
             return [
                 'success' => true,
@@ -408,11 +425,7 @@ class CartService
                 'total_bayar' => $cart->total_bayar,
                 'lebih_bayar' => $cart->lebih_bayar,
             ];
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        });
     }
 
     /**

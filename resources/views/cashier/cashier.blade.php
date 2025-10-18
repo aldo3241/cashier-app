@@ -463,11 +463,11 @@
                 <div class="bg-white rounded-xl shadow-lg border border-gray-200">
                     <div class="p-6">                        
                         <div class="space-y-3">
-                        <button onclick="console.log('Ganti Transaksi button clicked'); showDraftTransactions()" class="w-full bg-purple-100 hover:bg-purple-200 text-purple-800 p-4 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all">
+                        <button onclick="window.location.href='{{ route('sales.my-sales') }}'" class="w-full bg-purple-100 hover:bg-purple-200 text-purple-800 p-4 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                             </svg>
-                            <span data-en="Switch Transaction" data-id="Ganti Transaksi">Ganti Transaksi</span>
+                            <span data-en="Back to My Sales" data-id="Kembali ke Penjualan Saya">Kembali ke Penjualan Saya</span>
                         </button>
                         <button id="cancel-order-btn" class="w-full bg-red-100 hover:bg-red-200 text-red-800 p-4 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -999,7 +999,8 @@
                     },
                     body: JSON.stringify({
                         product_id: productId,
-                        customer_id: currentCustomer.id
+                        customer_id: currentCustomer.id,
+                        cart_id: currentCartId
                     })
                 });
 
@@ -1545,7 +1546,7 @@
             const confirmBtn = document.getElementById('modal-confirm-btn');
             const cancelBtn = document.getElementById('modal-cancel-btn');
             
-            titleElement.textContent = getText('Switch Transaction', 'Ganti Transaksi');
+            titleElement.textContent = getText('Back to My Sales', 'Kembali ke My Sales');
             
             // Buat daftar transaksi
             let transactionList = '';
@@ -1839,7 +1840,8 @@
                     body: JSON.stringify({
                         product_id: productId,
                         qty: qty,
-                        customer_id: currentCustomer.id
+                        customer_id: currentCustomer.id,
+                        cart_id: currentCartId
                     })
                 });
 
@@ -1909,6 +1911,7 @@
                     payment_method: paymentMethod,
                     total_bayar: totalBayar,
                     customer_id: currentCustomer.id,
+                    cart_id: currentCartId,
                     catatan: catatan,
                     status_barang: statusBarang
                 };
@@ -2092,7 +2095,13 @@
                     </div>
 
                     <!-- Footer -->
-                    <div class="px-6 py-4 border-t border-gray-200 flex justify-center">
+                    <div class="px-6 py-4 border-t border-gray-200 flex justify-center space-x-3">
+                        <button id="print-receipt-btn" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center space-x-2" data-en="Print Receipt" data-id="Cetak Struk">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                            </svg>
+                            <span>Print Receipt</span>
+                        </button>
                         <button id="close-success-modal" class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors" data-en="Close" data-id="Tutup">
                             Close
                         </button>
@@ -2104,6 +2113,12 @@
 
             // Update language for the modal
             updateLanguage();
+
+            // Print receipt event
+            document.getElementById('print-receipt-btn').onclick = () => {
+                // Open print receipt in new window
+                window.open('/receipt/print/' + transactionData.sale_id, '_blank');
+            };
 
             // Close modal event
             document.getElementById('close-success-modal').onclick = () => {
@@ -2214,9 +2229,17 @@
                         <!-- Amount Paid -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2" data-en="Amount Paid" data-id="Jumlah Bayar">Amount Paid</label>
-                            <input type="number" id="amount-paid" value="0" min="0" step="1000" 
+                            <input type="number" id="amount-paid" value="${totalAmount}" min="0" step="1000" 
                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <p class="text-sm text-gray-500 mt-1" data-en="Total amount: Rp" data-id="Jumlah total: Rp">Total amount: Rp ${formatPrice(totalAmount)}</p>
+                        </div>
+
+                        <!-- Change Calculation -->
+                        <div class="bg-gray-50 p-4 rounded-lg border">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-medium text-gray-700" data-en="Change" data-id="Kembalian">Change:</span>
+                                <span id="change-amount" class="text-lg font-bold text-green-600">Rp 0</span>
+                            </div>
                         </div>
 
                         <!-- Notes -->
@@ -2250,6 +2273,29 @@
                 document.body.removeChild(modal);
                 // Just close the modal, don't redirect
             };
+
+            // Real-time change calculation
+            const amountPaidInput = document.getElementById('amount-paid');
+            const changeAmountSpan = document.getElementById('change-amount');
+            
+            function updateChangeAmount() {
+                const amountPaid = parseFloat(amountPaidInput.value) || 0;
+                const change = amountPaid - totalAmount;
+                
+                if (change >= 0) {
+                    changeAmountSpan.textContent = `Rp ${formatPrice(change)}`;
+                    changeAmountSpan.className = 'text-lg font-bold text-green-600';
+                } else {
+                    changeAmountSpan.textContent = `Rp ${formatPrice(Math.abs(change))} kurang`;
+                    changeAmountSpan.className = 'text-lg font-bold text-red-600';
+                }
+            }
+            
+            // Update change amount on input
+            amountPaidInput.addEventListener('input', updateChangeAmount);
+            
+            // Initial calculation
+            updateChangeAmount();
 
             document.getElementById('confirm-checkout').onclick = async () => {
                 const paymentMethod = document.getElementById('payment-method').value;
@@ -2387,8 +2433,8 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h3 class="text-lg font-semibold text-purple-800">Ganti Transaksi</h3>
-                                    <p class="text-purple-600 text-sm">Pilih transaksi yang ingin dilanjutkan</p>
+                                    <h3 class="text-lg font-semibold text-purple-800">Kembali ke My Sales</h3>
+                                    <p class="text-purple-600 text-sm">Kembali ke halaman My Sales untuk melihat transaksi</p>
                                 </div>
                             </div>
                             <button id="close-drafts" class="text-purple-600 hover:text-purple-800 transition-colors p-2 rounded-lg hover:bg-purple-200">

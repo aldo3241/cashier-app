@@ -5,6 +5,7 @@ use App\Http\Controllers\cashierController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SalesReportController;
+use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\Api\ProdukController;
 use App\Http\Controllers\Api\PelangganController;
 use App\Http\Controllers\PenjualanController;
@@ -30,6 +31,12 @@ Route::middleware('auth')->group(function () {
     // Sales Report routes (protected)
     Route::get('/sales/my-sales', [SalesReportController::class, 'mySales'])->name('sales.my-sales');
     Route::get('/sales/all-sales', [SalesReportController::class, 'allSales'])->name('sales.all-sales');
+    Route::get('/sales/transaction/{id}', [SalesReportController::class, 'transactionDetails'])->name('sales.transaction-details');
+    
+    // Receipt routes (protected)
+    Route::get('/receipt/print/{id}', [ReceiptController::class, 'print'])->name('receipt.print');
+    Route::get('/receipt/print-invoice/{invoiceNumber}', [ReceiptController::class, 'printByInvoice'])->name('receipt.print-invoice');
+    Route::get('/receipt/print-latest', [ReceiptController::class, 'printLatest'])->name('receipt.print-latest');
     
     // Cashier routes (protected)
     Route::get('/cashier', [cashierController::class, 'index'])->name('cashier.index');
