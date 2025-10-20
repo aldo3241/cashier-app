@@ -273,7 +273,7 @@
                     </div>
                 </div>
                 
-                <!-- Center: FreshFood Logo & Text -->
+                <!-- Center: PT Inspizo Multi Inspirasi Logo & Text -->
                 <div class="flex items-center space-x-3">
                     <div class="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

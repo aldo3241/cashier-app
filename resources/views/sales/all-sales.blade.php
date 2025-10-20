@@ -68,6 +68,11 @@
             background-color: #fee2e2;
             color: #991b1b;
         }
+        
+        .status-belum-lunas {
+            background-color: #fed7aa;
+            color: #c2410c;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
@@ -211,7 +216,7 @@
                             <td>{{ $sale['payment_method'] }}</td>
                             <td>{{ $sale['customer'] }}</td>
                             <td>
-                                <span class="status-badge status-{{ strtolower($sale['status']) }}">
+                                <span class="status-badge status-{{ strtolower(str_replace(' ', '-', $sale['status'])) }}">
                                     {{ $sale['status'] }}
                                 </span>
                             </td>

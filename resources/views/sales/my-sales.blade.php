@@ -70,8 +70,8 @@
         }
         
         .status-belum-lunas {
-            background-color: #fef3c7;
-            color: #92400e;
+            background-color: #fed7aa;
+            color: #c2410c;
         }
     </style>
 </head>
@@ -111,14 +111,6 @@
     </header>
 
     <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 flex justify-end">
-        <a href="{{ route('cashier.index', ['new' => 1]) }}" class="inline-flex items-center px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-lg font-bold rounded-lg shadow-lg transition-all duration-200">
-            <svg class="w-6 h-6 mr-2 -ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-            <span data-en="New Transaction" data-id="Transaksi Baru">New Transaction</span>
-        </a>
-    </div>
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Error Messages -->
         @if(session('error'))
@@ -195,8 +187,14 @@
 
         <!-- DataTable -->
         <div class="bg-white rounded-lg shadow">
-            <div class="px-6 py-4 border-b border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                 <h2 class="text-xl font-semibold text-gray-800" data-en="Sales Transactions" data-id="Transaksi Penjualan">Sales Transactions</h2>
+                <a href="{{ route('cashier.index', ['new' => 1]) }}" class="inline-flex items-center px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-lg font-bold rounded-lg shadow-lg transition-all duration-200">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    <span data-en="New Transaction" data-id="Transaksi Baru">New Transaction</span>
+                </a>
             </div>
             
             <div class="overflow-x-auto">
@@ -225,7 +223,7 @@
                             <td>{{ $sale['payment_method'] }}</td>
                             <td>{{ $sale['customer'] }}</td>
                             <td>
-                                <span class="status-badge status-{{ strtolower($sale['status']) }}">
+                                <span class="status-badge status-{{ strtolower(str_replace(' ', '-', $sale['status'])) }}">
                                     {{ $sale['status'] }}
                                 </span>
                             </td>
