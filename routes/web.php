@@ -65,9 +65,15 @@ Route::middleware('auth')->group(function () {
         // Sales APIs
         Route::post('/sales/create', [PenjualanController::class, 'createSale'])->name('api.sales.create');
         Route::get('/sales', [PenjualanController::class, 'index'])->name('api.sales.index');
-        Route::get('/sales/{id}', [PenjualanController::class, 'show'])->name('api.sales.show');
         Route::get('/sales/payment-methods', [PenjualanController::class, 'getPaymentMethods'])->name('api.sales.payment-methods');
         Route::get('/sales/stats', [PenjualanController::class, 'getStats'])->name('api.sales.stats');
+        
+        // Sales Report DataTable APIs (must be before /sales/{id} route)
+        Route::get('/sales/my-sales-data', [SalesReportController::class, 'mySalesData'])->name('api.sales.my-sales-data');
+        Route::get('/sales/all-sales-data', [SalesReportController::class, 'allSalesData'])->name('api.sales.all-sales-data');
+        
+        // Generic sales route (must be last)
+        Route::get('/sales/{id}', [PenjualanController::class, 'show'])->name('api.sales.show');
         
         // Payment Methods API
         Route::get('/payment-methods', [PenjualanController::class, 'getPaymentMethods'])->name('api.payment-methods');

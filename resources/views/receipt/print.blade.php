@@ -11,9 +11,9 @@
         }
         
         body {
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            line-height: 1.2;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 16px;
+            line-height: 1.4;
             margin: 0;
             padding: 20px;
             background: white;
@@ -21,7 +21,8 @@
         }
         
         .receipt {
-            max-width: 300px;
+            max-width: 100%;
+            width: 100%;
             margin: 0 auto;
             background: white;
         }
@@ -32,35 +33,35 @@
         }
         
         .store-name {
-            font-size: 18px;
+            font-size: 28px;
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
         
         .store-desc {
-            font-size: 11px;
-            margin-bottom: 3px;
+            font-size: 16px;
+            margin-bottom: 5px;
         }
         
         .address {
-            font-size: 10px;
-            margin-bottom: 3px;
+            font-size: 14px;
+            margin-bottom: 5px;
         }
         
         .phone {
-            font-size: 10px;
-            margin-bottom: 8px;
+            font-size: 14px;
+            margin-bottom: 12px;
         }
         
         .transaction-info {
             text-align: center;
-            font-size: 10px;
-            margin-bottom: 10px;
+            font-size: 14px;
+            margin-bottom: 15px;
         }
         
         .divider {
-            border-top: 1px solid black;
-            margin: 10px 0;
+            border-top: 2px solid black;
+            margin: 15px 0;
         }
         
         .items {
@@ -73,7 +74,8 @@
         
         .item-name {
             font-weight: bold;
-            margin-bottom: 2px;
+            font-size: 16px;
+            margin-bottom: 4px;
         }
         
         .item-details {
@@ -83,12 +85,12 @@
         }
         
         .item-qty-price {
-            font-size: 11px;
+            font-size: 14px;
         }
         
         .item-total {
             font-weight: bold;
-            font-size: 11px;
+            font-size: 14px;
         }
         
         .total-section {
@@ -99,7 +101,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 14px;
+            font-size: 20px;
             font-weight: bold;
         }
         
@@ -114,21 +116,21 @@
         .payment-line {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 3px;
-            font-size: 11px;
+            margin-bottom: 5px;
+            font-size: 14px;
         }
         
         .policy {
             text-align: center;
-            font-size: 10px;
-            margin: 10px 0;
+            font-size: 12px;
+            margin: 15px 0;
             font-style: italic;
         }
         
         .served-by {
             text-align: center;
-            font-size: 10px;
-            margin-top: 10px;
+            font-size: 12px;
+            margin-top: 15px;
         }
         
         .print-button {

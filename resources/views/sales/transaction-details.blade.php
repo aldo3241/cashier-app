@@ -83,10 +83,10 @@
             <!-- Transaction Summary -->
             <div class="lg:col-span-2">
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                    <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="px-4 py-3 border-b border-gray-200">
                         <h3 class="text-lg font-semibold text-gray-900" data-en="Transaction Summary" data-id="Ringkasan Transaksi">Transaction Summary</h3>
                     </div>
-                    <div class="p-6">
+                    <div class="p-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="text-sm font-medium text-gray-500" data-en="Customer" data-id="Pelanggan">Customer</label>
@@ -120,7 +120,7 @@
             <!-- Quick Actions -->
             <div class="space-y-4">
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                    <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="px-4 py-3 border-b border-gray-200">
                         <h3 class="text-lg font-semibold text-gray-900" data-en="Quick Actions" data-id="Aksi Cepat">Quick Actions</h3>
                     </div>
                     <div class="p-6 space-y-3">
@@ -156,7 +156,7 @@
         <div class="space-y-6">
             <!-- Financial Mutation Section -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                <div class="px-6 py-4 border-b border-gray-200">
+                <div class="px-4 py-3 border-b border-gray-200">
                     <div class="flex items-center space-x-3">
                         <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
                             <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -166,41 +166,29 @@
                         <h3 class="text-lg font-semibold text-gray-900" data-en="Financial Mutation" data-id="Mutasi Keuangan">Financial Mutation</h3>
                     </div>
                 </div>
-                <div class="p-6">
+                <div class="p-4">
                     @if($keuangan)
-                        <div class="space-y-4">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="bg-green-50 p-4 rounded-lg">
-                                    <div class="flex items-center">
-                                        <div class="flex-shrink-0">
-                                            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                                            </svg>
-                                        </div>
-                                        <div class="ml-4">
-                                            <p class="text-sm font-medium text-green-600" data-en="Income" data-id="Pemasukan">Income</p>
-                                            <p class="text-2xl font-bold text-green-900">Rp {{ number_format($keuangan->masuk, 0, ',', '.') }}</p>
-                                        </div>
+                        <div class="space-y-3">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div class="bg-green-50 p-3 rounded-lg border border-green-200">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm font-medium text-green-600" data-en="Income" data-id="Pemasukan">Income</p>
+                                        <p class="text-lg font-bold text-green-900">Rp {{ number_format($keuangan->masuk, 0, ',', '.') }}</p>
                                     </div>
                                 </div>
-                                <div class="bg-red-50 p-4 rounded-lg">
-                                    <div class="flex items-center">
-                                        <div class="flex-shrink-0">
-                                            <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                                            </svg>
-                                        </div>
-                                        <div class="ml-4">
-                                            <p class="text-sm font-medium text-red-600" data-en="Expense" data-id="Pengeluaran">Expense</p>
-                                            <p class="text-2xl font-bold text-red-900">Rp {{ number_format($keuangan->keluar, 0, ',', '.') }}</p>
-                                        </div>
+                                <div class="bg-red-50 p-3 rounded-lg border border-red-200">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm font-medium text-red-600" data-en="Expense" data-id="Pengeluaran">Expense</p>
+                                        <p class="text-lg font-bold text-red-900">Rp {{ number_format($keuangan->keluar, 0, ',', '.') }}</p>
                                     </div>
                                 </div>
                             </div>
-                            <div class="bg-gray-50 p-4 rounded-lg">
-                                <h4 class="font-medium text-gray-900 mb-2" data-en="Description" data-id="Deskripsi">Description</h4>
-                                <p class="text-gray-700">{{ $keuangan->deskripsi ?? 'No description available' }}</p>
-                            </div>
+                            @if($keuangan->deskripsi)
+                                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                    <h4 class="font-medium text-gray-900 text-sm mb-1" data-en="Description" data-id="Deskripsi">Description</h4>
+                                    <p class="text-sm text-gray-700">{{ $keuangan->deskripsi }}</p>
+                                </div>
+                            @endif
                         </div>
                     @else
                         <div class="text-center py-8">
@@ -215,7 +203,7 @@
 
             <!-- Stock Mutation Section -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                <div class="px-6 py-4 border-b border-gray-200">
+                <div class="px-4 py-3 border-b border-gray-200">
                     <div class="flex items-center space-x-3">
                         <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                             <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -225,38 +213,77 @@
                         <h3 class="text-lg font-semibold text-gray-900" data-en="Stock Mutation" data-id="Mutasi Stok">Stock Mutation</h3>
                     </div>
                 </div>
-                <div class="p-6">
+                <div class="p-4">
                     @if($stokMutations->count() > 0)
-                        <div class="space-y-4">
+                        <div class="grid grid-cols-1 {{ $stokMutations->count() >= 3 ? 'md:grid-cols-2 lg:grid-cols-3' : 'md:grid-cols-1' }} gap-3">
                             @foreach($stokMutations as $mutation)
-                                <div class="bg-gray-50 p-4 rounded-lg">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex-1">
-                                            <h4 class="font-medium text-gray-900">{{ $mutation->produk->nama_produk ?? 'Unknown Product' }}</h4>
-                                            <p class="text-sm text-gray-600" data-en="Reference" data-id="Referensi">Reference: {{ $mutation->no_ref }}</p>
-                                            <p class="text-sm text-gray-600" data-en="Classification" data-id="Klasifikasi">Classification: {{ $mutation->klasifikasi }}</p>
-                                        </div>
-                                        <div class="text-right">
-                                            <div class="flex items-center space-x-4">
+                                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                    @if($stokMutations->count() >= 3)
+                                        <!-- Vertical layout for 3+ items -->
+                                        <div class="space-y-2">
+                                            <h4 class="font-medium text-gray-900 text-sm truncate" title="{{ $mutation->produk->nama_produk ?? 'Unknown Product' }}">{{ $mutation->produk->nama_produk ?? 'Unknown Product' }}</h4>
+                                            
+                                            <div class="space-y-1">
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-xs text-gray-500" data-en="Ref" data-id="Ref">Ref:</span>
+                                                    <span class="text-xs text-gray-600 font-medium">{{ $mutation->no_ref }}</span>
+                                                </div>
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-xs text-gray-500" data-en="Class" data-id="Klas">Class:</span>
+                                                    <span class="text-xs text-gray-600">{{ $mutation->klasifikasi }}</span>
+                                                </div>
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-xs text-gray-500">Date:</span>
+                                                    <span class="text-xs text-gray-600">{{ \Carbon\Carbon::parse($mutation->date_created)->format('d M H:i') }}</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="flex justify-center space-x-4 pt-2 border-t border-gray-200">
                                                 @if($mutation->masuk > 0)
-                                                    <div class="text-green-600">
-                                                        <span class="text-sm" data-en="In" data-id="Masuk">In:</span>
+                                                    <div class="text-green-600 text-center">
+                                                        <div class="text-xs" data-en="In" data-id="Masuk">In</div>
+                                                        <div class="font-bold text-sm">{{ $mutation->masuk }}</div>
+                                                    </div>
+                                                @endif
+                                                @if($mutation->keluar > 0)
+                                                    <div class="text-red-600 text-center">
+                                                        <div class="text-xs" data-en="Out" data-id="Keluar">Out</div>
+                                                        <div class="font-bold text-sm">{{ $mutation->keluar }}</div>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @else
+                                        <!-- Horizontal layout for 1-2 items -->
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex-1 min-w-0">
+                                                <h4 class="font-medium text-gray-900 text-sm truncate" title="{{ $mutation->produk->nama_produk ?? 'Unknown Product' }}">{{ $mutation->produk->nama_produk ?? 'Unknown Product' }}</h4>
+                                                <div class="flex items-center space-x-4 mt-1">
+                                                    <span class="text-xs text-gray-500" data-en="Ref" data-id="Ref">Ref: {{ $mutation->no_ref }}</span>
+                                                    <span class="text-xs text-gray-500" data-en="Class" data-id="Klas">Class: {{ $mutation->klasifikasi }}</span>
+                                                    <span class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($mutation->date_created)->format('d M H:i') }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center space-x-3 ml-4">
+                                                @if($mutation->masuk > 0)
+                                                    <div class="text-green-600 text-sm">
+                                                        <span class="text-xs" data-en="In" data-id="Masuk">In:</span>
                                                         <span class="font-bold">{{ $mutation->masuk }}</span>
                                                     </div>
                                                 @endif
                                                 @if($mutation->keluar > 0)
-                                                    <div class="text-red-600">
-                                                        <span class="text-sm" data-en="Out" data-id="Keluar">Out:</span>
+                                                    <div class="text-red-600 text-sm">
+                                                        <span class="text-xs" data-en="Out" data-id="Keluar">Out:</span>
                                                         <span class="font-bold">{{ $mutation->keluar }}</span>
                                                     </div>
                                                 @endif
                                             </div>
-                                            <p class="text-xs text-gray-500 mt-1">{{ \Carbon\Carbon::parse($mutation->date_created)->format('d M Y H:i') }}</p>
                                         </div>
-                                    </div>
+                                    @endif
+                                    
                                     @if($mutation->catatan)
-                                        <div class="mt-2 p-2 bg-white rounded border-l-4 border-blue-200">
-                                            <p class="text-sm text-gray-700">{{ $mutation->catatan }}</p>
+                                        <div class="mt-2 p-2 bg-white rounded border-l-2 border-blue-200">
+                                            <p class="text-xs text-gray-700">{{ $mutation->catatan }}</p>
                                         </div>
                                     @endif
                                 </div>
@@ -277,38 +304,43 @@
 </div>
 
 <script>
-
-    // Language switching functionality
+    // Language switching functionality with persistence
+    let currentLanguage = localStorage.getItem('language') || 'id'; // Default to Indonesian
+    
     function updateLanguage() {
-        const isIndonesian = document.documentElement.lang === 'id';
         const elements = document.querySelectorAll('[data-en][data-id]');
         
         elements.forEach(element => {
-            const text = isIndonesian ? element.getAttribute('data-id') : element.getAttribute('data-en');
+            const text = currentLanguage === 'id' ? element.getAttribute('data-id') : element.getAttribute('data-en');
             element.textContent = text;
         });
+        
+        // Update document language attribute
+        document.documentElement.lang = currentLanguage;
+        
+        // Update language button
+        const currentLang = document.getElementById('current-lang');
+        if (currentLang) {
+            currentLang.textContent = currentLanguage.toUpperCase();
+        }
     }
 
     // Initialize language on page load
     document.addEventListener('DOMContentLoaded', function() {
+        // Set initial language
         updateLanguage();
         
         // Language toggle functionality
         const languageToggle = document.getElementById('language-toggle');
-        const currentLang = document.getElementById('current-lang');
         
-        if (languageToggle && currentLang) {
+        if (languageToggle) {
             languageToggle.addEventListener('click', function() {
-                const isCurrentlyIndonesian = document.documentElement.lang === 'id';
+                currentLanguage = currentLanguage === 'en' ? 'id' : 'en';
                 
-                if (isCurrentlyIndonesian) {
-                    document.documentElement.lang = 'en';
-                    currentLang.textContent = 'EN';
-                } else {
-                    document.documentElement.lang = 'id';
-                    currentLang.textContent = 'ID';
-                }
+                // Save to localStorage
+                localStorage.setItem('language', currentLanguage);
                 
+                // Update display
                 updateLanguage();
             });
         }

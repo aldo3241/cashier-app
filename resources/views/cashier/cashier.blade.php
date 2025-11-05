@@ -1265,11 +1265,12 @@
         // Change customer button event listener
         document.getElementById('change-customer-btn').addEventListener('click', openCustomerModal);
 
-        // Language switcher functionality
-        let currentLanguage = 'id'; // Default to Indonesian
+        // Language switcher functionality with persistence
+        let currentLanguage = localStorage.getItem('language') || 'id'; // Default to Indonesian
         
         document.getElementById('language-toggle').addEventListener('click', function() {
             currentLanguage = currentLanguage === 'en' ? 'id' : 'en';
+            localStorage.setItem('language', currentLanguage);
             updateLanguage();
         });
 

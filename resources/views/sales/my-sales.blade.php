@@ -135,10 +135,10 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                         </svg>
                     </div>
-                    <div class="ml-4">
-                        <p class="text-sm text-gray-600" data-en="Total Transactions" data-id="Total Transaksi">Total Transactions</p>
-                        <p class="text-2xl font-bold text-gray-900">{{ $sales->count() }}</p>
-                    </div>
+                        <div class="ml-4">
+                            <p class="text-sm text-gray-600" data-en="Total Transactions" data-id="Total Transaksi">Total Transactions</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $stats['total_transactions'] }}</p>
+                        </div>
                 </div>
             </div>
             
@@ -149,10 +149,10 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
                         </svg>
                     </div>
-                    <div class="ml-4">
-                        <p class="text-sm text-gray-600" data-en="Total Revenue" data-id="Total Pendapatan">Total Revenue</p>
-                        <p class="text-2xl font-bold text-emerald-600">Rp {{ number_format($sales->sum('amount'), 0, ',', '.') }}</p>
-                    </div>
+                        <div class="ml-4">
+                            <p class="text-sm text-gray-600" data-en="Total Revenue" data-id="Total Pendapatan">Total Revenue</p>
+                            <p class="text-2xl font-bold text-emerald-600">Rp {{ number_format($stats['total_revenue'], 0, ',', '.') }}</p>
+                        </div>
                 </div>
             </div>
             
@@ -163,10 +163,10 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
                         </svg>
                     </div>
-                    <div class="ml-4">
-                        <p class="text-sm text-gray-600" data-en="Average Sale" data-id="Rata-rata Penjualan">Average Sale</p>
-                        <p class="text-2xl font-bold text-purple-600">Rp {{ number_format($sales->avg('amount'), 0, ',', '.') }}</p>
-                    </div>
+                        <div class="ml-4">
+                            <p class="text-sm text-gray-600" data-en="Average Sale" data-id="Rata-rata Penjualan">Average Sale</p>
+                            <p class="text-2xl font-bold text-purple-600">Rp {{ number_format($stats['average_sale'], 0, ',', '.') }}</p>
+                        </div>
                 </div>
             </div>
             
@@ -177,10 +177,10 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                         </svg>
                     </div>
-                    <div class="ml-4">
-                        <p class="text-sm text-gray-600" data-en="Total Items" data-id="Total Item">Total Items</p>
-                        <p class="text-2xl font-bold text-orange-600">{{ $sales->sum('items') }}</p>
-                    </div>
+                        <div class="ml-4">
+                            <p class="text-sm text-gray-600" data-en="Total Items" data-id="Total Item">Total Items</p>
+                            <p class="text-2xl font-bold text-orange-600">{{ $stats['total_items'] }}</p>
+                        </div>
                 </div>
             </div>
         </div>
@@ -195,6 +195,17 @@
                     </svg>
                     <span data-en="New Transaction" data-id="Transaksi Baru">New Transaction</span>
                 </a>
+            </div>
+            
+            <!-- Loading indicator -->
+            <div id="loadingIndicator" class="hidden px-6 py-4 text-center">
+                <div class="inline-flex items-center">
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span data-en="Loading transactions..." data-id="Memuat transaksi...">Loading transactions...</span>
+                </div>
             </div>
             
             <div class="overflow-x-auto">
@@ -213,45 +224,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($sales as $sale)
-                        <tr>
-                            <td><span class="font-mono text-sm text-gray-700">{{ $sale['invoice_number'] }}</span></td>
-                            <td>{{ $sale['date'] }}</td>
-                            <td>{{ $sale['time'] }}</td>
-                            <td class="text-center">{{ $sale['items'] }}</td>
-                            <td><span class="font-semibold text-green-600">{{ $sale['formatted_amount'] }}</span></td>
-                            <td>{{ $sale['payment_method'] }}</td>
-                            <td>{{ $sale['customer'] }}</td>
-                            <td>
-                                <span class="status-badge status-{{ strtolower(str_replace(' ', '-', $sale['status'])) }}">
-                                    {{ $sale['status'] }}
-                                </span>
-                            </td>
-                            <td class="text-center">
-                                @if($sale['status_bayar'] === 'Lunas')
-                                    <a href="{{ route('sales.transaction-details', $sale['id']) }}" 
-                                       class="inline-flex items-center px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition-colors"
-                                       data-en="View Details" data-id="Lihat Detail">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                        </svg>
-                                        <span data-en="View Details" data-id="Lihat Detail">View Details</span>
-                                    </a>
-                                @elseif($sale['status_bayar'] === 'Belum Lunas')
-                                    <a href="{{ route('api.cart.continue', $sale['id']) }}" 
-                                       class="inline-flex items-center px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors"
-                                       data-en="Continue Transaction" data-id="Lanjutkan Transaksi">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                        <span data-en="Continue" data-id="Lanjutkan">Continue</span>
-                                    </a>
-                                @else
-                                    <span class="text-gray-400 text-sm" data-en="No Details" data-id="Tidak Ada">No Details</span>
-                                @endif
-                            </td>
-                        </tr>
-                        @endforeach
+                        <!-- Data will be loaded via AJAX -->
                     </tbody>
                 </table>
             </div>
@@ -264,11 +237,12 @@
     <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
     
     <script>
-        // Language switcher
-        let currentLanguage = 'id'; // Default to Indonesian
+        // Language switcher with persistence
+        let currentLanguage = localStorage.getItem('language') || 'id'; // Default to Indonesian
         
         document.getElementById('language-toggle').addEventListener('click', function() {
             currentLanguage = currentLanguage === 'en' ? 'id' : 'en';
+            localStorage.setItem('language', currentLanguage);
             updateLanguage();
         });
 
@@ -325,33 +299,96 @@
             }
         }
 
-        // Initialize DataTable
+        // Initialize DataTable with server-side processing
         $(document).ready(function() {
-            $('#salesTable').DataTable({
-                responsive: true,
-                pageLength: 25,
-                order: [[1, 'desc'], [2, 'desc']], // Sort by date and time descending
-                language: {
-                    search: "_INPUT_",
-                    searchPlaceholder: "Search transactions...",
-                    lengthMenu: "Show _MENU_ entries",
-                    info: "Showing _START_ to _END_ of _TOTAL_ transactions",
-                    infoEmpty: "No transactions found",
-                    infoFiltered: "(filtered from _MAX_ total transactions)",
-                    paginate: {
-                        first: "First",
-                        last: "Last",
-                        next: "Next",
-                        previous: "Previous"
-                    }
-                },
-                columnDefs: [
-                    { className: "text-center", targets: [3, 7, 8] }
-                ]
-            });
-            
-            // Initialize language
-            updateLanguage();
+            try {
+                console.log('Initializing DataTable with server-side processing...');
+                
+                // Show loading indicator
+                $('#loadingIndicator').removeClass('hidden');
+                
+                var table = $('#salesTable').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    ajax: {
+                        url: "{{ route('api.sales.my-sales-data') }}",
+                        type: 'GET',
+                        error: function(xhr, error, thrown) {
+                            console.error('DataTables AJAX Error:', error, thrown);
+                            console.error('Response:', xhr.responseText);
+                        }
+                    },
+                    responsive: true,
+                    pageLength: 25,
+                    order: [[1, 'desc']], // Sort by date descending
+                    language: {
+                        search: "_INPUT_",
+                        searchPlaceholder: "Search transactions...",
+                        lengthMenu: "Show _MENU_ entries",
+                        info: "Showing _START_ to _END_ of _TOTAL_ transactions",
+                        infoEmpty: "No transactions found",
+                        infoFiltered: "(filtered from _MAX_ total transactions)",
+                        paginate: {
+                            first: "First",
+                            last: "Last",
+                            next: "Next",
+                            previous: "Previous"
+                        },
+                        processing: "Loading transactions..."
+                    },
+                    columnDefs: [
+                        { className: "text-center", targets: [3, 8] }
+                    ],
+                    columns: [
+                        { data: 'invoice_number', name: 'invoice_number' },
+                        { data: 'date', name: 'date' },
+                        { data: 'time', name: 'time' },
+                        { data: 'items', name: 'items' },
+                        { data: 'formatted_amount', name: 'amount' },
+                        { data: 'payment_method', name: 'payment_method' },
+                        { data: 'customer', name: 'customer' },
+                        { 
+                            data: 'status', 
+                            name: 'status',
+                            render: function(data, type, row) {
+                                if (type === 'display') {
+                                    return '<span class="status-badge status-' + data.toLowerCase().replace(' ', '-') + '">' + data + '</span>';
+                                }
+                                return data;
+                            }
+                        },
+                        { 
+                            data: 'id', 
+                            name: 'id', 
+                            orderable: false, 
+                            searchable: false,
+                            render: function(data, type, row) {
+                                if (type === 'display') {
+                                    if (row.status_bayar === 'Lunas') {
+                                        return '<a href="/sales/transaction/' + data + '" class="inline-flex items-center px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition-colors"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg><span>View Details</span></a>';
+                                    } else if (row.status_bayar === 'Belum Lunas') {
+                                        return '<a href="/api/cart/continue/' + data + '" class="inline-flex items-center px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span>Continue</span></a>';
+                                    } else {
+                                        return '<span class="text-gray-400 text-sm">No Details</span>';
+                                    }
+                                }
+                                return data;
+                            }
+                        }
+                    ]
+                });
+                
+                console.log('DataTable with server-side processing initialized successfully');
+                
+                // Hide loading indicator when table is ready
+                $('#loadingIndicator').addClass('hidden');
+                
+                // Initialize language
+                updateLanguage();
+                
+            } catch (error) {
+                console.error('DataTable initialization error:', error);
+            }
         });
 
     </script>
