@@ -73,6 +73,7 @@ class PenjualanDetail extends Model
         'date_updated',
         'dibuat_oleh',
         'no_faktur_penjualan',
+        'sub_total', // Added to allow mass assignment/saving
     ];
 
     /**
@@ -93,7 +94,7 @@ class PenjualanDetail extends Model
     /**
      * Get the subtotal attribute (calculated).
      */
-    public function getSubtotalAttribute()
+    public function getSubTotalAttribute() // Renamed to match snake_case column convention
     {
         return ($this->harga_jual * $this->qty) - $this->diskon;
     }
@@ -128,7 +129,7 @@ class PenjualanDetail extends Model
     public function calculateSubtotal()
     {
         $subtotal = ($this->harga_jual * $this->qty) - $this->diskon;
-        $this->subtotal = $subtotal;
+        $this->sub_total = $subtotal; // Use sub_total column name
         return $subtotal;
     }
 
@@ -158,7 +159,7 @@ class PenjualanDetail extends Model
     public static function createFromCartItem($penjualanId, $cartItem, $invoiceNumber)
     {
         $produk = Produk::find($cartItem['kd_produk']);
-        
+
         if (!$produk) {
             throw new \Exception("Product not found: {$cartItem['kd_produk']}");
         }
@@ -181,7 +182,7 @@ class PenjualanDetail extends Model
             'harga_jual' => $cartItem['harga'],
             'qty' => $cartItem['qty'],
             'diskon' => $cartItem['diskon'] ?? 0,
-            'subtotal' => 0, // Will be calculated
+            'sub_total' => 0, // Will be calculated
             'laba' => 0, // Will be calculated
             'status_bayar' => 'Lunas',
             'catatan' => null,
@@ -192,8 +193,8 @@ class PenjualanDetail extends Model
         ]);
 
         // Calculate subtotal and profit
-        $detail->calculateSubtotal();
-        $detail->calculateProfit();
+        $detail->sub_total = $detail->calculateSubtotal(); // Calculate and assign
+        $detail->laba = $detail->calculateProfit(); // Calculate and assign
         $detail->save();
 
         // Reduce stock

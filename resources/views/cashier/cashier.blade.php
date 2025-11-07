@@ -31,7 +31,7 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
-        
+
         /* Bottom header styles - always visible */
         .header-bottom {
             position: fixed;
@@ -43,20 +43,20 @@
             border-top: 1px solid #e5e7eb;
             box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
         }
-        
+
         /* Ensure proper spacing for bottom header */
         body {
             margin: 0;
             padding: 0;
             padding-bottom: 80px; /* Space for bottom header */
         }
-        
-        
+
+
         /* Adjust main content for bottom header */
         main {
             margin-bottom: 0;
         }
-        
+
         /* Custom Modal Styles */
         .modal-overlay {
             position: fixed;
@@ -73,12 +73,12 @@
             visibility: hidden;
             transition: all 0.3s ease;
         }
-        
+
         .modal-overlay.show {
             opacity: 1;
             visibility: visible;
         }
-        
+
         .modal-content {
             background: white;
             border-radius: 16px;
@@ -89,16 +89,16 @@
             transform: scale(0.9) translateY(20px);
             transition: all 0.3s ease;
         }
-        
+
         .modal-overlay.show .modal-content {
             transform: scale(1) translateY(0);
         }
-        
+
         .modal-header {
             padding: 24px 24px 16px 24px;
             border-bottom: 1px solid #e5e7eb;
         }
-        
+
         .modal-title {
             font-size: 18px;
             font-weight: 600;
@@ -107,24 +107,24 @@
             align-items: center;
             gap: 12px;
         }
-        
+
         .modal-body {
             padding: 16px 24px 24px 24px;
         }
-        
+
         .modal-message {
             color: #6b7280;
             font-size: 16px;
             line-height: 1.5;
         }
-        
+
         .modal-actions {
             display: flex;
             gap: 12px;
             justify-content: flex-end;
             margin-top: 20px;
         }
-        
+
         .modal-btn {
             padding: 10px 20px;
             border-radius: 8px;
@@ -135,96 +135,96 @@
             border: none;
             outline: none;
         }
-        
+
         .modal-btn-primary {
             background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             color: white;
         }
-        
+
         .modal-btn-primary:hover {
             background: linear-gradient(135deg, #2563eb, #1e40af);
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
         }
-        
+
         .modal-btn-secondary {
             background: #f3f4f6;
             color: #374151;
         }
-        
+
         .modal-btn-secondary:hover {
             background: #e5e7eb;
         }
-        
+
         .modal-icon {
             width: 24px;
             height: 24px;
             color: #f59e0b;
         }
-        
+
         /* Hide Scrollbars - Keep Functionality */
         ::-webkit-scrollbar {
             width: 0px;
             height: 0px;
             background: transparent;
         }
-        
+
         ::-webkit-scrollbar-track {
             background: transparent;
         }
-        
+
         ::-webkit-scrollbar-thumb {
             background: transparent;
         }
-        
+
         ::-webkit-scrollbar-corner {
             background: transparent;
         }
-        
+
         /* Firefox - Hide scrollbar */
         * {
             scrollbar-width: none;
         }
-        
+
         /* Hide scrollbars for specific elements */
         .search-suggestions::-webkit-scrollbar {
             width: 0px;
             background: transparent;
         }
-        
+
         #cart-items::-webkit-scrollbar {
             width: 0px;
             background: transparent;
         }
-        
+
         /* Alternative method for older browsers */
         .search-suggestions {
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
-        
+
         #cart-items {
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
-        
+
         /* Header Toggle Styles */
         .header-bottom {
             position: relative;
         }
-        
+
         .header-bottom.hidden {
             transform: translateY(100%);
         }
-        
+
         .header-bottom.visible {
             transform: translateY(0);
         }
-        
+
         #header-toggle {
             z-index: 50;
         }
-        
+
         #toggle-icon.rotated {
             transform: rotate(180deg);
         }
@@ -243,7 +243,7 @@
                         <button id="profile-dropdown-btn" class="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center hover:from-green-500 hover:to-blue-600 transition-all duration-200 cursor-pointer group" title="Profile Menu">
                             <span class="text-white font-bold text-sm group-hover:scale-110 transition-transform duration-200">{{ substr(auth()->user()->nama ?? auth()->user()->username ?? 'U', 0, 1) }}</span>
                         </button>
-                        
+
                         <!-- Dropdown Menu -->
                         <div id="profile-dropdown" class="absolute left-0 top-full mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 hidden">
                             <div class="px-4 py-3 border-b border-gray-100">
@@ -272,7 +272,7 @@
                         <div class="font-medium text-gray-800">{{ auth()->user()->nama ?? auth()->user()->username ?? 'User' }}</div>
                     </div>
                 </div>
-                
+
                 <!-- Center: PT Inspizo Multi Inspirasi Logo & Text -->
                 <div class="flex items-center space-x-3">
                     <div class="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
@@ -285,7 +285,7 @@
                         <p class="text-sm text-gray-500">Inspizo Cashier System</p>
                     </div>
                 </div>
-                
+
                 <!-- Right: Current Time & Language -->
                 <div class="flex items-center space-x-4">
                     <!-- Current Time -->
@@ -293,7 +293,7 @@
                         <div class="text-sm text-gray-500" data-en="Current Time" data-id="Waktu Saat Ini">Current Time</div>
                         <div class="text-lg font-semibold text-gray-800" id="current-time"></div>
                     </div>
-                    
+
                     <!-- Language Switcher -->
                     <button id="language-toggle" class="flex items-center space-x-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all" title="Change Language">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -304,7 +304,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Toggle Button -->
         <button id="header-toggle" class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-t-lg transition-all duration-300 ease-in-out shadow-lg">
             <svg id="toggle-icon" class="w-4 h-4 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -316,10 +316,10 @@
     <!-- Main Content -->
     <main class="p-6">
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[calc(100vh-120px)]">
-            
+
             <!-- Left Panel - Product Search & Cart -->
             <div class="lg:col-span-3 flex flex-col space-y-6">
-                
+
                 <!-- Product Search -->
                 <div class="bg-white rounded-xl shadow-lg border border-gray-200">
                     <div class="p-6">
@@ -352,7 +352,7 @@
                                     </svg>
                             </div>
                         </div>
-                        
+
                         <!-- Search Suggestions -->
                         <div id="search-suggestions" class="search-suggestions hidden mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
                             <!-- Suggestions will be populated by JavaScript -->
@@ -371,7 +371,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Cart Header -->
                     <div class="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200 text-sm font-semibold text-gray-600">
                         <div class="col-span-5" data-en="Product" data-id="Produk">Product</div>
@@ -380,7 +380,7 @@
                         <div class="col-span-2 text-right" data-en="Total" data-id="Total">Total</div>
                         <div class="col-span-1 text-center" data-en="Action" data-id="Aksi">Action</div>
                     </div>
-                    
+
                     <!-- Cart Items -->
                     <div id="cart-items" class="flex-1 overflow-y-auto">
                         <div class="p-8 text-center text-gray-500">
@@ -396,24 +396,24 @@
 
             <!-- Right Panel - Order Summary & Actions -->
             <div class="lg:col-span-1 flex flex-col space-y-6">
-                
+
                 <!-- Invoice Info & Total -->
                 <div class="bg-gradient-to-br from-blue-600 to-purple-700 rounded-xl shadow-lg text-white">
                     <div class="p-6">
-                        
+
                         <div class="space-y-4">
                             <!-- Invoice Number -->
                             <div>
                                 <div class="text-xs opacity-80" data-en="Invoice No:" data-id="No Faktur:">No Faktur:</div>
                                 <div class="text-sm font-bold" id="invoice-number">PJ250101000000</div>
                             </div>
-                            
+
                             <!-- Timestamp -->
                             <div>
                                 <div class="text-xs opacity-80" data-en="Date & Time:" data-id="Tanggal & Waktu:">Tanggal & Waktu:</div>
                                 <div class="text-sm font-medium" id="invoice-timestamp">Loading...</div>
                             </div>
-                            
+
                             <!-- Total Price -->
                             <div class="border-t border-white/20 pt-4 text-center">
                                 <div class="text-4xl font-bold" id="total">Rp 0</div>
@@ -433,19 +433,19 @@
                             </div>
                             <div class="text-xs font-medium text-orange-700 uppercase tracking-wide" data-en="Customer Information" data-id="Informasi Pelanggan">Customer Information</div>
                         </div>
-                        
+
                         <div class="space-y-2">
                             <div>
                                 <div class="text-xs text-orange-600 font-medium" data-en="Customer No" data-id="No Pelanggan">No Pelanggan</div>
                                 <div id="customer-code-display" class="text-sm font-bold text-gray-800">Loading...</div>
                             </div>
-                            
+
                             <div>
                                 <div class="text-xs text-orange-600 font-medium" data-en="Customer Name" data-id="Nama Pelanggan">Nama Pelanggan</div>
                                 <div id="customer-name-display" class="text-sm font-bold text-gray-800">Loading...</div>
                             </div>
                         </div>
-                        
+
                         <button id="change-customer-btn" class="w-full px-3 py-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-xs font-bold rounded-lg transition-all transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
@@ -461,7 +461,7 @@
 
                 <!-- Quick Actions -->
                 <div class="bg-white rounded-xl shadow-lg border border-gray-200">
-                    <div class="p-6">                        
+                    <div class="p-6">
                         <div class="space-y-3">
                         <button onclick="window.location.href='{{ route('sales.my-sales') }}'" class="w-full bg-purple-100 hover:bg-purple-200 text-purple-800 p-4 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -481,7 +481,7 @@
                                 </svg>
                                 <span data-en="Print Receipt" data-id="Cetak Struk">Print Receipt</span>
                             </button>
-                            
+
                             <button id="checkout-btn" class="w-full bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white text-xl font-bold py-4 rounded-lg transition-all transform hover:scale-105 shadow-lg">
                                 <div class="flex items-center justify-center space-x-2">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -525,24 +525,24 @@
         <div class="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[80vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                 <h3 class="text-lg font-medium text-gray-900" data-en="Select Customer" data-id="Pilih Pelanggan">Select Customer</h3>
-                <button onclick="closeCustomerModal()" class="text-gray-400 hover:text-gray-600">
+                <button onclick="closeCustomerModal('button')" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
-            
+
             <div class="p-6">
                 <!-- Search Input -->
                 <div class="mb-4">
-                    <input 
-                        type="text" 
+                    <input
+                        type="text"
                         id="customer-search-input"
                         placeholder="Search customer by name, phone, or organization..."
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                 </div>
-                
+
                 <!-- Default Customer Option -->
                 <div class="mb-4">
                     <button onclick="selectDefaultCustomer()" class="w-full text-left p-4 border-2 border-blue-300 bg-blue-50 rounded-lg hover:bg-blue-100 transition-all">
@@ -560,7 +560,7 @@
                         </div>
                     </button>
                 </div>
-                
+
                 <!-- Search Results -->
                 <div id="customer-search-results" class="space-y-2 overflow-y-auto max-h-96">
                     <div class="text-center py-8 text-gray-500">
@@ -578,7 +578,7 @@
     <script>
         // CSRF Token for API calls
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-        
+
         // Featured products from backend (will be populated)
         let featuredProducts = @json($featuredProducts ?? []);
 
@@ -600,7 +600,7 @@
         function updateTime() {
             const now = new Date();
             document.getElementById('current-time').textContent = now.toLocaleTimeString();
-            
+
             // Update invoice timestamp
             const timestampElement = document.getElementById('invoice-timestamp');
             if (timestampElement) {
@@ -623,11 +623,10 @@
             const year = String(now.getFullYear()).slice(-2); // 2 digit tahun
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const day = String(now.getDate()).padStart(2, '0');
-            const hour = String(now.getHours()).padStart(2, '0');
-            const minute = String(now.getMinutes()).padStart(2, '0');
-            const second = String(now.getSeconds()).padStart(2, '0');
-            
-            invoiceNumber = `PJ${year}${month}${day}${hour}${minute}${second}`;
+            // Generate 4 random digits (1000 to 9999)
+            const randomDigits = Math.floor(1000 + Math.random() * 9000);
+
+            invoiceNumber = `PJ${year}${month}${day}${randomDigits}`;
             document.getElementById('invoice-number').textContent = invoiceNumber;
         }
 
@@ -638,7 +637,7 @@
         document.getElementById('product-search').addEventListener('input', function(e) {
             clearTimeout(searchTimeout);
             const query = e.target.value.trim();
-            
+
             if (query.length < 2) {
                 document.getElementById('search-suggestions').classList.add('hidden');
                 return;
@@ -654,7 +653,7 @@
             if (e.key === 'Enter') {
                 e.preventDefault();
                 const barcode = e.target.value.trim();
-                
+
                 if (barcode.length > 0) {
                     handleBarcodeInput(barcode);
                 }
@@ -674,7 +673,7 @@
                 });
 
                 const result = await response.json();
-                
+
                 if (result.success) {
                     showSuggestions(result.data);
                 } else {
@@ -689,7 +688,7 @@
 
         function showSuggestions(products) {
             const suggestionsContainer = document.getElementById('search-suggestions');
-            
+
             if (products.length === 0) {
                 suggestionsContainer.innerHTML = `<div class="p-4 text-gray-500">${getText('No products found', 'Produk tidak ditemukan')}</div>`;
             } else {
@@ -700,7 +699,7 @@
                                 <div class="font-medium text-gray-800">${product.name}</div>
                                 <div class="text-sm text-gray-500">${product.category}</div>
                                 <div class="text-xs text-gray-400">
-                                    ${product.barcode_int ? 'INT: ' + product.barcode_int : ''} 
+                                    ${product.barcode_int ? 'INT: ' + product.barcode_int : ''}
                                     ${product.barcode_int && product.barcode_ext ? ' • ' : ''}
                                     ${product.barcode_ext ? 'EXT: ' + product.barcode_ext : ''}
                                 </div>
@@ -711,7 +710,7 @@
                     </div>
                 `).join('');
             }
-            
+
             suggestionsContainer.classList.remove('hidden');
         }
 
@@ -719,13 +718,13 @@
         async function handleBarcodeInput(barcode) {
             const searchInput = document.getElementById('product-search');
             const originalValue = searchInput.value;
-            
+
             try {
                 // Show loading state
                 searchInput.disabled = true;
                 searchInput.style.backgroundColor = '#fef3c7';
                 searchInput.style.borderColor = '#f59e0b';
-                
+
                 // Hide suggestions
                 document.getElementById('search-suggestions').classList.add('hidden');
 
@@ -740,10 +739,10 @@
                 });
 
                 const result = await response.json();
-                
+
                 if (result.success && result.data) {
                     const product = result.data;
-                    
+
                     // Check stock
                     if (product.stock <= 0) {
                         showNotification(getText('Out of Stock', 'Stok Habis'), 'error');
@@ -752,29 +751,17 @@
                         return;
                     }
 
-                    // Check if already in cart
-                    const existingItem = cart.find(item => item.id === product.id);
-                    if (existingItem) {
-                        if (existingItem.quantity >= product.stock) {
-                            showNotification(getText('Stock limit reached', 'Batas stok tercapai'), 'error');
-                            searchInput.style.backgroundColor = '#fef2f2';
-                            searchInput.style.borderColor = '#ef4444';
-                            return;
-                        }
-                        existingItem.quantity += 1;
-                    } else {
-                        cart.push({ ...product, quantity: 1 });
-                    }
+                    // Use real-time cart API to add/update the item
+                    await addToCartRealTime(product, 1);
 
                     // Success!
-                    updateCartDisplay();
                     searchInput.value = '';
-                    
+
                     // Show success feedback
                     searchInput.style.backgroundColor = '#dcfce7';
                     searchInput.style.borderColor = '#10b981';
                     showNotification(getText(`Added: ${product.name}`, `Ditambahkan: ${product.name}`), 'success');
-                    
+
                 } else {
                     // Product not found
                     searchInput.style.backgroundColor = '#fef2f2';
@@ -803,11 +790,11 @@
         function showNotification(message, type = 'success') {
             const notification = document.createElement('div');
             const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
-            
+
             notification.innerHTML = `
                 <div class="flex items-center space-x-2 ${bgColor} text-white px-4 py-3 rounded-lg shadow-lg">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        ${type === 'success' 
+                        ${type === 'success'
                             ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>'
                             : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>'
                         }
@@ -815,7 +802,7 @@
                     <span class="font-medium">${message}</span>
                 </div>
             `;
-            
+
             notification.style.position = 'fixed';
             notification.style.top = '100px';
             notification.style.right = '20px';
@@ -823,14 +810,14 @@
             notification.style.opacity = '0';
             notification.style.transform = 'translateX(100%)';
             notification.style.transition = 'all 0.3s ease';
-            
+
             document.body.appendChild(notification);
-            
+
             setTimeout(() => {
                 notification.style.opacity = '1';
                 notification.style.transform = 'translateX(0)';
             }, 10);
-            
+
             setTimeout(() => {
                 notification.style.opacity = '0';
                 notification.style.transform = 'translateX(100%)';
@@ -855,7 +842,7 @@
             try {
                 // First, get product details if not in featured products
                 let product = featuredProducts.find(p => p.id === productId);
-                
+
                 if (!product) {
                     // Search for the product by ID/barcode
                     const response = await fetch(`/api/products/barcode?barcode=${encodeURIComponent(productId)}`, {
@@ -1005,11 +992,11 @@
                 });
 
                 console.log('Remove from cart response status:', response.status);
-                
+
                 if (response.ok) {
                     const result = await response.json();
                     console.log('Remove from cart response:', result);
-                    
+
                     if (result.success) {
                         cart = result.data.items || [];
                         updateCartDisplay();
@@ -1043,18 +1030,18 @@
         // Checkout functionality
         document.getElementById('checkout-btn').addEventListener('click', async function() {
             if (cart.length === 0) return;
-            
+
             // Calculate total
             const totalAmount = cart.reduce((sum, item) => {
                 // Calculate subtotal if not available
                 const subtotal = item.subtotal || ((item.harga_jual * item.qty) - (item.diskon || 0));
                 return sum + subtotal;
             }, 0);
-            
+
             // Debug logging
             console.log('Cart items for checkout:', cart);
             console.log('Calculated total amount:', totalAmount);
-            
+
             // Show checkout modal with payment options
             showCheckoutModal(totalAmount);
         });
@@ -1067,7 +1054,8 @@
             searchCustomers('');
         }
 
-        function closeCustomerModal() {
+        function closeCustomerModal(source = 'overlay') {
+            console.log(`[DEBUG] closeCustomerModal called from: ${source}`);
             document.getElementById('customer-modal').classList.add('hidden');
             document.getElementById('customer-search-input').value = '';
             document.getElementById('customer-search-results').innerHTML = `
@@ -1231,7 +1219,7 @@
                             </div>
                         </button>
                     `).join('');
-                    
+
                     document.getElementById('customer-search-results').innerHTML = resultsHtml;
                 } else {
                     document.getElementById('customer-search-results').innerHTML = `
@@ -1267,7 +1255,7 @@
 
         // Language switcher functionality with persistence
         let currentLanguage = localStorage.getItem('language') || 'id'; // Default to Indonesian
-        
+
         document.getElementById('language-toggle').addEventListener('click', function() {
             currentLanguage = currentLanguage === 'en' ? 'id' : 'en';
             localStorage.setItem('language', currentLanguage);
@@ -1277,10 +1265,10 @@
         function updateLanguage() {
             const langButton = document.getElementById('current-lang');
             const elements = document.querySelectorAll('[data-en], [data-id]');
-            
+
             // Update language button
             langButton.textContent = currentLanguage.toUpperCase();
-            
+
             // Update all elements with data attributes
             elements.forEach(element => {
                 if (element.hasAttribute(`data-${currentLanguage}`)) {
@@ -1288,7 +1276,7 @@
                     element.textContent = text;
                 }
             });
-            
+
             // Update search placeholder
             const searchInput = document.getElementById('product-search');
             if (searchInput) {
@@ -1298,7 +1286,7 @@
                 searchInput.placeholder = searchInput.getAttribute('data-en-placeholder');
                 }
             }
-            
+
             // Update textarea placeholders
             const textareas = document.querySelectorAll('textarea[data-placeholder-en], textarea[data-placeholder-id]');
             textareas.forEach(textarea => {
@@ -1308,7 +1296,7 @@
                     textarea.placeholder = textarea.getAttribute('data-placeholder-en');
                 }
             });
-            
+
             // Update cart empty messages
             updateCartEmptyMessages();
         }
@@ -1319,7 +1307,7 @@
                 const emptyCart = cartItems.querySelector('.p-8');
                 const title = emptyCart.querySelector('.text-lg');
                 const subtitle = emptyCart.querySelector('.text-sm');
-                
+
                 if (currentLanguage === 'id') {
                     title.textContent = 'Keranjang Anda kosong';
                     subtitle.textContent = 'Mulai dengan mencari produk di atas';
@@ -1334,12 +1322,12 @@
         updateLanguage();
 
         // Bottom header is always visible - no auto-hide functionality needed
-        
+
         // Language helper function
         function getText(enText, idText) {
             return currentLanguage === 'id' ? idText : enText;
         }
-        
+
         // Show cancel transaction confirmation modal
         function showCancelTransactionModal() {
             const modal = document.getElementById('custom-modal');
@@ -1347,35 +1335,35 @@
             const messageElement = document.getElementById('modal-message-text');
             const confirmBtn = document.getElementById('modal-confirm-btn');
             const cancelBtn = document.getElementById('modal-cancel-btn');
-            
+
             titleElement.textContent = getText('Cancel Transaction', 'Batalkan Transaksi');
             messageElement.textContent = getText(
-                'Are you sure you want to cancel this transaction? All items will be permanently deleted and you will be redirected to My Sales page.', 
+                'Are you sure you want to cancel this transaction? All items will be permanently deleted and you will be redirected to My Sales page.',
                 'Apakah Anda yakin ingin membatalkan transaksi ini? Semua item akan dihapus secara permanen dan Anda akan dialihkan ke halaman Laporan Penjualan Saya.'
             );
-            
+
             // Update button text for cancel transaction
             confirmBtn.textContent = getText('Yes, Cancel Transaction', 'Ya, Batalkan Transaksi');
             confirmBtn.className = 'px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700';
             cancelBtn.textContent = getText('No, Keep Transaction', 'Tidak, Pertahankan Transaksi');
             cancelBtn.className = 'px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50';
-            
+
             // Show modal with animation
             modal.classList.add('show');
-            
+
             // Event listeners
             const handleConfirm = () => {
                 modal.classList.remove('show');
                 clearCart(); // Clear the cart using real-time system
             };
-            
+
             const handleCancel = () => {
                 modal.classList.remove('show');
             };
-            
+
             confirmBtn.onclick = handleConfirm;
             cancelBtn.onclick = handleCancel;
-            
+
             // Close on escape key
             const handleEscape = (e) => {
                 if (e.key === 'Escape') {
@@ -1385,7 +1373,7 @@
             };
             document.addEventListener('keydown', handleEscape);
         }
-        
+
         // Custom Modal Functions
         function showModal(title, message, onConfirm = null, onCancel = null) {
             const modal = document.getElementById('custom-modal');
@@ -1393,38 +1381,38 @@
             const messageElement = document.getElementById('modal-message-text');
             const confirmBtn = document.getElementById('modal-confirm-btn');
             const cancelBtn = document.getElementById('modal-cancel-btn');
-            
+
             titleElement.textContent = title;
             messageElement.textContent = message;
-            
+
             // Update button text based on language
             confirmBtn.textContent = getText('OK', 'OK');
             cancelBtn.textContent = getText('Cancel', 'Batal');
-            
+
             // Show modal with animation
             modal.classList.add('show');
-            
+
             // Event listeners
             const handleConfirm = () => {
                 hideModal();
                 if (onConfirm) onConfirm();
             };
-            
+
             const handleCancel = () => {
                 hideModal();
                 if (onCancel) onCancel();
             };
-            
+
             confirmBtn.onclick = handleConfirm;
             cancelBtn.onclick = handleCancel;
-            
+
             // Close on overlay click
             modal.onclick = (e) => {
                 if (e.target === modal) {
                     handleCancel();
                 }
             };
-            
+
             // Close on Escape key
             const handleEscape = (e) => {
                 if (e.key === 'Escape') {
@@ -1434,28 +1422,29 @@
             };
             document.addEventListener('keydown', handleEscape);
         }
-        
+
         function hideModal() {
+            console.log('[DEBUG] hideModal called');
             const modal = document.getElementById('custom-modal');
             modal.classList.remove('show');
         }
-        
+
         // Print functionality
         function printReceipt() {
             if (cart.length === 0) {
                 showModal(
-                    getText('Empty Cart', 'Keranjang Kosong'), 
+                    getText('Empty Cart', 'Keranjang Kosong'),
                     getText('Your cart is empty. Please add some items before printing a receipt.', 'Keranjang Anda kosong. Silakan tambahkan beberapa item sebelum mencetak struk.'),
                     null, // No confirm action needed
                     null  // No cancel action needed
                 );
                 return;
             }
-            
+
             // Create a print-friendly receipt
             const printWindow = window.open('', '_blank');
             const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            
+
             const receiptContent = `
                 <!DOCTYPE html>
                 <html>
@@ -1477,7 +1466,7 @@
                             <p>Cashier Receipt</p>
                             <p>${new Date().toLocaleString()}</p>
                         </div>
-                        
+
                         <div class="items">
                             ${cart.map(item => `
                                 <div class="item">
@@ -1486,14 +1475,14 @@
                                 </div>
                             `).join('')}
                         </div>
-                        
+
                         <div class="total">
                             <div class="item">
                                 <span>Total:</span>
                                 <span>$${totalAmount.toFixed(2)}</span>
                             </div>
                         </div>
-                        
+
                         <div class="center" style="margin-top: 30px;">
                             <p>Thank you for your purchase!</p>
                         </div>
@@ -1501,26 +1490,26 @@
                 </body>
                 </html>
             `;
-            
+
             printWindow.document.write(receiptContent);
             printWindow.document.close();
             printWindow.print();
         }
-        
+
         // Switch Transaction functionality
         function switchTransaction() {
             // Simpan transaksi saat ini jika ada item di cart
             saveCurrentTransaction();
-            
+
             // Tampilkan modal dengan daftar transaksi
             showTransactionListModal();
         }
-        
+
         function saveCurrentTransaction() {
             if (cart.length > 0) {
                 // Cari apakah transaksi dengan ID ini sudah ada
                 const existingIndex = allTransactions.findIndex(t => t.id === currentTransactionId);
-                
+
                 const transactionData = {
                     id: currentTransactionId,
                     customerInfo: `Customer ${currentTransactionId}`,
@@ -1529,7 +1518,7 @@
                     timestamp: new Date(),
                     items: cart.length
                 };
-                
+
                 if (existingIndex >= 0) {
                     // Update transaksi yang sudah ada
                     allTransactions[existingIndex] = transactionData;
@@ -1539,22 +1528,22 @@
                 }
             }
         }
-        
+
         function showTransactionListModal() {
             const modal = document.getElementById('custom-modal');
             const titleElement = document.getElementById('modal-title-text');
             const messageElement = document.getElementById('modal-message-text');
             const confirmBtn = document.getElementById('modal-confirm-btn');
             const cancelBtn = document.getElementById('modal-cancel-btn');
-            
+
             titleElement.textContent = getText('Back to My Sales', 'Kembali ke My Sales');
-            
+
             // Buat daftar transaksi
             let transactionList = '';
-            
+
             // Tambahkan opsi untuk transaksi baru
             transactionList += `
-                <div class="transaction-item p-3 border border-gray-200 rounded-lg mb-2 cursor-pointer hover:bg-blue-50 hover:border-blue-300" 
+                <div class="transaction-item p-3 border border-gray-200 rounded-lg mb-2 cursor-pointer hover:bg-blue-50 hover:border-blue-300"
                      onclick="switchToTransaction('new')">
                     <div class="flex justify-between items-center">
                         <div>
@@ -1569,20 +1558,20 @@
                     </div>
                 </div>
             `;
-            
+
             // Tambahkan transaksi yang sudah ada
             allTransactions.forEach(transaction => {
                 const isActive = transaction.id === currentTransactionId;
                 const activeClass = isActive ? 'bg-blue-100 border-blue-400' : 'hover:bg-gray-50';
-                
+
                 transactionList += `
-                    <div class="transaction-item p-3 border border-gray-200 rounded-lg mb-2 cursor-pointer ${activeClass}" 
+                    <div class="transaction-item p-3 border border-gray-200 rounded-lg mb-2 cursor-pointer ${activeClass}"
                          onclick="switchToTransaction(${transaction.id})">
                         <div class="flex justify-between items-center">
                             <div>
                                 <div class="font-semibold">${transaction.customerInfo} ${isActive ? '(Active)' : ''}</div>
                                 <div class="text-sm text-gray-500">
-                                    ${transaction.items} items • Rp${transaction.total.toFixed(2)} • 
+                                    ${transaction.items} items • Rp${transaction.total.toFixed(2)} •
                                     ${transaction.timestamp.toLocaleTimeString()}
                                 </div>
                             </div>
@@ -1595,7 +1584,7 @@
                     </div>
                 `;
             });
-            
+
             if (allTransactions.length === 0) {
                 transactionList += `
                     <div class="text-center text-gray-500 py-4">
@@ -1603,40 +1592,40 @@
                     </div>
                 `;
             }
-            
+
             messageElement.innerHTML = `
                 <div class="max-h-60 overflow-y-auto">
                     ${transactionList}
                 </div>
             `;
-            
+
             // Sembunyikan tombol confirm/cancel karena kita pakai onclick
             confirmBtn.style.display = 'none';
             cancelBtn.textContent = getText('Close', 'Tutup');
             cancelBtn.style.display = 'block';
-            
+
             modal.classList.add('show');
-            
+
             const handleCancel = () => {
                 hideModal();
                 // Tampilkan kembali tombol confirm
                 confirmBtn.style.display = 'block';
             };
-            
+
             cancelBtn.onclick = handleCancel;
         }
-        
+
         // Fungsi global untuk switch transaksi (dipanggil dari onclick)
         window.switchToTransaction = function(transactionId) {
             hideModal();
-            
+
             if (transactionId === 'new') {
                 // Buat transaksi baru
                 currentTransactionId = Date.now();
                 cart = [];
                 generateInvoiceNumber(); // Generate nomor faktur baru
                 updateCartDisplay();
-                
+
                 showModal(
                     getText('New Transaction', 'Transaksi Baru'),
                     getText('Started new transaction', 'Memulai transaksi baru')
@@ -1648,7 +1637,7 @@
                     currentTransactionId = transactionId;
                     cart = [...transaction.cart];
                     updateCartDisplay();
-                    
+
                     showModal(
                         getText('Transaction Switched', 'Transaksi Diganti'),
                         getText(`Switched to ${transaction.customerInfo}`, `Beralih ke ${transaction.customerInfo}`)
@@ -1656,7 +1645,7 @@
                 }
             }
         }
-        
+
         // Profile Dropdown Functionality
         function toggleProfileDropdown() {
             const dropdown = document.getElementById('profile-dropdown');
@@ -1716,7 +1705,7 @@
 
         // Load default customer immediately when script loads
         loadDefaultCustomer();
-        
+
         // Check if continuing an existing transaction first
         @if(isset($continueTransaction) && $continueTransaction)
             loadContinueTransaction(@json($continueTransaction));
@@ -1728,7 +1717,7 @@
             // Only load current cart if not continuing a transaction or starting a new one
             loadCurrentCart();
         @endif
-        
+
         // Debug API connectivity
         testCartAPI();
 
@@ -1738,7 +1727,7 @@
                 console.log('Testing cart API connectivity...');
                 const response = await fetch('/api/cart/debug');
                 console.log('Debug API response status:', response.status);
-                
+
                 if (response.ok) {
                     const result = await response.json();
                     console.log('Debug API response:', result);
@@ -1757,11 +1746,11 @@
                 console.log('Loading current cart for customer:', currentCustomer.id);
                 const response = await fetch(`/api/cart?customer_id=${currentCustomer.id}`);
                 console.log('Cart API response status:', response.status);
-                
+
                 if (response.ok) {
                     const result = await response.json();
                     console.log('Cart API response:', result);
-                    
+
                     if (result.success && result.data) {
                         currentCartId = result.data.cart_id;
                         cart = result.data.items || [];
@@ -1802,11 +1791,11 @@
                 });
 
                 console.log('Add to cart response status:', response.status);
-                
+
                 if (response.ok) {
                     const result = await response.json();
                     console.log('Add to cart response:', result);
-                    
+
                     if (result.success) {
                         cart = result.data.items || [];
                         currentCartId = result.data.cart_id;
@@ -1888,7 +1877,7 @@
                         currentInvoiceNumber = 'PJ250101000000'; // Reset to default
                         updateCartDisplay();
                         showSuccessMessage('Transaction cancelled. Redirecting to My Sales...');
-                        
+
                         // Redirect to My Sales page immediately
                         window.location.href = '/sales/my-sales';
                     } else {
@@ -1916,11 +1905,11 @@
                     catatan: catatan,
                     status_barang: statusBarang
                 };
-                
+
                 console.log('Sending checkout data:', checkoutData);
                 console.log('Current cart ID for checkout:', currentCartId);
                 console.log('Cart items for checkout:', cart);
-                
+
                 const response = await fetch('/api/cart/checkout', {
                     method: 'POST',
                     headers: {
@@ -1936,7 +1925,7 @@
                         cart = [];
                         currentCartId = null;
                         updateCartDisplay();
-                        
+
                         // Show checkout success modal with change money
                         showCheckoutSuccessModal(result.data, totalBayar);
                         return result.data;
@@ -1971,16 +1960,16 @@
         // Load continue transaction
         function loadContinueTransaction(transactionData) {
             console.log('Loading continue transaction:', transactionData);
-            
+
             try {
                 // Set the current cart ID
                 currentCartId = transactionData.kd_penjualan;
                 console.log('Set current cart ID:', currentCartId);
-                
+
                 // Set the invoice number from the transaction
                 currentInvoiceNumber = transactionData.no_faktur_penjualan || 'PJ' + new Date().getTime();
                 console.log('Set invoice number:', currentInvoiceNumber);
-                
+
                 // Update customer information
                 if (transactionData.pelanggan) {
                     currentCustomer = {
@@ -1993,14 +1982,14 @@
                 } else {
                     console.log('No customer data found in transaction');
                 }
-                
+
                 // Load cart items
                 console.log('Transaction data structure:', transactionData);
                 console.log('Penjualan details:', transactionData.penjualan_details);
-                
+
                 if (transactionData.penjualan_details && transactionData.penjualan_details.length > 0) {
                     console.log('First detail item:', transactionData.penjualan_details[0]);
-                    
+
                     const cartItems = transactionData.penjualan_details.map(detail => {
                         console.log('Mapping detail:', detail);
                         console.log('Detail fields:', {
@@ -2009,7 +1998,7 @@
                             harga_jual: detail.harga_jual,
                             qty: detail.qty
                         });
-                        
+
                         return {
                             kd_produk: detail.kd_produk,
                             nama_produk: detail.nama_produk,
@@ -2020,7 +2009,7 @@
                             produk_jenis: detail.produk_jenis || 'General'
                         };
                     });
-                    
+
                     cart = cartItems;
                     console.log('Loaded cart items:', cart);
                     updateCartDisplay();
@@ -2029,10 +2018,10 @@
                     cart = [];
                     updateCartDisplay();
                 }
-                
+
                 // Show notification
                 showNotification('Transaction loaded successfully! You can now continue editing.', 'success');
-                
+
             } catch (error) {
                 console.error('Error loading continue transaction:', error);
                 showNotification('Error loading transaction: ' + error.message, 'error');
@@ -2042,7 +2031,7 @@
         // Show checkout success modal with change money
         function showCheckoutSuccessModal(transactionData, amountPaid) {
             const changeMoney = amountPaid - transactionData.total_harga;
-            
+
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
             modal.innerHTML = `
@@ -2076,12 +2065,12 @@
                                 <span class="text-gray-600" data-en="Total Amount" data-id="Jumlah Total">Total Amount</span>
                                 <span class="font-semibold">Rp ${formatPrice(transactionData.total_harga)}</span>
                             </div>
-                            
+
                             <div class="flex justify-between items-center py-2 border-b border-gray-100">
                                 <span class="text-gray-600" data-en="Amount Paid" data-id="Jumlah Bayar">Amount Paid</span>
                                 <span class="font-semibold">Rp ${formatPrice(amountPaid)}</span>
                             </div>
-                            
+
                             <div class="flex justify-between items-center py-3 bg-blue-50 rounded-lg px-4">
                                 <span class="text-lg font-semibold text-blue-800" data-en="Change Money" data-id="Kembalian">Change Money</span>
                                 <span class="text-xl font-bold text-blue-900">Rp ${formatPrice(changeMoney)}</span>
@@ -2123,6 +2112,7 @@
 
             // Close modal event
             document.getElementById('close-success-modal').onclick = () => {
+                console.log('[DEBUG] close-success-modal button clicked');
                 document.body.removeChild(modal);
                 // Redirect to My Sales page
                 window.location.href = '/sales/my-sales';
@@ -2131,20 +2121,13 @@
             // Close modal when clicking outside
             modal.onclick = (e) => {
                 if (e.target === modal) {
+                    console.log('[DEBUG] close-success-modal overlay clicked');
                     document.body.removeChild(modal);
                     // Redirect to My Sales page
                     window.location.href = '/sales/my-sales';
                 }
             };
 
-            // Auto close after 10 seconds
-            setTimeout(() => {
-                if (document.body.contains(modal)) {
-                    document.body.removeChild(modal);
-                    // Redirect to My Sales page
-                    window.location.href = '/sales/my-sales';
-                }
-            }, 10000);
         }
 
         // Load payment methods from API
@@ -2164,7 +2147,7 @@
                         return result.data;
                     }
                 }
-                
+
                 // Fallback to default payment methods if API fails
                 return [
                     { id: '1', name: 'Tunai' },
@@ -2184,10 +2167,10 @@
         async function showCheckoutModal(totalAmount) {
             // Debug logging
             console.log('showCheckoutModal called with totalAmount:', totalAmount);
-            
+
             // Load payment methods from API
             const paymentMethods = await loadPaymentMethods();
-            
+
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
             modal.innerHTML = `
@@ -2210,17 +2193,17 @@
                         <!-- Item Status -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <span data-en="Item Status" data-id="Status Barang">Status Barang</span> 
+                                <span data-en="Item Status" data-id="Status Barang">Status Barang</span>
                                 <span class="text-red-500">*</span>
                             </label>
                             <div class="space-y-2">
                                 <label class="flex items-center">
-                                    <input type="radio" name="status-barang" value="diterima langsung" checked 
+                                    <input type="radio" name="status-barang" value="diterima langsung" checked
                                            class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 focus:ring-purple-500 focus:ring-2">
                                     <span class="ml-2 text-sm font-medium text-gray-700" data-en="received directly" data-id="diterima langsung">diterima langsung</span>
                                 </label>
                                 <label class="flex items-center">
-                                    <input type="radio" name="status-barang" value="dikirimkan ekspedisi" 
+                                    <input type="radio" name="status-barang" value="dikirimkan ekspedisi"
                                            class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 focus:ring-purple-500 focus:ring-2">
                                     <span class="ml-2 text-sm font-medium text-gray-700" data-en="sent by expedition" data-id="dikirimkan ekspedisi">dikirimkan ekspedisi</span>
                                 </label>
@@ -2230,7 +2213,7 @@
                         <!-- Amount Paid -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2" data-en="Amount Paid" data-id="Jumlah Bayar">Amount Paid</label>
-                            <input type="number" id="amount-paid" value="${totalAmount}" min="0" step="1000" 
+                            <input type="number" id="amount-paid" value="${totalAmount}" min="0" step="1000"
                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <p class="text-sm text-gray-500 mt-1" data-en="Total amount: Rp" data-id="Jumlah total: Rp">Total amount: Rp ${formatPrice(totalAmount)}</p>
                         </div>
@@ -2246,7 +2229,7 @@
                         <!-- Notes -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2" data-en="Notes (Optional)" data-id="Catatan (Opsional)">Notes (Optional)</label>
-                            <textarea id="checkout-notes" rows="3" 
+                            <textarea id="checkout-notes" rows="3"
                                       class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                                       data-placeholder-en="Add any notes..." data-placeholder-id="Tambahkan catatan..."></textarea>
                         </div>
@@ -2278,11 +2261,11 @@
             // Real-time change calculation
             const amountPaidInput = document.getElementById('amount-paid');
             const changeAmountSpan = document.getElementById('change-amount');
-            
+
             function updateChangeAmount() {
                 const amountPaid = parseFloat(amountPaidInput.value) || 0;
                 const change = amountPaid - totalAmount;
-                
+
                 if (change >= 0) {
                     changeAmountSpan.textContent = `Rp ${formatPrice(change)}`;
                     changeAmountSpan.className = 'text-lg font-bold text-green-600';
@@ -2291,10 +2274,10 @@
                     changeAmountSpan.className = 'text-lg font-bold text-red-600';
                 }
             }
-            
+
             // Update change amount on input
             amountPaidInput.addEventListener('input', updateChangeAmount);
-            
+
             // Initial calculation
             updateChangeAmount();
 
@@ -2317,12 +2300,12 @@
                 }
             };
         }
-        
+
         // Add event listeners for print buttons and switch transaction
         document.addEventListener('DOMContentLoaded', function() {
             // Load default customer data
             loadDefaultCustomer();
-            
+
             // Profile dropdown functionality
             const profileBtn = document.getElementById('profile-dropdown-btn');
             if (profileBtn) {
@@ -2344,7 +2327,7 @@
             const mainHeader = document.getElementById('main-header');
             const toggleIcon = document.getElementById('toggle-icon');
             let isHeaderVisible = true;
-            
+
             if (headerToggle && mainHeader && toggleIcon) {
                 headerToggle.addEventListener('click', function() {
                     if (isHeaderVisible) {
@@ -2360,7 +2343,7 @@
                     }
                 });
             }
-            
+
             // Auto focus on search input when page loads
             const searchInput = document.getElementById('product-search');
             if (searchInput) {
@@ -2368,14 +2351,14 @@
                     searchInput.focus();
                 }, 100); // Small delay to ensure page is fully loaded
             }
-            
-            
+
+
             // Print button in quick actions
             const quickPrintBtn = document.querySelector('button:has(span[data-en="Print Receipt"])');
             if (quickPrintBtn) {
                 quickPrintBtn.addEventListener('click', printReceipt);
             }
-            
+
             // Switch transaction button
             const switchBtn = document.getElementById('switch-transaction-btn');
             if (switchBtn) {
@@ -2397,7 +2380,7 @@
                 });
 
                 console.log('Draft transactions response status:', response.status);
-                
+
                 if (response.ok) {
                     const result = await response.json();
                     console.log('Draft transactions result:', result);
@@ -2448,7 +2431,7 @@
 
                     <!-- Content -->
                     <div class="p-4">
-                        ${drafts.length === 0 ? 
+                        ${drafts.length === 0 ?
                             `<div class="text-center py-8">
                                 <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
                                     <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2500,7 +2483,7 @@
                             <div class="text-sm text-gray-500">
                                 Total: <span class="font-semibold">${drafts.length}</span> transaksi draft
                             </div>
-                            <button onclick="startNewTransaction()" 
+                            <button onclick="startNewTransaction()"
                                     class="px-4 py-2 bg-green-100 hover:bg-green-200 text-green-800 rounded-lg font-semibold transition-all">
                                 Transaksi Baru
                             </button>
@@ -2545,7 +2528,7 @@
                         currentCartId = result.data.cart_id;
                         updateCartDisplay();
                         showSuccessMessage('Switched to draft transaction');
-                        
+
                         // Close the modal
                         const modal = document.querySelector('.fixed.inset-0.bg-black.bg-opacity-50');
                         if (modal) {
@@ -2601,7 +2584,7 @@
         async function startFreshTransaction() {
             try {
                 console.log('Creating fresh transaction on page load...');
-                
+
                 // Create a fresh transaction via API
                 const response = await fetch('/api/cart/fresh', {
                     method: 'POST',
@@ -2617,7 +2600,7 @@
                 if (response.ok) {
                     const result = await response.json();
                     console.log('Fresh transaction created:', result);
-                    
+
                     if (result.success) {
                         // Update cart state with new transaction
                         currentCartId = result.data.kd_penjualan;
@@ -2641,7 +2624,7 @@
                     currentInvoiceNumber = 'PJ' + new Date().getTime();
                     updateCartDisplay();
                 }
-                
+
             } catch (error) {
                 console.error('Error starting fresh transaction:', error);
                 // Fallback to manual creation
@@ -2655,7 +2638,7 @@
         async function startNewTransaction() {
             try {
                 console.log('Starting fresh transaction...');
-                
+
                 // Create a fresh transaction via API
                 const response = await fetch('/api/cart/fresh', {
                     method: 'POST',
@@ -2671,20 +2654,20 @@
                 if (response.ok) {
                     const result = await response.json();
                     console.log('Fresh transaction created:', result);
-                    
+
                     if (result.success) {
                         // Update cart state with new transaction
                         currentCartId = result.data.kd_penjualan;
                         currentInvoiceNumber = result.data.no_faktur_penjualan;
                         cart = [];
                         updateCartDisplay();
-                        
+
                         // Close the modal
                         const modal = document.querySelector('.fixed.inset-0');
                         if (modal) {
                             document.body.removeChild(modal);
                         }
-                        
+
                         showSuccessMessage('Transaksi baru dimulai');
                     } else {
                         showErrorMessage(result.message || 'Failed to start new transaction');
@@ -2694,7 +2677,7 @@
                     console.error('Error creating fresh transaction:', errorText);
                     showErrorMessage('Failed to start new transaction');
                 }
-                
+
             } catch (error) {
                 console.error('Error starting new transaction:', error);
                 showErrorMessage('Error starting new transaction');

@@ -10,9 +10,16 @@ use App\Models\Produk;
 use App\Models\Stok;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\CartService;
 
 class PenjualanController extends Controller
 {
+    protected $cartService;
+
+    public function __construct(CartService $cartService)
+    {
+        $this->cartService = $cartService;
+    }
     /**
      * Create a new sale from cart data
      */
@@ -29,14 +36,13 @@ class PenjualanController extends Controller
                 'cart.*.harga' => 'required|numeric|min:0',
                 'customer_id' => 'required|string',
                 'payment_method' => 'required|string',
-                'total_bayar' => 'required|numeric|min:0',
                 'catatan' => 'nullable|string',
             ]);
 
             $cart = $request->cart;
             $customerId = $request->customer_id;
             $paymentMethod = $request->payment_method;
-            $totalBayar = $request->total_bayar;
+            // $totalBayar is now derived from totalHarga
             $catatan = $request->catatan;
 
             // Generate invoice number and sale ID
@@ -53,7 +59,8 @@ class PenjualanController extends Controller
             }
 
             $totalHarga = $subTotal + $pajak;
-            $lebihBayar = $totalBayar - $totalHarga;
+            $totalBayar = $totalHarga; // total_bayar must be equal to total_harga
+            $lebihBayar = 0; // lebih_bayar must be 0
 
             // Create the sale
             $penjualan = Penjualan::create([
@@ -98,7 +105,7 @@ class PenjualanController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error creating sale: ' . $e->getMessage()

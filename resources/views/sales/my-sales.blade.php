@@ -7,17 +7,17 @@
     <title>My Sales Report - Inspizo Spiritosanto</title>
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
-    
+
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
-    
+
     <style>
         /* Custom DataTable Styling */
         .dataTables_wrapper {
             padding: 20px;
         }
-        
+
         table.dataTable thead th {
             background: linear-gradient(135deg, #10b981);
             color: white;
@@ -25,50 +25,50 @@
             padding: 12px 18px;
             border: none;
         }
-        
+
         table.dataTable tbody tr {
             transition: all 0.2s ease;
         }
-        
+
         table.dataTable tbody tr:hover {
             background-color: #f3f4f6;
         }
-        
+
         table.dataTable tbody td {
             padding: 12px 18px;
         }
-        
+
         .dataTables_filter input {
             border: 1px solid #d1d5db;
             border-radius: 0.5rem;
             padding: 0.5rem 1rem;
             margin-left: 0.5rem;
         }
-        
+
         .dataTables_length select {
             border: 1px solid #d1d5db;
             border-radius: 0.5rem;
             padding: 0.5rem 1rem;
             margin: 0 0.5rem;
         }
-        
+
         .status-badge {
             padding: 4px 12px;
             border-radius: 9999px;
             font-size: 0.75rem;
             font-weight: 600;
         }
-        
+
         .status-completed {
             background-color: #dcfce7;
             color: #166534;
         }
-        
+
         .status-refunded {
             background-color: #fee2e2;
             color: #991b1b;
         }
-        
+
         .status-belum-lunas {
             background-color: #fed7aa;
             color: #c2410c;
@@ -91,7 +91,7 @@
                         <p class="text-sm text-gray-600">{{ $user->nama ?? $user->username }}</p>
                     </div>
                 </div>
-                
+
                 <div class="flex items-center space-x-4">
                     <!-- Language Toggle -->
                     <button id="language-toggle" class="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all">
@@ -100,11 +100,12 @@
                         </svg>
                         <span id="current-lang" class="text-sm font-medium">EN</span>
                     </button>
-                    
-                    <!-- Close Button -->
-                    <button onclick="window.close()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all">
-                        <span data-en="Close" data-id="Tutup">Close</span>
-                    </button>
+
+                    <!-- Back Button -->
+                    <a href="{{ route('dashboard') }}" class="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all">
+                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        <span data-en="Back" data-id="Kembali">Back</span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -141,7 +142,7 @@
                         </div>
                 </div>
             </div>
-            
+
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="flex items-center">
                     <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
@@ -155,7 +156,7 @@
                         </div>
                 </div>
             </div>
-            
+
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="flex items-center">
                     <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -169,7 +170,7 @@
                         </div>
                 </div>
             </div>
-            
+
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="flex items-center">
                     <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
@@ -196,7 +197,7 @@
                     <span data-en="New Transaction" data-id="Transaksi Baru">New Transaction</span>
                 </a>
             </div>
-            
+
             <!-- Loading indicator -->
             <div id="loadingIndicator" class="hidden px-6 py-4 text-center">
                 <div class="inline-flex items-center">
@@ -207,7 +208,7 @@
                     <span data-en="Loading transactions..." data-id="Memuat transaksi...">Loading transactions...</span>
                 </div>
             </div>
-            
+
             <div class="overflow-x-auto">
                 <table id="salesTable" class="display responsive nowrap" style="width:100%">
                     <thead>
@@ -235,11 +236,11 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
-    
+
     <script>
         // Language switcher with persistence
         let currentLanguage = localStorage.getItem('language') || 'id'; // Default to Indonesian
-        
+
         document.getElementById('language-toggle').addEventListener('click', function() {
             currentLanguage = currentLanguage === 'en' ? 'id' : 'en';
             localStorage.setItem('language', currentLanguage);
@@ -249,9 +250,9 @@
         function updateLanguage() {
             const langButton = document.getElementById('current-lang');
             const elements = document.querySelectorAll('[data-en], [data-id]');
-            
+
             langButton.textContent = currentLanguage.toUpperCase();
-            
+
             elements.forEach(element => {
                 if (element.hasAttribute(`data-${currentLanguage}`)) {
                     const text = element.getAttribute(`data-${currentLanguage}`);
@@ -263,7 +264,7 @@
                     }
                 }
             });
-            
+
             // Update modal content if it exists
             const modal = document.querySelector('.fixed.inset-0');
             if (modal) {
@@ -282,7 +283,7 @@
                     if (element.id === 'kategori' && element.textContent !== 'Loading...' && element.textContent !== 'Memuat...' && element.textContent.trim() !== '') {
                         return; // Skip this element as it has real data
                     }
-                    
+
                     // Only update if the element still contains loading text
                     if (element.textContent.includes('Memuat') || element.textContent.includes('Loading')) {
                         if (element.hasAttribute(`data-${currentLanguage}`)) {
@@ -292,7 +293,7 @@
                     }
                 });
             }
-            
+
             // Redraw table to update column headers
             if ($.fn.DataTable.isDataTable('#salesTable')) {
                 $('#salesTable').DataTable().columns.adjust().draw();
@@ -303,10 +304,10 @@
         $(document).ready(function() {
             try {
                 console.log('Initializing DataTable with server-side processing...');
-                
+
                 // Show loading indicator
                 $('#loadingIndicator').removeClass('hidden');
-                
+
                 var table = $('#salesTable').DataTable({
                     processing: true,
                     serverSide: true,
@@ -347,8 +348,8 @@
                         { data: 'formatted_amount', name: 'amount' },
                         { data: 'payment_method', name: 'payment_method' },
                         { data: 'customer', name: 'customer' },
-                        { 
-                            data: 'status', 
+                        {
+                            data: 'status',
                             name: 'status',
                             render: function(data, type, row) {
                                 if (type === 'display') {
@@ -357,10 +358,10 @@
                                 return data;
                             }
                         },
-                        { 
-                            data: 'id', 
-                            name: 'id', 
-                            orderable: false, 
+                        {
+                            data: 'id',
+                            name: 'id',
+                            orderable: false,
                             searchable: false,
                             render: function(data, type, row) {
                                 if (type === 'display') {
@@ -377,15 +378,15 @@
                         }
                     ]
                 });
-                
+
                 console.log('DataTable with server-side processing initialized successfully');
-                
+
                 // Hide loading indicator when table is ready
                 $('#loadingIndicator').addClass('hidden');
-                
+
                 // Initialize language
                 updateLanguage();
-                
+
             } catch (error) {
                 console.error('DataTable initialization error:', error);
             }

@@ -14,28 +14,28 @@
             --color-primary: #2563eb;        /* Blue 600 */
             --color-primary-dark: #1e40af;   /* Blue 700 */
             --color-primary-light: #3b82f6;  /* Blue 500 */
-            
+
             /* Secondary Colors */
             --color-secondary: #8b5cf6;      /* Purple 500 */
             --color-secondary-dark: #7c3aed; /* Purple 600 */
-            
+
             /* Success/Positive */
             --color-success: #10b981;        /* Emerald 500 */
             --color-success-dark: #059669;   /* Emerald 600 */
             --color-success-light: #34d399;  /* Emerald 400 */
-            
+
             /* Warning */
             --color-warning: #f59e0b;        /* Amber 500 */
             --color-warning-dark: #d97706;   /* Amber 600 */
-            
+
             /* Danger/Error */
             --color-danger: #ef4444;         /* Red 500 */
             --color-danger-dark: #dc2626;    /* Red 600 */
-            
+
             /* Info */
             --color-info: #06b6d4;          /* Cyan 500 */
             --color-info-dark: #0891b2;     /* Cyan 600 */
-            
+
             /* Neutral Grays */
             --color-gray-50: #f9fafb;
             --color-gray-100: #f3f4f6;
@@ -46,7 +46,7 @@
             --color-gray-800: #1f2937;
             --color-gray-900: #111827;
         }
-        
+
         .stat-card {
             transition: all 0.3s ease;
         }
@@ -68,7 +68,7 @@
             from { opacity: 0; transform: translateX(-20px); }
             to { opacity: 1; transform: translateX(0); }
         }
-        
+
         /* Bottom header styles - same as cashier */
         .header-bottom {
             position: fixed;
@@ -80,36 +80,36 @@
             border-top: 1px solid #e5e7eb;
             box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
         }
-        
+
         /* Ensure proper spacing for bottom header */
         body {
             margin: 0;
             padding: 0;
             padding-bottom: 80px; /* Space for bottom header */
         }
-        
+
         /* Adjust main content for bottom header */
         main {
             margin-bottom: 0;
         }
-        
+
         /* Header Toggle Styles */
         .header-bottom {
             position: relative;
         }
-        
+
         .header-bottom.hidden {
             transform: translateY(100%);
         }
-        
+
         .header-bottom.visible {
             transform: translateY(0);
         }
-        
+
         #header-toggle {
             z-index: 50;
         }
-        
+
         #toggle-icon.rotated {
             transform: rotate(180deg);
         }
@@ -127,7 +127,7 @@
                         <button id="profile-dropdown-btn" class="w-10 h-10 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-full flex items-center justify-center hover:from-emerald-500 hover:to-blue-600 transition-all duration-200 cursor-pointer group shadow-md" title="Profile Menu">
                             <span class="text-white font-bold text-sm group-hover:scale-110 transition-transform duration-200">{{ substr(auth()->user()->nama ?? auth()->user()->username ?? 'U', 0, 1) }}</span>
                         </button>
-                        
+
                         <!-- Dropdown Menu -->
                         <div id="profile-dropdown" class="absolute left-0 top-full mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 hidden">
                             <div class="px-4 py-3 border-b border-gray-100">
@@ -156,7 +156,7 @@
                         <div class="font-medium text-gray-800">{{ auth()->user()->nama ?? auth()->user()->username ?? 'User' }}</div>
                     </div>
                 </div>
-                
+
                 <!-- Center: App Title -->
                 <div class="flex items-center space-x-3">
                     <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-500 rounded-lg flex items-center justify-center shadow-md">
@@ -169,7 +169,7 @@
                         <p class="text-sm text-gray-500">Inspizo Cashier System</p>
                     </div>
                 </div>
-                
+
                 <!-- Right: Actions -->
                 <div class="flex items-center space-x-4">
                     <!-- Current Time -->
@@ -177,7 +177,7 @@
                         <div class="text-sm text-gray-500" data-en="Current Time" data-id="Waktu Saat Ini">Current Time</div>
                         <div class="text-lg font-semibold text-gray-800" id="current-time"></div>
                     </div>
-                    
+
                     <!-- Language Switcher -->
                     <button id="language-toggle" class="flex items-center space-x-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all" title="Change Language">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -188,7 +188,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Toggle Button -->
         <button id="header-toggle" class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-t-lg transition-all duration-300 ease-in-out shadow-lg">
             <svg id="toggle-icon" class="w-4 h-4 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -204,15 +204,15 @@
             <div class="text-center space-y-4">
                 <!-- Sales Report Buttons -->
                 <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                    <a href="{{ route('sales.my-sales') }}" target="_blank"
+                    <a href="{{ route('sales.my-sales') }}"
                        class="inline-flex items-center px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white text-xl font-bold rounded-lg shadow-lg quick-action-btn transition-all duration-300">
                         <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                         </svg>
                         <span data-en="My Sales" data-id="Penjualan Saya">My Sales</span>
                     </a>
-                    
-                    <a href="{{ route('sales.all-sales') }}" target="_blank"
+
+                    <a href="{{ route('sales.all-sales') }}"
                        class="inline-flex items-center px-8 py-4 bg-purple-500 hover:bg-purple-600 text-white text-xl font-bold rounded-lg shadow-lg quick-action-btn transition-all duration-300">
                         <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
@@ -373,7 +373,7 @@
 
         // Language switcher functionality with persistence
         let currentLanguage = localStorage.getItem('language') || 'id'; // Default to Indonesian
-        
+
         document.getElementById('language-toggle').addEventListener('click', function() {
             currentLanguage = currentLanguage === 'en' ? 'id' : 'en';
             localStorage.setItem('language', currentLanguage);
@@ -383,10 +383,10 @@
         function updateLanguage() {
             const langButton = document.getElementById('current-lang');
             const elements = document.querySelectorAll('[data-en], [data-id]');
-            
+
             // Update language button
             langButton.textContent = currentLanguage.toUpperCase();
-            
+
             // Update all elements with data attributes
             elements.forEach(element => {
                 if (element.hasAttribute(`data-${currentLanguage}`)) {
@@ -415,15 +415,15 @@
             let hours = now.getHours();
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const seconds = String(now.getSeconds()).padStart(2, '0');
-            
+
             // Convert to 12-hour format
             const ampm = hours >= 12 ? 'PM' : 'AM';
             hours = hours % 12;
             hours = hours ? hours : 12; // the hour '0' should be '12'
             const hoursStr = String(hours);
-            
+
             const timeString = `${hoursStr}:${minutes}:${seconds} ${ampm}`;
-            
+
             const timeElement = document.getElementById('current-time');
             if (timeElement) {
                 timeElement.textContent = timeString;
@@ -468,10 +468,10 @@
 
             // Initialize header as visible
             header.classList.add('visible');
-            
+
             // Initialize language on page load
             updateLanguage();
-            
+
             // Initialize and update current time
             updateCurrentTime();
             setInterval(updateCurrentTime, 1000); // Update every second
