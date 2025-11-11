@@ -626,7 +626,7 @@
             // Generate 4 random digits (1000 to 9999)
             const randomDigits = Math.floor(1000 + Math.random() * 9000);
 
-            invoiceNumber = `PJ${year}${month}${day}${randomDigits}`;
+            invoiceNumber = `PJ0000000000`;
             document.getElementById('invoice-number').textContent = invoiceNumber;
         }
 

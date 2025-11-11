@@ -7,7 +7,7 @@
     <title>Transaction Details - Inspizo Spiritosanto</title>
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
-    
+
     <style>
         /* Custom styles for transaction details page */
     </style>
@@ -28,7 +28,7 @@
                         <p class="text-sm text-gray-600">{{ $user->nama ?? $user->username }}</p>
                     </div>
                 </div>
-                
+
                 <div class="flex items-center space-x-4">
                     <!-- Language Toggle -->
                     <button id="language-toggle" class="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all">
@@ -37,7 +37,7 @@
                         </svg>
                         <span id="current-lang" class="text-sm font-medium">EN</span>
                     </button>
-                    
+
                     <!-- Close Button -->
                     <button onclick="window.close()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all">
                         <span data-en="Close" data-id="Tutup">Close</span>
@@ -125,7 +125,7 @@
                     </div>
                     <div class="p-6 space-y-3">
                         @if($transaction->status_bayar == 'Belum Lunas')
-                            <a href="{{ route('cashier.index') }}?continue={{ $transaction->kd_penjualan }}" 
+                            <a href="{{ route('cashier.index') }}?continue={{ $transaction->kd_penjualan }}"
                                class="w-full bg-blue-100 hover:bg-blue-200 text-blue-800 p-3 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -133,7 +133,7 @@
                                 <span data-en="Continue Transaction" data-id="Lanjutkan Transaksi">Continue Transaction</span>
                             </a>
                         @endif
-                        <a href="{{ route('sales.my-sales') }}" 
+                        <a href="{{ route('sales.my-sales') }}"
                            class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 p-3 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -222,7 +222,7 @@
                                         <!-- Vertical layout for 3+ items -->
                                         <div class="space-y-2">
                                             <h4 class="font-medium text-gray-900 text-sm truncate" title="{{ $mutation->produk->nama_produk ?? 'Unknown Product' }}">{{ $mutation->produk->nama_produk ?? 'Unknown Product' }}</h4>
-                                            
+
                                             <div class="space-y-1">
                                                 <div class="flex justify-between items-center">
                                                     <span class="text-xs text-gray-500" data-en="Ref" data-id="Ref">Ref:</span>
@@ -237,7 +237,7 @@
                                                     <span class="text-xs text-gray-600">{{ \Carbon\Carbon::parse($mutation->date_created)->format('d M H:i') }}</span>
                                                 </div>
                                             </div>
-                                            
+
                                             <div class="flex justify-center space-x-4 pt-2 border-t border-gray-200">
                                                 @if($mutation->masuk > 0)
                                                     <div class="text-green-600 text-center">
@@ -280,7 +280,7 @@
                                             </div>
                                         </div>
                                     @endif
-                                    
+
                                     @if($mutation->catatan)
                                         <div class="mt-2 p-2 bg-white rounded border-l-2 border-blue-200">
                                             <p class="text-xs text-gray-700">{{ $mutation->catatan }}</p>
@@ -306,18 +306,18 @@
 <script>
     // Language switching functionality with persistence
     let currentLanguage = localStorage.getItem('language') || 'id'; // Default to Indonesian
-    
+
     function updateLanguage() {
         const elements = document.querySelectorAll('[data-en][data-id]');
-        
+
         elements.forEach(element => {
             const text = currentLanguage === 'id' ? element.getAttribute('data-id') : element.getAttribute('data-en');
             element.textContent = text;
         });
-        
+
         // Update document language attribute
         document.documentElement.lang = currentLanguage;
-        
+
         // Update language button
         const currentLang = document.getElementById('current-lang');
         if (currentLang) {
@@ -329,17 +329,17 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Set initial language
         updateLanguage();
-        
+
         // Language toggle functionality
         const languageToggle = document.getElementById('language-toggle');
-        
+
         if (languageToggle) {
             languageToggle.addEventListener('click', function() {
                 currentLanguage = currentLanguage === 'en' ? 'id' : 'en';
-                
+
                 // Save to localStorage
                 localStorage.setItem('language', currentLanguage);
-                
+
                 // Update display
                 updateLanguage();
             });

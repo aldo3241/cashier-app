@@ -66,7 +66,7 @@ class CartService
     public function createDraftCart($userId, $customerId = 1)
     {
         // Generate invoice number (kd_penjualan will be auto-generated)
-        $invoiceNumber = 'PJ' . date('ymd') . mt_rand(1000, 9999);
+        $invoiceNumber = \App\Models\Penjualan::generateNewInvoiceNumber($userId);
 
         return Penjualan::create([
             'no_faktur_penjualan' => $invoiceNumber,
@@ -351,12 +351,10 @@ class CartService
     {
         return DB::transaction(function() use ($userId, $customerId, $paymentMethod, $totalBayar, $catatan, $statusBarang, $cartId) {
 
-            // 1. Lock and get the last transaction ID to prevent duplicates
-            $lastTransaction = Penjualan::lockForUpdate()->latest('kd_penjualan')->first();
-            $newId = $lastTransaction ? $lastTransaction->kd_penjualan + 1 : 1;
+            // 1. Generate unique invoice number based on PJ+YMDH+kd+increment
+            $finalInvoiceNumber = Penjualan::generateNewInvoiceNumber($userId);
 
-            // 2. Generate unique invoice number with locked ID
-            $finalInvoiceNumber = 'PJ' . date('ymd') . str_pad($newId, 4, '0', STR_PAD_LEFT);
+            // 2. No need to lock for ID or generate ID based invoice number anymore.
 
             // 3. Get specific cart if provided, otherwise get active cart
             if ($cartId) {

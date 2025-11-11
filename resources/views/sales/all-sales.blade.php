@@ -200,7 +200,6 @@
                             <th data-en="Items" data-id="Item">Items</th>
                             <th data-en="Amount" data-id="Jumlah">Amount</th>
                             <th data-en="Payment Method" data-id="Metode Pembayaran">Payment Method</th>
-                            <th data-en="Customer" data-id="Pelanggan">Customer</th>
                             <th data-en="Status" data-id="Status">Status</th>
                             <th data-en="Actions" data-id="Aksi">Actions</th>
                         </tr>
@@ -313,8 +312,8 @@
                         processing: "Loading transactions..."
                     },
                     columnDefs: [
-                        { className: "text-center", targets: [4, 8, 9] },
-                        { orderable: false, targets: [7, 8, 9] } // Disable sorting on customer, status, and actions columns
+                        { className: "text-center", targets: [4, 7, 8] },
+                        { orderable: false, targets: [7, 8] } // Disable sorting on status, and actions columns
                     ],
                     columns: [
                         { data: 'invoice_number', name: 'invoice_number' },
@@ -324,7 +323,6 @@
                         { data: 'items', name: 'items' },
                         { data: 'formatted_amount', name: 'amount' },
                         { data: 'payment_method', name: 'payment_method' },
-                        { data: 'customer', name: 'customer' },
                         {
                             data: 'status',
                             name: 'status',

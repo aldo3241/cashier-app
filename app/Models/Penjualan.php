@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use App\Models\User;
 
 class Penjualan extends Model
 {
@@ -110,7 +111,7 @@ class Penjualan extends Model
     protected static function boot()
     {
         parent::boot();
-        
+
         // Delete related details when deleting a sale
         static::deleting(function ($model) {
             $model->penjualanDetails()->delete();
@@ -122,7 +123,51 @@ class Penjualan extends Model
      */
     public static function generateInvoiceNumber()
     {
-        return 'PJ' . date('ymdHis');
+        return 'PJ' . date('ymdH');
+    }
+    /**
+     * Generate unique invoice number based on PJ+ymdH+kd+increment.
+     */
+    public static function generateNewInvoiceNumber($userId)
+    {
+        // 1. Retrieve user KD. Assuming $userId is the username string (dibuat_oleh).
+        $user = User::where('username', $userId)->first();
+
+        // If user is not found by username, try finding by primary key (kd) if $userId looks like an integer.
+        if (!$user && is_numeric($userId)) {
+            $user = User::find($userId);
+        }
+
+        // Use the user's KD, or a fallback '00' if not found.
+        // Note: Assuming KD is a string or can be safely concatenated.
+        $userKd = $user ? $user->kd : '00';
+
+        // 2. Define the prefix based on current date/time (YMDH) and user KD
+        // Format: PJ + YEAR + MONTH + DAY + HOUR + kd
+        $datePrefix = date('ymdH');
+        $prefix ='PJ' . $datePrefix . $userKd;
+
+        // 3. Find the highest existing invoice number for this prefix (hourly reset)
+        $latestInvoice = self::where('no_faktur_penjualan', 'like', $prefix . '%')
+            ->orderBy('no_faktur_penjualan', 'desc')
+            ->first();
+
+        $increment = 1;
+
+        if ($latestInvoice) {
+            // Extract the increment part (which starts after the prefix)
+            $latestNumber = $latestInvoice->no_faktur_penjualan;
+            $incrementPart = substr($latestNumber, strlen($prefix));
+
+            // Ensure the extracted part is numeric before incrementing
+            if (is_numeric($incrementPart)) {
+                $increment = (int)$incrementPart + 1;
+            }
+        }
+
+        // 4. Format the final invoice number (e.g., PJ202511110400001)
+        // We use str_pad to ensure 3 digits for the increment part.
+        return $prefix . str_pad($increment, 2, '0', STR_PAD_LEFT);
     }
 
     /**
@@ -193,7 +238,7 @@ class Penjualan extends Model
         DB::transaction(function () {
             // Delete all related details first
             $this->penjualanDetails()->delete();
-            
+
             // Then delete the sale
             $this->delete();
         });
