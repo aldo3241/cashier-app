@@ -25,11 +25,6 @@ class CartService
             ->with(['penjualanDetails.produk'])
             ->first();
 
-        if (!$cart) {
-            // Create new draft cart
-            $cart = $this->createDraftCart($userId, $customerId);
-        }
-
         return $cart;
     }
 
@@ -38,8 +33,15 @@ class CartService
      */
     public function createFreshCart($userId, $customerId = 1)
     {
-        // Always create a new draft cart, don't look for existing ones
-        return $this->createDraftCart($userId, $customerId);
+        // Delete any existing draft cart for this user/customer combination
+        Penjualan::where('dibuat_oleh', $userId)
+            ->where('kd_pelanggan', $customerId)
+            ->where('status_bayar', 'Belum Lunas')
+            ->where('status_barang', 'Draft')
+            ->delete();
+
+        // Return null, forcing lazy creation on first item add
+        return null;
     }
 
     /**
@@ -93,11 +95,16 @@ class CartService
     {
         return DB::transaction(function() use ($userId, $customerId, $productId, $qty, $cartId) {
 
-            // Get specific cart if provided, otherwise get or create active cart
+            // Get specific cart if provided, otherwise get active cart
             if ($cartId) {
                 $cart = $this->getCartById($cartId, $userId);
             } else {
                 $cart = $this->getActiveCart($userId, $customerId);
+            }
+
+            // If no cart exists (because getActiveCart returned null), create a new draft cart (lazy creation).
+            if (!$cart) {
+                $cart = $this->createDraftCart($userId, $customerId);
             }
 
             // Lock the product for stock validation to prevent race conditions

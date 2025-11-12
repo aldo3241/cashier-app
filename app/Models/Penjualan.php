@@ -112,6 +112,14 @@ class Penjualan extends Model
     {
         parent::boot();
 
+        // Synchronize date_created and date_updated on every save
+        static::saving(function ($model) {
+            // Use a single timestamp instance to ensure microsecond precision match
+            $timestamp = $model->freshTimestamp();
+            $model->date_created = $timestamp;
+            $model->date_updated = $timestamp;
+        });
+
         // Delete related details when deleting a sale
         static::deleting(function ($model) {
             $model->penjualanDetails()->delete();

@@ -40,6 +40,18 @@ class PenjualanDetail extends Model
     protected static function boot()
     {
         parent::boot();
+
+        // Synchronize date_created and date_updated on every save
+        static::saving(function ($model) {
+            // Use a single timestamp instance to ensure microsecond precision match
+            $timestamp = $model->freshTimestamp();
+
+            // Only set date_created if the model is being created
+            if (!$model->exists) {
+                $model->date_created = $timestamp;
+            }
+            $model->date_updated = $timestamp;
+        });
     }
 
     /**

@@ -1773,8 +1773,11 @@
         }
 
         async function addToCartRealTime(product, qty = 1) {
+            // Store the cart ID before the API call
+            const initialCartId = currentCartId;
+
             try {
-                console.log('Adding to cart:', product, 'qty:', qty, 'customer:', currentCustomer.id, 'cartId:', currentCartId);
+                console.log('Adding to cart:', product, 'qty:', qty, 'customer:', currentCustomer.id, 'cartId:', initialCartId);
                 console.log('Product ID to send:', product.id || product.kd_produk);
                 const response = await fetch('/api/cart/add', {
                     method: 'POST',
@@ -1786,7 +1789,7 @@
                         product_id: product.id || product.kd_produk,
                         qty: qty,
                         customer_id: currentCustomer.id,
-                        cart_id: currentCartId // Include current cart ID for continued transactions
+                        cart_id: initialCartId // Include current cart ID for continued transactions
                     })
                 });
 
@@ -1804,6 +1807,15 @@
                         console.log('Added to cart - Items count:', cart.length);
                         updateCartDisplay();
                         showSuccessMessage('Item added to cart');
+
+                        // Check if this was the lazy creation step (initialCartId was null/falsy, but currentCartId is now truthy)
+                        if (!initialCartId && currentCartId) {
+                            console.log('Lazy creation detected. Redirecting to continue URL.');
+                            // Redirect to the new transaction URL to reflect the ID
+                            window.location.href = `/cashier?continue=${currentCartId}`;
+                            return;
+                        }
+
                     } else {
                         console.error('Add to cart failed:', result.message);
                         showErrorMessage(result.message);
@@ -2018,9 +2030,6 @@
                     cart = [];
                     updateCartDisplay();
                 }
-
-                // Show notification
-                showNotification('Transaction loaded successfully! You can now continue editing.', 'success');
 
             } catch (error) {
                 console.error('Error loading continue transaction:', error);

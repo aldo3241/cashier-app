@@ -25,7 +25,7 @@ class CartController extends Controller
         try {
             $user = Auth::user();
             $userId = $user ? ($user->username ?? $user->name ?? $user->email ?? 'system') : 'system';
-            
+
             // Debug logging for checkout
             if ($request->isMethod('post') && $request->routeIs('api.cart.checkout')) {
                 \Log::info('Checkout user debug', [
@@ -70,7 +70,7 @@ class CartController extends Controller
 
             $user = Auth::user();
             $userId = $user ? ($user->username ?? $user->name ?? $user->email ?? 'system') : 'system';
-            
+
             // Debug logging for checkout
             if ($request->isMethod('post') && $request->routeIs('api.cart.checkout')) {
                 \Log::info('Checkout user debug', [
@@ -119,7 +119,7 @@ class CartController extends Controller
 
             $user = Auth::user();
             $userId = $user ? ($user->username ?? $user->name ?? $user->email ?? 'system') : 'system';
-            
+
             // Debug logging for checkout
             if ($request->isMethod('post') && $request->routeIs('api.cart.checkout')) {
                 \Log::info('Checkout user debug', [
@@ -167,7 +167,7 @@ class CartController extends Controller
 
             $user = Auth::user();
             $userId = $user ? ($user->username ?? $user->name ?? $user->email ?? 'system') : 'system';
-            
+
             // Debug logging for checkout
             if ($request->isMethod('post') && $request->routeIs('api.cart.checkout')) {
                 \Log::info('Checkout user debug', [
@@ -208,7 +208,7 @@ class CartController extends Controller
         try {
             $user = Auth::user();
             $userId = $user ? ($user->username ?? $user->name ?? $user->email ?? 'system') : 'system';
-            
+
             // Debug logging for checkout
             if ($request->isMethod('post') && $request->routeIs('api.cart.checkout')) {
                 \Log::info('Checkout user debug', [
@@ -257,7 +257,7 @@ class CartController extends Controller
 
             $user = Auth::user();
             $userId = $user ? ($user->username ?? $user->name ?? $user->email ?? 'system') : 'system';
-            
+
             // Debug logging for checkout
             if ($request->isMethod('post') && $request->routeIs('api.cart.checkout')) {
                 \Log::info('Checkout user debug', [
@@ -301,7 +301,7 @@ class CartController extends Controller
         try {
             $user = Auth::user();
             $userId = $user ? ($user->username ?? $user->name ?? $user->email ?? 'system') : 'system';
-            
+
             // Debug logging for checkout
             if ($request->isMethod('post') && $request->routeIs('api.cart.checkout')) {
                 \Log::info('Checkout user debug', [
@@ -346,7 +346,7 @@ class CartController extends Controller
         try {
             $user = Auth::user();
             $userId = $user ? ($user->username ?? $user->name ?? $user->email ?? 'system') : 'system';
-            
+
             $drafts = $this->cartService->getDraftTransactions($userId);
 
             return response()->json([
@@ -384,8 +384,9 @@ class CartController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $cart,
-                'message' => 'Fresh transaction created successfully'
+                // If $cart is null, return an empty structure to signal a fresh start
+                'data' => $cart ?? ['kd_penjualan' => null, 'no_faktur_penjualan' => 'PJ0000000000'],
+                'message' => 'Fresh transaction initiated successfully (lazy creation enabled)'
             ]);
 
         } catch (\Exception $e) {
@@ -408,7 +409,7 @@ class CartController extends Controller
 
             $user = Auth::user();
             $userId = $user ? ($user->username ?? $user->name ?? $user->email ?? 'system') : 'system';
-            
+
             // Debug logging for checkout
             if ($request->isMethod('post') && $request->routeIs('api.cart.checkout')) {
                 \Log::info('Checkout user debug', [
@@ -451,7 +452,7 @@ class CartController extends Controller
 
             $user = Auth::user();
             $userId = $user ? ($user->username ?? $user->name ?? $user->email ?? 'system') : 'system';
-            
+
             // Debug logging for checkout
             if ($request->isMethod('post') && $request->routeIs('api.cart.checkout')) {
                 \Log::info('Checkout user debug', [
@@ -488,7 +489,7 @@ class CartController extends Controller
     {
         try {
             $userId = Auth::user()->username ?? Auth::user()->name ?? 'system';
-            
+
             // Find the transaction
             $transaction = Penjualan::with(['penjualanDetails', 'pelanggan'])
                 ->where('kd_penjualan', $transactionId)
