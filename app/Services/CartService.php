@@ -358,17 +358,18 @@ class CartService
     {
         return DB::transaction(function() use ($userId, $customerId, $paymentMethod, $totalBayar, $catatan, $statusBarang, $cartId) {
 
-            // 1. Generate unique invoice number based on PJ+YMDH+kd+increment
-            $finalInvoiceNumber = Penjualan::generateNewInvoiceNumber($userId);
-
-            // 2. No need to lock for ID or generate ID based invoice number anymore.
-
-            // 3. Get specific cart if provided, otherwise get active cart
+            // 1. Get specific cart if provided, otherwise get active cart
             if ($cartId) {
                 $cart = $this->getCartById($cartId, $userId);
             } else {
                 $cart = $this->getActiveCart($userId, $customerId);
             }
+
+            // 2. Reuse the existing draft invoice number. This number was generated
+            //    when the first item was added (CartService::createDraftCart).
+            $finalInvoiceNumber = $cart->no_faktur_penjualan;
+
+            // 3. No need to lock for ID or generate ID based invoice number anymore.
 
             if ($cart->penjualanDetails->count() == 0) {
                 throw new \Exception('Cart is empty');

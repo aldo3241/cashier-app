@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -151,7 +151,7 @@
                         </svg>
                     </div>
                         <div class="ml-4">
-                            <p class="text-sm text-gray-600" data-en="Total Revenue" data-id="Total Pendapatan">Total Revenue</p>
+                            <p class="text-sm text-gray-600" data-en="Total Revenue Today" data-id="Total Pendapatan Hari Ini">Total Revenue Today</p>
                             <p class="text-2xl font-bold text-emerald-600">Rp {{ number_format($stats['total_revenue'], 0, ',', '.') }}</p>
                         </div>
                 </div>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>All Cashiers Sales Report - Inspizo Spiritosanto</title>
+    <title>Today's All Cashiers Sales Report - Inspizo Spiritosanto</title>
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
 
@@ -87,8 +87,8 @@
                         </svg>
                     </div>
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-800" data-en="All Cashiers Sales Report" data-id="Laporan Penjualan Semua Kasir">All Cashiers Sales Report</h1>
-                        <p class="text-sm text-gray-600" data-en="All transactions from all cashiers" data-id="Semua transaksi dari semua kasir">All transactions from all cashiers</p>
+                        <h1 class="text-2xl font-bold text-gray-800" data-en="Today's All Cashiers Sales Report" data-id="Laporan Penjualan Semua Kasir Hari Ini">Today's All Cashiers Sales Report</h1>
+                        <p class="text-sm text-gray-600" data-en="All transactions from all cashiers today" data-id="Semua transaksi dari semua kasir hari ini">All transactions from all cashiers today</p>
                     </div>
                 </div>
 
@@ -137,7 +137,7 @@
                         </svg>
                     </div>
                         <div class="ml-4">
-                            <p class="text-sm text-gray-600" data-en="Total Revenue" data-id="Total Pendapatan">Total Revenue</p>
+                            <p class="text-sm text-gray-600" data-en="Total Revenue Today" data-id="Total Pendapatan Hari Ini">Total Revenue Today</p>
                             <p class="text-2xl font-bold text-emerald-600">Rp {{ number_format($stats['total_revenue'], 0, ',', '.') }}</p>
                         </div>
                 </div>
@@ -175,7 +175,7 @@
         <!-- DataTable -->
         <div class="bg-white rounded-lg shadow">
             <div class="px-6 py-4 border-b border-gray-200">
-                <h2 class="text-xl font-semibold text-gray-800" data-en="Sales Transactions" data-id="Transaksi Penjualan">Sales Transactions</h2>
+                <h2 class="text-xl font-semibold text-gray-800" data-en="Today's Sales Transactions" data-id="Transaksi Penjualan Hari Ini">Today's Sales Transactions</h2>
             </div>
 
             <!-- Loading Indicator -->

@@ -37,29 +37,26 @@ class PenjualanDetail extends Model
     /**
      * Boot the model.
      */
-    protected static function boot()
-    {
-        parent::boot();
+    /**
+     * The name of the "created at" column.
+     *
+     * @var string
+     */
+    const CREATED_AT = 'date_created';
 
-        // Synchronize date_created and date_updated on every save
-        static::saving(function ($model) {
-            // Use a single timestamp instance to ensure microsecond precision match
-            $timestamp = $model->freshTimestamp();
-
-            // Only set date_created if the model is being created
-            if (!$model->exists) {
-                $model->date_created = $timestamp;
-            }
-            $model->date_updated = $timestamp;
-        });
-    }
+    /**
+     * The name of the "updated at" column.
+     *
+     * @var string
+     */
+    const UPDATED_AT = 'date_updated';
 
     /**
      * Indicates if the model should be timestamped.
      *
      * @var bool
      */
-    public $timestamps = false;
+    public $timestamps = true;
 
     /**
      * The attributes that are mass assignable.
@@ -200,8 +197,6 @@ class PenjualanDetail extends Model
             'catatan' => null,
             'dibuat_oleh' => auth()->user()->name ?? 'system',
             'no_faktur_penjualan' => $invoiceNumber,
-            'date_created' => now(),
-            'date_updated' => now(),
         ]);
 
         // Calculate subtotal and profit

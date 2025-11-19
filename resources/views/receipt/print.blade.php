@@ -16,7 +16,7 @@
             font-size: 16px;
             line-height: 1.4;
             margin: 0;
-            padding: 20px;
+            padding: 10px; /* Reduced padding */
             background: white;
             color: black;
         }
@@ -34,104 +34,112 @@
         }
 
         .store-name {
-            font-size: 28px;
+            font-size: 14px; /* Even smaller font */
             font-weight: bold;
-            margin-bottom: 8px;
+            margin-bottom: 2px; /* Reduced margin */
         }
 
         .store-desc {
-            font-size: 16px;
-            margin-bottom: 5px;
+            font-size: 12px; /* Even smaller font */
+            font-weight: bold; /* Added bold */
+            margin-bottom: 2px; /* Reduced margin */
         }
 
         .address {
-            font-size: 14px;
-            margin-bottom: 5px;
+            font-size: 12px; /* Even smaller font */
+            font-weight: bold; /* Added bold */
+            margin-bottom: 2px; /* Reduced margin */
         }
 
         .phone {
-            font-size: 14px;
-            margin-bottom: 12px;
+            font-size: 12px; /* Even smaller font */
+            font-weight: bold; /* Added bold */
+            margin-bottom: 5px; /* Reduced margin */
         }
 
         .transaction-info {
             text-align: center;
-            font-size: 14px;
-            margin-bottom: 15px;
+            font-size: 10px; /* Even smaller font */
+            font-weight: bold; /* Added bold */
+            margin-bottom: 5px; /* Reduced margin */
         }
 
         .divider {
-            border-top: 2px solid black;
-            margin: 15px 0;
+            border-top: 2px solid black; /* Slightly thinner line */
+            margin: 5px 0; /* Reduced margin */
         }
 
         .items {
-            margin-bottom: 10px;
+            margin-bottom: 5px; /* Reduced margin */
         }
 
         .item {
-            margin-bottom: 8px;
+            margin-bottom: 2px; /* Reduced margin */
+        }
+
+        .item-line-1 {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px; /* Smaller font */
         }
 
         .item-name {
-            font-weight: bold;
-            font-size: 16px;
-            margin-bottom: 4px;
-        }
-
-        .item-details {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .item-qty-price {
-            font-size: 14px;
+            font-weight: normal;
+            font-size: 12px; /* Smaller font */
         }
 
         .item-total {
-            font-weight: bold;
-            font-size: 14px;
+            font-weight: normal;
+            font-size: 12px; /* Smaller font */
+            text-align: right;
+        }
+
+        .item-line-2 {
+            font-size: 10px; /* Smaller font */
+            margin-top: 0px; /* Removed margin */
         }
 
         .total-section {
-            margin: 15px 0;
+            margin: 5px 0; /* Reduced margin */
         }
 
         .total-line {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 20px;
+            font-size: 14px; /* Smaller font */
             font-weight: bold;
         }
 
         .footer {
-            margin-top: 15px;
+            margin-top: 5px; /* Reduced margin */
         }
 
         .payment-info {
-            margin-bottom: 10px;
+            margin-bottom: 5px; /* Reduced margin */
         }
 
         .payment-line {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 5px;
-            font-size: 14px;
+            font-size: 12px; /* Smaller font */
+        }
+
+        .payment-line-total {
+            font-size: 12px; /* Smaller font */
+            font-weight: bold;
         }
 
         .policy {
             text-align: center;
-            font-size: 12px;
-            margin: 15px 0;
-            font-style: italic;
+            font-size: 10px; /* Smaller font */
+            margin: 5px 0 2px 0; /* Reduced margin */
         }
 
         .served-by {
             text-align: center;
-            font-size: 12px;
-            margin-top: 15px;
+            font-size: 10px; /* Smaller font */
+            margin-top: 2px; /* Reduced margin */
         }
 
         .print-button {
@@ -193,10 +201,12 @@
         <div class="items">
             @foreach($transaction->penjualanDetails as $item)
             <div class="item">
-                <div class="item-name">{{ $item->nama_produk }}</div>
-                <div class="item-details">
-                    <span class="item-qty-price">{{ $item->qty }} x {{ number_format($item->harga_jual, 0, ',', '.') }}</span>
+                <div class="item-line-1">
+                    <span class="item-name">{{ $item->nama_produk }}</span>
                     <span class="item-total">{{ number_format($item->subtotal, 0, ',', '.') }}</span>
+                </div>
+                <div class="item-line-2">
+                    <span>{{ $item->qty }} x {{ number_format($item->harga_jual, 0, ',', '.') }}</span>
                 </div>
             </div>
             @endforeach
@@ -204,29 +214,32 @@
 
         <div class="divider"></div>
 
-        <!-- Total -->
+        <!-- Total and Payment -->
         <div class="total-section">
-            <div class="total-line">
-                <span>Total=</span>
-                <span>{{ number_format($transaction->total_harga, 0, ',', '.') }}</span>
+            <div class="payment-info">
+                <div class="payment-line">
+                    <div style="display: flex; flex-direction: column;">
+                        <span>Lunas</span>
+                        <span>Tunai</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; text-align: right;">
+                        <span class="payment-line-total">Total=</span>
+                        <span class="payment-line-total">{{ number_format($transaction->total_harga, 0, ',', '.') }}</span>
+                    </div>
+                </div>
             </div>
         </div>
 
+        <div class="divider"></div>
+
         <!-- Footer -->
         <div class="footer">
-            <div class="payment-info">
-                <div class="payment-line">
-                    <span>Lunas</span>
-                    <span>{{ $transaction->keuangan_kotak ?? 'Cash' }}</span>
-                </div>
-            </div>
-
             <div class="policy">
                 Barang yang dibeli, tidak dapat dikembalikan
             </div>
 
             <div class="served-by">
-                Dilayani oleh {{ $transaction->dibuat_oleh ?? 'System' }}
+                Dilayani oleh
             </div>
         </div>
     </div>

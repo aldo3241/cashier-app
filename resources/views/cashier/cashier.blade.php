@@ -475,7 +475,7 @@
                             </svg>
                             <span data-en="Cancel Order" data-id="Batalkan Pesanan">Cancel Order</span>
                         </button>
-                            <button class="w-full bg-green-100 hover:bg-green-200 text-green-800 p-4 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all">
+                            <button id="quick-print-btn" class="w-full bg-green-100 hover:bg-green-200 text-green-800 p-4 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
                                 </svg>
@@ -1429,73 +1429,6 @@
             modal.classList.remove('show');
         }
 
-        // Print functionality
-        function printReceipt() {
-            if (cart.length === 0) {
-                showModal(
-                    getText('Empty Cart', 'Keranjang Kosong'),
-                    getText('Your cart is empty. Please add some items before printing a receipt.', 'Keranjang Anda kosong. Silakan tambahkan beberapa item sebelum mencetak struk.'),
-                    null, // No confirm action needed
-                    null  // No cancel action needed
-                );
-                return;
-            }
-
-            // Create a print-friendly receipt
-            const printWindow = window.open('', '_blank');
-            const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-            const receiptContent = `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Receipt</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; margin: 20px; }
-                        .receipt { max-width: 300px; margin: 0 auto; }
-                        .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
-                        .item { display: flex; justify-content: space-between; margin-bottom: 5px; }
-                        .total { border-top: 1px solid #000; padding-top: 10px; margin-top: 20px; font-weight: bold; }
-                        .center { text-align: center; }
-                    </style>
-                </head>
-                <body>
-                    <div class="receipt">
-                        <div class="header">
-                            <h2>Inspizo Spiritosanto</h2>
-                            <p>Cashier Receipt</p>
-                            <p>${new Date().toLocaleString()}</p>
-                        </div>
-
-                        <div class="items">
-                            ${cart.map(item => `
-                                <div class="item">
-                                    <span>${item.name} x${item.quantity}</span>
-                                    <span>$${(item.price * item.quantity).toFixed(2)}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-
-                        <div class="total">
-                            <div class="item">
-                                <span>Total:</span>
-                                <span>$${totalAmount.toFixed(2)}</span>
-                            </div>
-                        </div>
-
-                        <div class="center" style="margin-top: 30px;">
-                            <p>Thank you for your purchase!</p>
-                        </div>
-                    </div>
-                </body>
-                </html>
-            `;
-
-            printWindow.document.write(receiptContent);
-            printWindow.document.close();
-            printWindow.print();
-        }
-
         // Switch Transaction functionality
         function switchTransaction() {
             // Simpan transaksi saat ini jika ada item di cart
@@ -1958,6 +1891,20 @@
             }
         }
 
+        // Print functionality for draft/current transaction
+        function printDraftReceipt() {
+            if (!currentCartId || cart.length === 0) {
+                showModal(
+                    getText('Empty Cart', 'Keranjang Kosong'),
+                    getText('Your cart is empty. Please add some items before printing a receipt.', 'Keranjang Anda kosong. Silakan tambahkan beberapa item sebelum mencetak struk.')
+                );
+                return;
+            }
+
+            // Open print receipt in new window using the current cart ID (which is the sale ID for drafts)
+            window.open('/receipt/print/' + currentCartId, '_blank');
+        }
+
         function showSuccessMessage(message) {
             // You can implement a toast notification here
             console.log('Success:', message);
@@ -2195,7 +2142,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2" data-en="Payment Method" data-id="Metode Pembayaran">Payment Method</label>
                             <select id="payment-method" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                ${paymentMethods.map(method => `<option value="${method.name}">${method.name}</option>`).join('')}
+                                ${paymentMethods.map(method => `<option value="${method.name}" ${method.name === 'Tunai' ? 'selected' : ''}>${method.name}</option>`).join('')}
                             </select>
                         </div>
 
@@ -2363,9 +2310,9 @@
 
 
             // Print button in quick actions
-            const quickPrintBtn = document.querySelector('button:has(span[data-en="Print Receipt"])');
+            const quickPrintBtn = document.getElementById('quick-print-btn');
             if (quickPrintBtn) {
-                quickPrintBtn.addEventListener('click', printReceipt);
+                quickPrintBtn.addEventListener('click', printDraftReceipt);
             }
 
             // Switch transaction button

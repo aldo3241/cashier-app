@@ -17,26 +17,26 @@ class SalesReportController extends Controller
     public function mySales()
     {
         $user = auth()->user();
-        
+
         // Calculate stats for the dashboard
         $stats = $this->calculateMySalesStats($user->name ?? $user->username);
-        
+
         return view('sales.my-sales', compact('stats', 'user'));
     }
-    
+
     /**
      * Show all cashiers sales report
      */
     public function allSales(Request $request)
     {
         $user = auth()->user();
-        
+
         // Calculate stats for the dashboard
         $stats = $this->calculateAllSalesStats();
-        
+
         return view('sales.all-sales', compact('stats', 'user'));
     }
-    
+
     /**
      * Get my sales data (both completed and incomplete)
      */
@@ -45,22 +45,22 @@ class SalesReportController extends Controller
         $query = Penjualan::with(['penjualanDetails.produk', 'pelanggan'])
             ->where('dibuat_oleh', $userId)
             ->whereIn('status_bayar', ['Lunas', 'Belum Lunas']); // Include both completed and incomplete
-        
+
         $sales = $query->orderBy('date_created', 'desc')->get();
-        
+
         return $sales->map(function ($sale) {
             $itemCount = $sale->penjualanDetails->sum('qty');
             $totalAmount = $sale->penjualanDetails->sum(function ($item) {
                 return ($item->harga_jual * $item->qty) - $item->diskon;
             });
-            
+
             // Get financial mutation ID for completed sales
             $keuanganId = null;
             if ($sale->status_bayar === 'Lunas' && $sale->no_faktur_penjualan) {
                 $keuangan = \App\Models\Keuangan::where('referensi', $sale->no_faktur_penjualan)->first();
                 $keuanganId = $keuangan ? $keuangan->kd_keuangan : null;
             }
-            
+
             return [
                 'id' => $sale->kd_penjualan,
                 'date' => $sale->date_created->format('Y-m-d'),
@@ -88,20 +88,20 @@ class SalesReportController extends Controller
         $query = Penjualan::with(['penjualanDetails.produk', 'pelanggan'])
             ->where('status_bayar', 'Lunas') // Only completed sales
             ->where('status_barang', 'diterima langsung'); // Only completed deliveries
-        
+
         // Filter by user for "my sales"
         if ($type === 'my' && $userId) {
             $query->where('dibuat_oleh', $userId);
         }
-        
+
         $sales = $query->orderBy('date_created', 'desc')->get();
-        
+
         return $sales->map(function ($sale) {
             $itemCount = $sale->penjualanDetails->sum('qty');
             $totalAmount = $sale->penjualanDetails->sum(function ($item) {
                 return ($item->harga_jual * $item->qty) - $item->diskon;
             });
-            
+
             return [
                 'id' => $sale->kd_penjualan,
                 'date' => $sale->date_created->format('Y-m-d'),
@@ -117,7 +117,7 @@ class SalesReportController extends Controller
             ];
         });
     }
-    
+
     /**
      * Get real sales data from database with pagination for better performance
      */
@@ -125,30 +125,30 @@ class SalesReportController extends Controller
     {
         $query = Penjualan::with(['penjualanDetails', 'pelanggan'])
             ->whereIn('status_bayar', ['Lunas', 'Belum Lunas']); // Include both completed and incomplete sales
-        
+
         // Filter by user for "my sales"
         if ($type === 'my' && $userId) {
             $query->where('dibuat_oleh', $userId);
         }
-        
+
         // Get paginated results
         $sales = $query->orderBy('date_created', 'desc')
             ->paginate($perPage, ['*'], 'page', $page);
-        
+
         // Transform the data
         $transformedSales = $sales->getCollection()->map(function ($sale) {
             $itemCount = $sale->penjualanDetails->sum('qty');
             $totalAmount = $sale->penjualanDetails->sum(function ($item) {
                 return ($item->harga_jual * $item->qty) - $item->diskon;
             });
-            
+
             // Get financial mutation ID for completed sales
             $keuanganId = null;
             if ($sale->status_bayar === 'Lunas' && $sale->no_faktur_penjualan) {
                 $keuangan = \App\Models\Keuangan::where('referensi', $sale->no_faktur_penjualan)->first();
                 $keuanganId = $keuangan ? $keuangan->kd_keuangan : null;
             }
-            
+
             return [
                 'id' => $sale->kd_penjualan,
                 'date' => $sale->date_created->format('Y-m-d'),
@@ -166,39 +166,39 @@ class SalesReportController extends Controller
                 'keuangan_id' => $keuanganId
             ];
         });
-        
+
         // Return paginated collection
         return $sales->setCollection($transformedSales);
     }
-    
+
     /**
      * Show transaction details page
      */
     public function transactionDetails($id)
     {
         $user = auth()->user();
-        
+
         // Get the transaction
         $transaction = Penjualan::with(['penjualanDetails.produk', 'pelanggan'])
             ->where('kd_penjualan', $id)
             ->first();
-            
+
         if (!$transaction) {
             abort(404, 'Transaction not found');
         }
-        
+
         // Get financial mutation
         $keuangan = \App\Models\Keuangan::where('referensi', $transaction->no_faktur_penjualan)->first();
-        
+
         // Get stock mutations
         $stokMutations = \App\Models\Stok::with('produk')
             ->where('no_ref', $transaction->no_faktur_penjualan)
             ->orderBy('date_created', 'desc')
             ->get();
-        
+
         return view('sales.transaction-details', compact('transaction', 'keuangan', 'stokMutations', 'user'));
     }
-    
+
     /**
      * Clear sales stats cache (call this when transactions are updated)
      */
@@ -209,7 +209,7 @@ class SalesReportController extends Controller
         }
         cache()->forget("all_sales_stats");
     }
-    
+
     /**
      * API endpoint for My Sales DataTable server-side processing
      */
@@ -220,11 +220,11 @@ class SalesReportController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
         $userId = $user->name ?? $user->username;
-        
+
         $query = Penjualan::with(['penjualanDetails', 'pelanggan'])
             ->where('dibuat_oleh', $userId)
             ->whereIn('status_bayar', ['Lunas', 'Belum Lunas']);
-        
+
         // Apply search filter
         if ($request->has('search') && !empty($request->search['value'])) {
             $searchValue = $request->search['value'];
@@ -237,25 +237,25 @@ class SalesReportController extends Controller
                   });
             });
         }
-        
+
         // Get total count before pagination (more efficient)
         $totalRecords = $query->count();
-        
+
         // Apply pagination
         $start = $request->start ?? 0;
         $length = $request->length ?? 25;
-        
+
         $sales = $query->orderBy('date_created', 'desc')
             ->offset($start)
             ->limit($length)
             ->get();
-        
+
         $data = $sales->map(function ($sale) {
             $itemCount = $sale->penjualanDetails->sum('qty');
             $totalAmount = $sale->penjualanDetails->sum(function ($item) {
                 return ($item->harga_jual * $item->qty) - $item->diskon;
             });
-            
+
             return [
                 'id' => $sale->kd_penjualan,
                 'invoice_number' => $sale->no_faktur_penjualan,
@@ -270,7 +270,7 @@ class SalesReportController extends Controller
                 'status_bayar' => $sale->status_bayar
             ];
         });
-        
+
         return response()->json([
             'draw' => intval($request->draw),
             'recordsTotal' => $totalRecords,
@@ -278,7 +278,7 @@ class SalesReportController extends Controller
             'data' => $data
         ]);
     }
-    
+
     /**
      * API endpoint for All Sales DataTable server-side processing
      */
@@ -288,10 +288,10 @@ class SalesReportController extends Controller
         if (!$user) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-        
+
         $query = Penjualan::with(['penjualanDetails', 'pelanggan'])
             ->whereIn('status_bayar', ['Lunas', 'Belum Lunas']);
-        
+
         // Apply search filter
         if ($request->has('search') && !empty($request->search['value'])) {
             $searchValue = $request->search['value'];
@@ -304,25 +304,25 @@ class SalesReportController extends Controller
                   });
             });
         }
-        
+
         // Get total count before pagination (more efficient)
         $totalRecords = $query->count();
-        
+
         // Apply pagination
         $start = $request->start ?? 0;
         $length = $request->length ?? 50;
-        
+
         $sales = $query->orderBy('date_created', 'desc')
             ->offset($start)
             ->limit($length)
             ->get();
-        
+
         $data = $sales->map(function ($sale) {
             $itemCount = $sale->penjualanDetails->sum('qty');
             $totalAmount = $sale->penjualanDetails->sum(function ($item) {
                 return ($item->harga_jual * $item->qty) - $item->diskon;
             });
-            
+
             return [
                 'id' => $sale->kd_penjualan,
                 'invoice_number' => $sale->no_faktur_penjualan,
@@ -338,7 +338,7 @@ class SalesReportController extends Controller
                 'status_bayar' => $sale->status_bayar
             ];
         });
-        
+
         return response()->json([
             'draw' => intval($request->draw),
             'recordsTotal' => $totalRecords,
@@ -346,74 +346,107 @@ class SalesReportController extends Controller
             'data' => $data
         ]);
     }
-    
+
     /**
      * Calculate stats for My Sales page with caching
      */
     private function calculateMySalesStats($userId)
     {
         $cacheKey = "my_sales_stats_{$userId}";
-        
+
         return cache()->remember($cacheKey, 300, function() use ($userId) { // Cache for 5 minutes
             $query = Penjualan::with(['penjualanDetails'])
                 ->where('dibuat_oleh', $userId)
                 ->whereIn('status_bayar', ['Lunas', 'Belum Lunas']);
-            
+
             $totalTransactions = $query->count();
-            
-            // Use database aggregation for better performance
-            $revenueData = $query->get()->reduce(function ($carry, $sale) {
+
+            // Fetch all sales data once for all-time calculations
+            $allSales = $query->get();
+
+            // Calculate All Time Revenue for Average Sale calculation
+            $allTimeRevenue = $allSales->reduce(function ($carry, $sale) {
                 $saleTotal = $sale->penjualanDetails->sum(function ($item) {
                     return ($item->harga_jual * $item->qty) - $item->diskon;
                 });
                 return $carry + $saleTotal;
             }, 0);
-            
-            $totalItems = $query->get()->sum(function ($sale) {
+
+            // Calculate Today's Revenue
+            $today = Carbon::today();
+            $todayQuery = Penjualan::with(['penjualanDetails'])
+                ->where('dibuat_oleh', $userId)
+                ->whereIn('status_bayar', ['Lunas', 'Belum Lunas'])
+                ->whereDate('date_created', $today);
+
+            $todayRevenueData = $todayQuery->get()->reduce(function ($carry, $sale) {
+                $saleTotal = $sale->penjualanDetails->sum(function ($item) {
+                    return ($item->harga_jual * $item->qty) - $item->diskon;
+                });
+                return $carry + $saleTotal;
+            }, 0);
+
+            $totalItems = $allSales->sum(function ($sale) {
                 return $sale->penjualanDetails->sum('qty');
             });
-            
-            $averageSale = $totalTransactions > 0 ? $revenueData / $totalTransactions : 0;
-            
+
+            $averageSale = $totalTransactions > 0 ? $allTimeRevenue / $totalTransactions : 0;
+
             return [
                 'total_transactions' => $totalTransactions,
-                'total_revenue' => $revenueData,
+                'total_revenue' => $todayRevenueData, // Use today's revenue
                 'average_sale' => $averageSale,
                 'total_items' => $totalItems
             ];
         });
     }
-    
+
     /**
      * Calculate stats for All Sales page with caching
      */
     private function calculateAllSalesStats()
     {
         $cacheKey = "all_sales_stats";
-        
+
         return cache()->remember($cacheKey, 300, function() { // Cache for 5 minutes
             $query = Penjualan::with(['penjualanDetails'])
                 ->whereIn('status_bayar', ['Lunas', 'Belum Lunas']);
-            
+
             $totalTransactions = $query->count();
-            
-            // Use database aggregation for better performance
-            $revenueData = $query->get()->reduce(function ($carry, $sale) {
+
+            // Fetch all sales data once for all-time calculations
+            $allSales = $query->get();
+
+            // Calculate All Time Revenue for Average Sale calculation
+            $allTimeRevenue = $allSales->reduce(function ($carry, $sale) {
                 $saleTotal = $sale->penjualanDetails->sum(function ($item) {
                     return ($item->harga_jual * $item->qty) - $item->diskon;
                 });
                 return $carry + $saleTotal;
             }, 0);
-            
-            $totalItems = $query->get()->sum(function ($sale) {
+
+            // Calculate Today's Revenue
+            $today = Carbon::today();
+            $todayQuery = Penjualan::with(['penjualanDetails'])
+                ->whereIn('status_bayar', ['Lunas', 'Belum Lunas'])
+                ->whereDate('date_created', $today);
+
+            $todayRevenueData = $todayQuery->get()->reduce(function ($carry, $sale) {
+                $saleTotal = $sale->penjualanDetails->sum(function ($item) {
+                    return ($item->harga_jual * $item->qty) - $item->diskon;
+                });
+                return $carry + $saleTotal;
+            }, 0);
+
+            $totalItems = $allSales->sum(function ($sale) {
                 return $sale->penjualanDetails->sum('qty');
             });
-            
-            $averageSale = $totalTransactions > 0 ? $revenueData / $totalTransactions : 0;
-            
+
+            $averageSale = $totalTransactions > 0 ? $allTimeRevenue / $totalTransactions : 0;
+
             return [
                 'total_transactions' => $totalTransactions,
-                'total_revenue' => $revenueData,
+                'total_revenue' => $todayRevenueData, // Use today's revenue
                 'average_sale' => $averageSale,
                 'total_items' => $totalItems
             ];

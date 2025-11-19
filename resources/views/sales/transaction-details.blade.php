@@ -38,9 +38,10 @@
                         <span id="current-lang" class="text-sm font-medium">EN</span>
                     </button>
 
-                    <!-- Close Button -->
-                    <button onclick="window.close()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all">
-                        <span data-en="Close" data-id="Tutup">Close</span>
+                    <!-- Back Button -->
+                    <button onclick="history.back()" class="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all">
+                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        <span data-en="Back" data-id="Kembali">Back</span>
                     </button>
                 </div>
             </div>
