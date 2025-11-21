@@ -216,79 +216,51 @@
                 </div>
                 <div class="p-4">
                     @if($stokMutations->count() > 0)
-                        <div class="grid grid-cols-1 {{ $stokMutations->count() >= 3 ? 'md:grid-cols-2 lg:grid-cols-3' : 'md:grid-cols-1' }} gap-3">
-                            @foreach($stokMutations as $mutation)
-                                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                                    @if($stokMutations->count() >= 3)
-                                        <!-- Vertical layout for 3+ items -->
-                                        <div class="space-y-2">
-                                            <h4 class="font-medium text-gray-900 text-sm truncate" title="{{ $mutation->produk->nama_produk ?? 'Unknown Product' }}">{{ $mutation->produk->nama_produk ?? 'Unknown Product' }}</h4>
-
-                                            <div class="space-y-1">
-                                                <div class="flex justify-between items-center">
-                                                    <span class="text-xs text-gray-500" data-en="Ref" data-id="Ref">Ref:</span>
-                                                    <span class="text-xs text-gray-600 font-medium">{{ $mutation->no_ref }}</span>
-                                                </div>
-                                                <div class="flex justify-between items-center">
-                                                    <span class="text-xs text-gray-500" data-en="Class" data-id="Klas">Class:</span>
-                                                    <span class="text-xs text-gray-600">{{ $mutation->klasifikasi }}</span>
-                                                </div>
-                                                <div class="flex justify-between items-center">
-                                                    <span class="text-xs text-gray-500">Date:</span>
-                                                    <span class="text-xs text-gray-600">{{ \Carbon\Carbon::parse($mutation->date_created)->format('d M H:i') }}</span>
-                                                </div>
-                                            </div>
-
-                                            <div class="flex justify-center space-x-4 pt-2 border-t border-gray-200">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-en="Product" data-id="Produk">Product</th>
+                                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-en="Ref" data-id="Ref">Ref / Class</th>
+                                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-en="Date" data-id="Tanggal">Date</th>
+                                        <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" data-en="In" data-id="Masuk">In</th>
+                                        <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" data-en="Out" data-id="Keluar">Out</th>
+                                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-en="Note" data-id="Catatan">Note</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @foreach($stokMutations as $mutation)
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                {{ $mutation->produk->nama_produk ?? 'Unknown Product' }}
+                                            </td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                                                <span class="font-medium text-gray-700">{{ $mutation->no_ref }}</span>
+                                            </td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                                                {{ \Carbon\Carbon::parse($mutation->date_created)->format('d M H:i') }}
+                                            </td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-center">
                                                 @if($mutation->masuk > 0)
-                                                    <div class="text-green-600 text-center">
-                                                        <div class="text-xs" data-en="In" data-id="Masuk">In</div>
-                                                        <div class="font-bold text-sm">{{ $mutation->masuk }}</div>
-                                                    </div>
+                                                    <span class="font-bold text-green-600">{{ $mutation->masuk }}</span>
+                                                @else
+                                                    -
                                                 @endif
+                                            </td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-center">
                                                 @if($mutation->keluar > 0)
-                                                    <div class="text-red-600 text-center">
-                                                        <div class="text-xs" data-en="Out" data-id="Keluar">Out</div>
-                                                        <div class="font-bold text-sm">{{ $mutation->keluar }}</div>
-                                                    </div>
+                                                    <span class="font-bold text-red-600">{{ $mutation->keluar }}</span>
+                                                @else
+                                                    -
                                                 @endif
-                                            </div>
-                                        </div>
-                                    @else
-                                        <!-- Horizontal layout for 1-2 items -->
-                                        <div class="flex items-center justify-between">
-                                            <div class="flex-1 min-w-0">
-                                                <h4 class="font-medium text-gray-900 text-sm truncate" title="{{ $mutation->produk->nama_produk ?? 'Unknown Product' }}">{{ $mutation->produk->nama_produk ?? 'Unknown Product' }}</h4>
-                                                <div class="flex items-center space-x-4 mt-1">
-                                                    <span class="text-xs text-gray-500" data-en="Ref" data-id="Ref">Ref: {{ $mutation->no_ref }}</span>
-                                                    <span class="text-xs text-gray-500" data-en="Class" data-id="Klas">Class: {{ $mutation->klasifikasi }}</span>
-                                                    <span class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($mutation->date_created)->format('d M H:i') }}</span>
-                                                </div>
-                                            </div>
-                                            <div class="flex items-center space-x-3 ml-4">
-                                                @if($mutation->masuk > 0)
-                                                    <div class="text-green-600 text-sm">
-                                                        <span class="text-xs" data-en="In" data-id="Masuk">In:</span>
-                                                        <span class="font-bold">{{ $mutation->masuk }}</span>
-                                                    </div>
-                                                @endif
-                                                @if($mutation->keluar > 0)
-                                                    <div class="text-red-600 text-sm">
-                                                        <span class="text-xs" data-en="Out" data-id="Keluar">Out:</span>
-                                                        <span class="font-bold">{{ $mutation->keluar }}</span>
-                                                    </div>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    @endif
-
-                                    @if($mutation->catatan)
-                                        <div class="mt-2 p-2 bg-white rounded border-l-2 border-blue-200">
-                                            <p class="text-xs text-gray-700">{{ $mutation->catatan }}</p>
-                                        </div>
-                                    @endif
-                                </div>
-                            @endforeach
+                                            </td>
+                                            <td class="px-4 py-2 text-sm text-gray-700 max-w-xs truncate">
+                                                {{ $mutation->catatan ?? '-' }}
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
                     @else
                         <div class="text-center py-8">

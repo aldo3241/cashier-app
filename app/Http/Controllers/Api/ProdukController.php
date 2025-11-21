@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Produk;
 use App\Models\ProdukJenis;
 use Illuminate\Http\Request;
+use App\Services\CartService;
+use App\Models\PenjualanDetail;
+use Illuminate\Support\Facades\DB;
 
 class ProdukController extends Controller
 {
@@ -58,7 +61,7 @@ class ProdukController extends Controller
     {
         try {
             $barcode = $request->get('barcode');
-            
+
             $product = Produk::with('produkJenis')
                 ->where(function($query) use ($barcode) {
                     $query->where('kd_int', $barcode)
@@ -149,7 +152,7 @@ class ProdukController extends Controller
             ]);
 
             $product = Produk::find($request->product_id);
-            
+
             if (!$product) {
                 return response()->json([
                     'success' => false,
