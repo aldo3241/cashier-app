@@ -45,8 +45,8 @@ class ReceiptController extends Controller
     public function printLatest(Request $request)
     {
         $userId = auth()->id();
-        
-        $transaction = Penjualan::with(['penjualanDetails.produk', 'pelanggan'])
+
+        $transaction = Penjualan::with(['penjualanDetails.produk', 'pelanggan', 'cashier'])
             ->where('dibuat_oleh', $userId)
             ->where('status_bayar', 'Lunas')
             ->latest('date_created')

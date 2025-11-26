@@ -104,6 +104,13 @@ class Penjualan extends Model
     {
         return $this->hasMany(PenjualanDetail::class, 'kd_penjualan', 'kd_penjualan');
     }
+    /**
+     * Get the user (cashier) who created the sale.
+     */
+    public function cashier()
+    {
+        return $this->belongsTo(User::class, 'dibuat_oleh', 'username');
+    }
 
     /**
      * Boot the model.

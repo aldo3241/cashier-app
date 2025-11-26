@@ -46,27 +46,27 @@
                     <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label for="nama" class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
-                                <input type="text" id="nama" name="nama" value="{{ old('nama', $user->nama) }}" 
+                                <input type="text" id="nama" name="nama" value="{{ old('nama', $user->nama) }}"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             </div>
-                            
+
                             <div>
                                 <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
-                                <input type="text" id="username" value="{{ $user->username }}" 
+                                <input type="text" id="username" value="{{ $user->username }}"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100" readonly>
                                 <p class="text-xs text-gray-500 mt-1">Username tidak dapat diubah</p>
                             </div>
-                            
+
                             <div>
                                 <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                                <input type="email" id="email" name="email" value="{{ old('email', $user->email) }}" 
+                                <input type="email" id="email" name="email" value="{{ old('email', $user->email) }}"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             </div>
-                            
+
                             <div>
                                 <label for="photo_profile" class="block text-sm font-medium text-gray-700 mb-2">Foto Profil</label>
                                 <input type="file" id="photo_profile" name="photo_profile" accept="image/*"
@@ -76,7 +76,7 @@
                                 @endif
                             </div>
                         </div>
-                        
+
                         <div class="mt-6">
                             <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                                 Simpan Perubahan
@@ -90,27 +90,27 @@
                     <h2 class="text-xl font-semibold text-gray-800 mb-4">Ubah Password</h2>
                     <form method="POST" action="{{ route('change-password.update') }}">
                         @csrf
-                        
+
                         <div class="space-y-4">
                             <div>
                                 <label for="current_password" class="block text-sm font-medium text-gray-700 mb-2">Password Lama</label>
                                 <input type="password" id="current_password" name="current_password" required
                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             </div>
-                            
+
                             <div>
                                 <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password Baru</label>
                                 <input type="password" id="password" name="password" required
                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             </div>
-                            
+
                             <div>
                                 <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">Konfirmasi Password Baru</label>
                                 <input type="password" id="password_confirmation" name="password_confirmation" required
                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             </div>
                         </div>
-                        
+
                         <div class="mt-6">
                             <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
                                 Ubah Password
@@ -129,22 +129,22 @@
                             <span class="text-sm font-medium text-gray-500">ID Pengguna</span>
                             <p class="text-gray-800">{{ $user->kd }}</p>
                         </div>
-                        
+
                         <div>
                             <span class="text-sm font-medium text-gray-500">Dibuat Oleh</span>
                             <p class="text-gray-800">{{ $user->dibuat_oleh ?? 'System' }}</p>
                         </div>
-                        
+
                         <div>
                             <span class="text-sm font-medium text-gray-500">Tanggal Dibuat</span>
                             <p class="text-gray-800">{{ $user->date_created ? $user->date_created->format('d M Y H:i') : 'N/A' }}</p>
                         </div>
-                        
+
                         <div>
                             <span class="text-sm font-medium text-gray-500">Terakhir Diperbarui</span>
                             <p class="text-gray-800">{{ $user->date_updated ? $user->date_updated->format('d M Y H:i') : 'N/A' }}</p>
                         </div>
-                        
+
                         <div>
                             <span class="text-sm font-medium text-gray-500">Email Terverifikasi</span>
                             <p class="text-gray-800">

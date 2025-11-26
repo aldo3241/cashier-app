@@ -240,6 +240,7 @@
 
             <div class="served-by">
                 Dilayani oleh
+                <div>{{ $transaction->cashier->username ?? 'N/A' }}</div>
             </div>
         </div>
     </div>
