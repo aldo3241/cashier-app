@@ -235,11 +235,11 @@
     <!-- Bottom Header - Collapsible -->
     <header id="main-header" class="header-bottom bg-white shadow-lg border-t border-gray-200 transition-all duration-300 ease-in-out">
         <div class="px-6 py-4">
-            <div class="flex justify-between items-center">
+            <div class="flex flex-wrap lg:flex-nowrap justify-start lg:justify-between items-center">
                 <!-- Left: User Info -->
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-3 w-full lg:w-auto py-2">
                     <!-- Profile Dropdown -->
-                    <div class="relative">
+                    <div class="hidden lg:block relative">
                         <button id="profile-dropdown-btn" class="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center hover:from-green-500 hover:to-blue-600 transition-all duration-200 cursor-pointer group" title="Profile Menu">
                             <span class="text-white font-bold text-sm group-hover:scale-110 transition-transform duration-200">{{ substr(auth()->user()->nama ?? auth()->user()->username ?? 'U', 0, 1) }}</span>
                         </button>
@@ -267,14 +267,14 @@
                         </form>
                         </div>
                     </div>
-                    <div class="text-left">
+                    <div class="hidden lg:block text-left">
                         <div class="text-sm text-gray-500" data-en="Logged in as" data-id="Masuk sebagai">Masuk sebagai</div>
                         <div class="font-medium text-gray-800">{{ auth()->user()->nama ?? auth()->user()->username ?? 'User' }}</div>
                     </div>
                 </div>
 
                 <!-- Center: PT Inspizo Multi Inspirasi Logo & Text -->
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-3 w-full justify-center lg:w-auto lg:justify-start py-2">
                     <div class="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
@@ -287,7 +287,7 @@
                 </div>
 
                 <!-- Right: Current Time & Language -->
-                <div class="flex items-center space-x-4">
+                <div class="hidden lg:flex items-center space-x-4 w-full justify-start lg:justify-end lg:w-auto py-2">
                     <!-- Current Time -->
                     <div class="text-right">
                         <div class="text-sm text-gray-500" data-en="Current Time" data-id="Waktu Saat Ini">Current Time</div>
@@ -334,23 +334,10 @@
                                 id="product-search"
                                 placeholder="Search products by name, barcode, or category..."
                                 data-en-placeholder="Search products by name, barcode, or category..."
-                                data-id-placeholder="Cari produk berdasarkan nama, barcode, atau kategori..."
+                                data-id-placeholder="Cari produk"
                                 class="w-full text-xl font-medium text-gray-800 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue-500 pl-12 pr-4 py-4 bg-gray-50 rounded-lg"
                                 autocomplete="off"
                             >
-                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                                <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                                    <rect x="2" y="6" width="1.5" height="12" rx="0.5"/>
-                                    <rect x="4.5" y="6" width="1" height="12" rx="0.5"/>
-                                    <rect x="6.5" y="6" width="2" height="12" rx="0.5"/>
-                                    <rect x="9.5" y="6" width="1" height="12" rx="0.5"/>
-                                    <rect x="11.5" y="6" width="1.5" height="12" rx="0.5"/>
-                                    <rect x="14" y="6" width="1" height="12" rx="0.5"/>
-                                    <rect x="16" y="6" width="2" height="12" rx="0.5"/>
-                                    <rect x="19" y="6" width="1" height="12" rx="0.5"/>
-                                    <rect x="21" y="6" width="1.5" height="12" rx="0.5"/>
-                                    </svg>
-                            </div>
                         </div>
 
                         <!-- Search Suggestions -->
@@ -372,23 +359,27 @@
                         </div>
                     </div>
 
-                    <!-- Cart Header -->
-                    <div class="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200 text-sm font-semibold text-gray-600">
-                        <div class="col-span-5" data-en="Product" data-id="Produk">Product</div>
-                        <div class="col-span-2 text-right" data-en="Price" data-id="Harga">Price</div>
-                        <div class="col-span-2 text-center" data-en="Qty" data-id="Jml">Qty</div>
-                        <div class="col-span-2 text-right" data-en="Total" data-id="Total">Total</div>
-                        <div class="col-span-1 text-center" data-en="Action" data-id="Aksi">Action</div>
-                    </div>
+                    <!-- Start Responsive Table Wrapper for Horizontal Scroll on Mobile -->
+                    <div class="flex-1 min-h-0 overflow-y-auto overflow-x-auto">
 
-                    <!-- Cart Items -->
-                    <div id="cart-items" class="flex-1 overflow-y-auto">
-                        <div class="p-8 text-center text-gray-500">
-                            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
-                            </svg>
-                            <p class="text-lg font-medium" data-en="Your cart is empty" data-id="Keranjang Anda kosong">Your cart is empty</p>
-                            <p class="text-sm" data-en="Start by searching for products above" data-id="Mulai dengan mencari produk di atas">Start by searching for products above</p>
+                        <!-- Cart Header -->
+                        <div class="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200 text-sm font-semibold text-gray-600 min-w-[700px] lg:min-w-full sticky top-0 z-10">
+                            <div class="col-span-5" data-en="Product" data-id="Produk">Product</div>
+                            <div class="col-span-2 text-right" data-en="Price" data-id="Harga">Price</div>
+                            <div class="col-span-2 text-center" data-en="Qty" data-id="Jml">Qty</div>
+                            <div class="col-span-2 text-right" data-en="Total" data-id="Total">Total</div>
+                            <div class="col-span-1 text-center" data-en="Action" data-id="Aksi">Action</div>
+                        </div>
+
+                        <!-- Cart Items -->
+                        <div id="cart-items" class="">
+                            <div class="p-8 text-center text-gray-500 min-w-[700px] lg:min-w-full">
+                                <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+                                </svg>
+                                <p class="text-lg font-medium" data-en="Your cart is empty" data-id="Keranjang Anda kosong">Your cart is empty</p>
+                                <p class="text-sm" data-en="Start by searching for products above" data-id="Mulai dengan mencari produk di atas">Start by searching for products above</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -922,7 +913,7 @@
 
             // Render cart items
             cartItemsContainer.innerHTML = cart.map(item => `
-                <div class="cart-item grid grid-cols-12 gap-4 p-4 border-b border-gray-100">
+                <div class="cart-item grid grid-cols-12 gap-4 p-4 border-b border-gray-100 min-w-[700px] lg:min-w-full">
                     <div class="col-span-5">
                         <div class="font-medium text-gray-800">${item.nama_produk}</div>
                         <div class="text-sm text-gray-500">${item.produk_jenis || 'General'}</div>

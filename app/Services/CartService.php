@@ -263,6 +263,16 @@ class CartService
                 $cart = $this->getActiveCart($userId, $customerId);
             }
 
+            if (!$cart) {
+                DB::commit();
+                return [
+                    'success' => true,
+                    'message' => 'No active cart found to clear.',
+                    'cart_id' => null,
+                    'items' => []
+                ];
+            }
+
             // Delete all cart items first
             PenjualanDetail::where('kd_penjualan', $cart->kd_penjualan)->delete();
 
