@@ -352,51 +352,39 @@ class SalesReportController extends Controller
      */
     private function calculateMySalesStats($userId)
     {
-        $cacheKey = "my_sales_stats_{$userId}";
+        $today = Carbon::today()->format('Ymd');
+        $cacheKey = "my_sales_stats_{$userId}_{$today}"; // Make cache key day-specific
 
         return cache()->remember($cacheKey, 300, function() use ($userId) { // Cache for 5 minutes
-            $query = Penjualan::with(['penjualanDetails'])
-                ->where('dibuat_oleh', $userId)
-                ->whereIn('status_bayar', ['Lunas', 'Belum Lunas']);
-
-            $totalTransactions = $query->count();
-
-            // Fetch all sales data once for all-time calculations
-            $allSales = $query->get();
-
-            // Calculate All Time Revenue for Average Sale calculation
-            $allTimeRevenue = $allSales->reduce(function ($carry, $sale) {
-                $saleTotal = $sale->penjualanDetails->sum(function ($item) {
-                    return ($item->harga_jual * $item->qty) - $item->diskon;
-                });
-                return $carry + $saleTotal;
-            }, 0);
-
-            // Calculate Today's Revenue
             $today = Carbon::today();
-            $todayQuery = Penjualan::with(['penjualanDetails'])
+
+            // All stats are based on today's transactions
+            $todaySalesQuery = Penjualan::with(['penjualanDetails'])
                 ->where('dibuat_oleh', $userId)
                 ->whereIn('status_bayar', ['Lunas', 'Belum Lunas'])
                 ->whereDate('date_created', $today);
 
-            $todayRevenueData = $todayQuery->get()->reduce(function ($carry, $sale) {
+            $totalTransactionsToday = $todaySalesQuery->count();
+            $todaySales = $todaySalesQuery->get();
+
+            $todayRevenueData = $todaySales->reduce(function ($carry, $sale) {
                 $saleTotal = $sale->penjualanDetails->sum(function ($item) {
                     return ($item->harga_jual * $item->qty) - $item->diskon;
                 });
                 return $carry + $saleTotal;
             }, 0);
 
-            $totalItems = $allSales->sum(function ($sale) {
+            $totalItemsToday = $todaySales->sum(function ($sale) {
                 return $sale->penjualanDetails->sum('qty');
             });
 
-            $averageSale = $totalTransactions > 0 ? $allTimeRevenue / $totalTransactions : 0;
+            $averageSale = $totalTransactionsToday > 0 ? $todayRevenueData / $totalTransactionsToday : 0;
 
             return [
-                'total_transactions' => $totalTransactions,
-                'total_revenue' => $todayRevenueData, // Use today's revenue
+                'total_transactions' => $totalTransactionsToday,
+                'total_revenue' => $todayRevenueData,
                 'average_sale' => $averageSale,
-                'total_items' => $totalItems
+                'total_items' => $totalItemsToday
             ];
         });
     }
@@ -406,49 +394,38 @@ class SalesReportController extends Controller
      */
     private function calculateAllSalesStats()
     {
-        $cacheKey = "all_sales_stats";
+        $today = Carbon::today()->format('Ymd');
+        $cacheKey = "all_sales_stats_{$today}"; // Make cache key day-specific
 
         return cache()->remember($cacheKey, 300, function() { // Cache for 5 minutes
-            $query = Penjualan::with(['penjualanDetails'])
-                ->whereIn('status_bayar', ['Lunas', 'Belum Lunas']);
-
-            $totalTransactions = $query->count();
-
-            // Fetch all sales data once for all-time calculations
-            $allSales = $query->get();
-
-            // Calculate All Time Revenue for Average Sale calculation
-            $allTimeRevenue = $allSales->reduce(function ($carry, $sale) {
-                $saleTotal = $sale->penjualanDetails->sum(function ($item) {
-                    return ($item->harga_jual * $item->qty) - $item->diskon;
-                });
-                return $carry + $saleTotal;
-            }, 0);
-
-            // Calculate Today's Revenue
             $today = Carbon::today();
-            $todayQuery = Penjualan::with(['penjualanDetails'])
+
+            // All stats are based on today's transactions
+            $todaySalesQuery = Penjualan::with(['penjualanDetails'])
                 ->whereIn('status_bayar', ['Lunas', 'Belum Lunas'])
                 ->whereDate('date_created', $today);
 
-            $todayRevenueData = $todayQuery->get()->reduce(function ($carry, $sale) {
+            $totalTransactionsToday = $todaySalesQuery->count();
+            $todaySales = $todaySalesQuery->get();
+
+            $todayRevenueData = $todaySales->reduce(function ($carry, $sale) {
                 $saleTotal = $sale->penjualanDetails->sum(function ($item) {
                     return ($item->harga_jual * $item->qty) - $item->diskon;
                 });
                 return $carry + $saleTotal;
             }, 0);
 
-            $totalItems = $allSales->sum(function ($sale) {
+            $totalItemsToday = $todaySales->sum(function ($sale) {
                 return $sale->penjualanDetails->sum('qty');
             });
 
-            $averageSale = $totalTransactions > 0 ? $allTimeRevenue / $totalTransactions : 0;
+            $averageSale = $totalTransactionsToday > 0 ? $todayRevenueData / $totalTransactionsToday : 0;
 
             return [
-                'total_transactions' => $totalTransactions,
-                'total_revenue' => $todayRevenueData, // Use today's revenue
+                'total_transactions' => $totalTransactionsToday,
+                'total_revenue' => $todayRevenueData,
                 'average_sale' => $averageSale,
-                'total_items' => $totalItems
+                'total_items' => $totalItemsToday
             ];
         });
     }

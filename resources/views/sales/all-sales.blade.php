@@ -74,10 +74,82 @@
             color: #c2410c;
         }
     </style>
+
+    <style>
+        /* Shared Responsive Styles */
+        body {
+            margin: 0;
+            padding: 0;
+            padding-top: 60px; /* Space for mobile top header */
+        }
+
+        @media (min-width: 1024px) {
+            body {
+                padding-top: 0;
+            }
+        }
+
+        /* Mobile Menu Drawer Styles (from cashier.blade.php) */
+        .mobile-drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 80%;
+            max-width: 320px;
+            height: 100%;
+            z-index: 9000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-out;
+            box-shadow: -4px 0 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-drawer.open {
+            transform: translateX(0);
+        }
+
+        .mobile-drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.4);
+            z-index: 8999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-out;
+        }
+
+        .mobile-drawer-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <!-- Mobile Top Header (Visible on small screens) -->
+    <header id="mobile-top-header" class="fixed top-0 left-0 right-0 lg:hidden bg-white shadow-md z-40 px-4 py-3">
+        <div class="flex justify-between items-center">
+            <!-- Logo/Title Center -->
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-md flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+                    </svg>
+                </div>
+                <h1 class="text-xl font-bold text-gray-800">Spiritosanto</h1>
+            </div>
+            <!-- Menu Toggle Right -->
+            <button id="mobile-menu-btn" class="p-2 rounded-full hover:bg-gray-100 transition-colors" aria-label="Open menu">
+                <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
     <!-- Header -->
-    <header class="bg-white shadow-sm border-b border-gray-200">
+    <header class="hidden lg:block bg-white shadow-sm border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div class="flex justify-between items-center">
                 <div class="flex items-center space-x-4">
@@ -123,7 +195,7 @@
                         </svg>
                     </div>
                         <div class="ml-4">
-                            <p class="text-sm text-gray-600" data-en="Total Transactions" data-id="Total Transaksi">Total Transactions</p>
+                            <p class="text-sm text-gray-600" data-en="Total Transactions Today" data-id="Total Transaksi Hari Ini">Total Transactions Today</p>
                             <p class="text-2xl font-bold text-gray-900">{{ $stats['total_transactions'] }}</p>
                         </div>
                 </div>
@@ -151,7 +223,7 @@
                         </svg>
                     </div>
                         <div class="ml-4">
-                            <p class="text-sm text-gray-600" data-en="Average Sale" data-id="Rata-rata Penjualan">Average Sale</p>
+                            <p class="text-sm text-gray-600" data-en="Average Sale Today" data-id="Rata-rata Penjualan Hari Ini">Average Sale Today</p>
                             <p class="text-2xl font-bold text-purple-600">Rp {{ number_format($stats['average_sale'], 0, ',', '.') }}</p>
                         </div>
                 </div>
@@ -165,7 +237,7 @@
                         </svg>
                     </div>
                         <div class="ml-4">
-                            <p class="text-sm text-gray-600" data-en="Total Items" data-id="Total Item">Total Items</p>
+                            <p class="text-sm text-gray-600" data-en="Total Items Sold Today" data-id="Total Item Terjual Hari Ini">Total Items Sold Today</p>
                             <p class="text-2xl font-bold text-orange-600">{{ $stats['total_items'] }}</p>
                         </div>
                 </div>
@@ -212,26 +284,123 @@
         </div>
     </main>
 
+    <!-- Mobile Menu Drawer (Right Tab) -->
+    <div id="mobile-menu-overlay" class="mobile-drawer-overlay lg:hidden" onclick="closeMobileMenu()"></div>
+    <div id="mobile-menu-drawer" class="mobile-drawer lg:hidden bg-white flex flex-col justify-between">
+        <div class="p-4 flex-1 overflow-y-auto">
+            <h3 class="text-xl font-bold text-gray-800 border-b pb-3 mb-4" data-en="Navigation" data-id="Navigasi">Navigation</h3>
+            <div class="space-y-2">
+                <!-- Top Navigation Links -->
+                <a href="{{ route('sales.my-sales') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 transition-colors group">
+                    <svg class="w-6 h-6 text-blue-500 group-hover:text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                    <span class="text-gray-700 font-medium" data-en="My Sales" data-id="Penjualan Saya">My Sales</span>
+                </a>
+                <a href="{{ route('sales.all-sales') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 transition-colors group">
+                    <svg class="w-6 h-6 text-purple-500 group-hover:text-purple-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c1.657 0 3 .895 3 2s-1.343 2-3 2-3-.895-3-2 1.343-2 3-2zM9 17v-4h6v4m-6 0h6m-6 4h6a2 2 0 002-2v-4a2 2 0 00-2-2h-6a2 2 0 00-2 2v4a2 2 0 002 2z"></path>
+                    </svg>
+                    <span class="text-gray-700 font-medium" data-en="All Sales" data-id="Semua Penjualan">All Sales</span>
+                </a>
+                <a href="{{ route('profile') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 transition-colors group">
+                    <svg class="w-6 h-6 text-green-500 group-hover:text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    <span class="text-gray-700 font-medium" data-en="Account Profile" data-id="Profil Akun">Account Profile</span>
+                </a>
+
+                <!-- Settings Link (Placeholder if needed) -->
+                <button class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 transition-colors group">
+                    <svg class="w-6 h-6 text-yellow-500 group-hover:text-yellow-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <span class="text-gray-700 font-medium" data-en="Settings (Placeholder)" data-id="Pengaturan (Placeholder)">Settings (Placeholder)</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Bottom: Language Switch and Logout -->
+        <div class="p-4 border-t border-gray-200">
+             <!-- Language Switcher (Copied from desktop header, modified to be full width) -->
+            <button id="mobile-language-toggle" class="w-full flex items-center justify-between space-x-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all mb-4" title="Change Language">
+                <div class="flex items-center space-x-2">
+                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path>
+                    </svg>
+                    <span class="text-sm font-medium text-gray-700" data-en="Switch Language" data-id="Ganti Bahasa">Switch Language</span>
+                </div>
+                <span id="mobile-current-lang" class="text-sm font-semibold text-blue-600">ID</span>
+            </button>
+
+            <!-- Logout Button -->
+            <form method="POST" action="{{ route('logout') }}" class="block w-full">
+                @csrf
+                <button type="submit" class="flex items-center w-full px-3 py-2 text-sm text-white bg-red-500 hover:bg-red-600 font-semibold rounded-lg transition-colors">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                    </svg>
+                    <span data-en="Logout" data-id="Keluar">Logout</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- jQuery & DataTables JS -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
 
     <script>
+        // Language helper function
+        function getText(enText, idText) {
+            return currentLanguage === 'id' ? idText : enText;
+        }
+
+        // Mobile Menu Drawer Functionality (Shared)
+        window.openMobileMenu = function() {
+            const mobileMenuDrawer = document.getElementById('mobile-menu-drawer');
+            const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+            if (mobileMenuDrawer && mobileMenuOverlay) {
+                mobileMenuDrawer.classList.add('open');
+                mobileMenuOverlay.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        window.closeMobileMenu = function() {
+            const mobileMenuDrawer = document.getElementById('mobile-menu-drawer');
+            const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+            if (mobileMenuDrawer && mobileMenuOverlay) {
+                mobileMenuDrawer.classList.remove('open');
+                mobileMenuOverlay.classList.remove('open');
+                document.body.style.overflow = '';
+            }
+        }
+
         // Language switcher with persistence
         let currentLanguage = localStorage.getItem('language') || 'id'; // Default to Indonesian
 
-        document.getElementById('language-toggle').addEventListener('click', function() {
+        const desktopLangToggle = document.getElementById('language-toggle');
+        const mobileLangToggle = document.getElementById('mobile-language-toggle');
+
+        function toggleLanguageHandler() {
             currentLanguage = currentLanguage === 'en' ? 'id' : 'en';
             localStorage.setItem('language', currentLanguage);
             updateLanguage();
-        });
+        }
+
+        if (desktopLangToggle) desktopLangToggle.addEventListener('click', toggleLanguageHandler);
+        if (mobileLangToggle) mobileLangToggle.addEventListener('click', toggleLanguageHandler);
 
         function updateLanguage() {
             const langButton = document.getElementById('current-lang');
+            const mobileLangButton = document.getElementById('mobile-current-lang');
             const elements = document.querySelectorAll('[data-en], [data-id]');
 
-            langButton.textContent = currentLanguage.toUpperCase();
+            if (langButton) langButton.textContent = currentLanguage.toUpperCase();
+            if (mobileLangButton) mobileLangButton.textContent = currentLanguage.toUpperCase();
 
             elements.forEach(element => {
                 if (element.hasAttribute(`data-${currentLanguage}`)) {
@@ -275,6 +444,12 @@
         // Initialize DataTable with server-side processing
         $(document).ready(function() {
             try {
+                 // Attach event listener for mobile menu button
+                const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+                if (mobileMenuBtn) {
+                    mobileMenuBtn.addEventListener('click', window.openMobileMenu);
+                }
+
                 console.log('Initializing DataTable with server-side processing...');
 
                 // Show loading indicator

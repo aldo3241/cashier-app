@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Services\CartService;
 use App\Models\Penjualan;
+use App\Http\Controllers\SalesReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -278,6 +279,9 @@ class CartController extends Controller
             $statusBarang = $request->get('status_barang', 'diterima langsung');
 
             $result = $this->cartService->checkoutCart($userId, $customerId, $paymentMethod, $totalBayar, $catatan, $statusBarang, $cartId);
+
+            // Clear statistics cache for accurate daily reporting
+            SalesReportController::clearStatsCache($userId);
 
             return response()->json([
                 'success' => true,
