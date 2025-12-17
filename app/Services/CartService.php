@@ -9,6 +9,7 @@ use App\Models\Stok;
 use App\Models\Pelanggan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class CartService
 {
@@ -25,6 +26,11 @@ class CartService
             ->with(['penjualanDetails.produk'])
             ->first();
 
+        if (!$cart) {
+            // Create new draft cart
+            $cart = $this->createDraftCart($userId, $customerId);
+        }
+
         return $cart;
     }
 
@@ -33,15 +39,8 @@ class CartService
      */
     public function createFreshCart($userId, $customerId = 1)
     {
-        // Delete any existing draft cart for this user/customer combination
-        Penjualan::where('dibuat_oleh', $userId)
-            ->where('kd_pelanggan', $customerId)
-            ->where('status_bayar', 'Belum Lunas')
-            ->where('status_barang', 'Draft')
-            ->delete();
-
-        // Return null, forcing lazy creation on first item add
-        return null;
+        // Always create a new draft cart, don't look for existing ones
+        return $this->createDraftCart($userId, $customerId);
     }
 
     /**
@@ -67,8 +66,10 @@ class CartService
      */
     public function createDraftCart($userId, $customerId = 1)
     {
-        // Generate invoice number (kd_penjualan will be auto-generated)
+        // Generate invoice number ONCE when creating the draft
         $invoiceNumber = \App\Models\Penjualan::generateNewInvoiceNumber($userId);
+
+        Log::info("CartService: Draft cart created with invoice number: {$invoiceNumber} for user {$userId}");
 
         return Penjualan::create([
             'no_faktur_penjualan' => $invoiceNumber,
@@ -95,16 +96,11 @@ class CartService
     {
         return DB::transaction(function() use ($userId, $customerId, $productId, $qty, $cartId) {
 
-            // Get specific cart if provided, otherwise get active cart
+            // Get specific cart if provided, otherwise get or create active cart
             if ($cartId) {
                 $cart = $this->getCartById($cartId, $userId);
             } else {
                 $cart = $this->getActiveCart($userId, $customerId);
-            }
-
-            // If no cart exists (because getActiveCart returned null), create a new draft cart (lazy creation).
-            if (!$cart) {
-                $cart = $this->createDraftCart($userId, $customerId);
             }
 
             // Lock the product for stock validation to prevent race conditions
@@ -133,12 +129,12 @@ class CartService
                 }
 
                 $existingItem->qty = $newQty;
-                $existingItem->sub_total = ($existingItem->harga_jual * $newQty) - $existingItem->diskon; // Calculate sub_total
+                $existingItem->sub_total = ($existingItem->harga_jual * $newQty) - $existingItem->diskon;
                 $existingItem->laba = ($existingItem->harga_jual - $existingItem->hpp) * $newQty;
                 $existingItem->date_updated = now();
                 $existingItem->save();
             } else {
-                // Create new item
+                // Create new item with the cart's invoice number
                 PenjualanDetail::create([
                     'kd_penjualan' => $cart->kd_penjualan,
                     'kd_produk' => $productId,
@@ -151,12 +147,12 @@ class CartService
                     'harga_jual' => $produk->harga_jual,
                     'qty' => $qty,
                     'diskon' => 0,
-                    'sub_total' => ($produk->harga_jual * $qty) - 0, // Calculate sub_total (assuming 0 discount initially)
+                    'sub_total' => ($produk->harga_jual * $qty) - 0,
                     'laba' => ($produk->harga_jual - ($produk->hpp ?? 0)) * $qty,
                     'status_bayar' => 'Belum Lunas',
                     'catatan' => null,
                     'dibuat_oleh' => $userId,
-                    'no_faktur_penjualan' => $cart->no_faktur_penjualan,
+                    'no_faktur_penjualan' => $cart->no_faktur_penjualan, // Use cart's invoice number
                     'date_created' => now(),
                     'date_updated' => now(),
                 ]);
@@ -207,7 +203,7 @@ class CartService
             }
 
             $item->qty = $qty;
-            $item->sub_total = ($item->harga_jual * $qty) - $item->diskon; // Calculate sub_total
+            $item->sub_total = ($item->harga_jual * $qty) - $item->diskon;
             $item->laba = ($item->harga_jual - $item->hpp) * $qty;
             $item->date_updated = now();
             $item->save();
@@ -263,16 +259,6 @@ class CartService
                 $cart = $this->getActiveCart($userId, $customerId);
             }
 
-            if (!$cart) {
-                DB::commit();
-                return [
-                    'success' => true,
-                    'message' => 'No active cart found to clear.',
-                    'cart_id' => null,
-                    'items' => []
-                ];
-            }
-
             // Delete all cart items first
             PenjualanDetail::where('kd_penjualan', $cart->kd_penjualan)->delete();
 
@@ -313,8 +299,8 @@ class CartService
         $cart->sub_total = $subTotal;
         $cart->pajak = $pajak;
         $cart->total_harga = $totalHarga;
-        $cart->total_bayar = $totalHarga; // Set total_bayar equal to total_harga
-        $cart->lebih_bayar = 0; // Set lebih_bayar to 0
+        $cart->total_bayar = $totalHarga;
+        $cart->lebih_bayar = 0;
         $cart->date_updated = now();
         $cart->save();
     }
@@ -368,24 +354,23 @@ class CartService
     {
         return DB::transaction(function() use ($userId, $customerId, $paymentMethod, $totalBayar, $catatan, $statusBarang, $cartId) {
 
-            // 1. Get specific cart if provided, otherwise get active cart
+            // Get specific cart if provided, otherwise get active cart
             if ($cartId) {
                 $cart = $this->getCartById($cartId, $userId);
             } else {
                 $cart = $this->getActiveCart($userId, $customerId);
             }
 
-            // 2. Reuse the existing draft invoice number. This number was generated
-            //    when the first item was added (CartService::createDraftCart).
-            $finalInvoiceNumber = $cart->no_faktur_penjualan;
+            // Use the EXISTING invoice number from the cart (DO NOT generate a new one)
+            $invoiceNumber = $cart->no_faktur_penjualan;
 
-            // 3. No need to lock for ID or generate ID based invoice number anymore.
+            Log::info("CartService: Checking out cart (ID: {$cart->kd_penjualan}) with invoice number: {$invoiceNumber}");
 
             if ($cart->penjualanDetails->count() == 0) {
                 throw new \Exception('Cart is empty');
             }
 
-            // 4. Validate and update stock for all items with locking
+            // Validate and update stock for all items with locking
             foreach ($cart->penjualanDetails as $item) {
                 // Lock the product for stock update to prevent race conditions
                 $product = Produk::lockForUpdate()->find($item->kd_produk);
@@ -409,16 +394,15 @@ class CartService
                     $item->kd_produk,
                     $item->qty,
                     'Penjualan',
-                    $finalInvoiceNumber,
-                    "Sale: {$finalInvoiceNumber}",
+                    $invoiceNumber,
+                    "Sale: {$invoiceNumber}",
                     $userId
                 );
             }
 
-            // 5. Update cart to completed sale
-            $cart->no_faktur_penjualan = $finalInvoiceNumber;
-            $cart->total_bayar = $cart->total_harga; // total_bayar must be equal to total_harga
-            $cart->lebih_bayar = 0; // lebih_bayar must be 0
+            // Update cart to completed sale (keep the same invoice number)
+            $cart->total_bayar = $cart->total_harga;
+            $cart->lebih_bayar = 0;
             $cart->status_bayar = 'Lunas';
             $cart->keuangan_kotak = $paymentMethod;
             $cart->catatan = $catatan;
@@ -426,21 +410,22 @@ class CartService
             $cart->date_updated = now();
             $cart->save();
 
-            // 6. Update all detail items
+            Log::info("CartService: Cart completed with invoice number: {$invoiceNumber}");
+
+            // Update all detail items status (invoice number already correct from when items were added)
             PenjualanDetail::where('kd_penjualan', $cart->kd_penjualan)
                 ->update([
                     'status_bayar' => 'Lunas',
-                    'no_faktur_penjualan' => $finalInvoiceNumber,
                     'date_updated' => now(),
                 ]);
 
-            // 7. Create financial mutation (mutasi keuangan)
+            // Create financial mutation (mutasi keuangan)
             \App\Models\Keuangan::createSaleMutation($cart);
 
             return [
                 'success' => true,
                 'sale_id' => $cart->kd_penjualan,
-                'invoice_number' => $finalInvoiceNumber,
+                'invoice_number' => $invoiceNumber,
                 'total_harga' => $cart->total_harga,
                 'total_bayar' => $cart->total_bayar,
                 'lebih_bayar' => $cart->lebih_bayar,
@@ -576,4 +561,3 @@ class CartService
         }
     }
 }
-
