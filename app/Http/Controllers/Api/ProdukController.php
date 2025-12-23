@@ -6,9 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Produk;
 use App\Models\ProdukJenis;
 use Illuminate\Http\Request;
-use App\Services\CartService;
-use App\Models\PenjualanDetail;
-use Illuminate\Support\Facades\DB;
 
 class ProdukController extends Controller
 {
@@ -23,7 +20,6 @@ class ProdukController extends Controller
 
             $products = Produk::with('produkJenis')
                 ->search($search)
-                ->inStock()
                 ->limit($limit)
                 ->get()
                 ->map(function($product) {
@@ -68,7 +64,6 @@ class ProdukController extends Controller
                         ->orWhere('kd_ext', $barcode)
                         ->orWhere('kd_produk', $barcode);
                 })
-                ->inStock()
                 ->first();
 
             if (!$product) {
@@ -109,9 +104,7 @@ class ProdukController extends Controller
     {
         try {
             // Get categories from produk_jenis table with product count
-            $categories = ProdukJenis::withCount(['produks' => function($query) {
-                    $query->where('stok_total', '>', 0); // Only count products in stock
-                }])
+            $categories = ProdukJenis::withCount('produks')
                 ->orderByName()
                 ->get()
                 ->map(function($jenis) {
@@ -160,14 +153,7 @@ class ProdukController extends Controller
                 ], 404);
             }
 
-            // Check stock availability for 'keluar' type
-            if ($request->type === 'keluar' && !$product->hasEnoughStock($request->quantity)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Insufficient stock'
-                ], 400);
-            }
-
+            // Allow negative stock - removed the stock check for 'keluar' type
             $product->updateStock($request->quantity, $request->type);
 
             return response()->json([

@@ -109,11 +109,6 @@ class CartService
                 throw new \Exception('Product not found');
             }
 
-            // Check stock availability using the locked product
-            if ($produk->stok_total < $qty) {
-                throw new \Exception("Insufficient stock. Available: {$produk->stok_total}, Requested: {$qty}");
-            }
-
             // Check if item already exists in cart
             $existingItem = PenjualanDetail::where('kd_penjualan', $cart->kd_penjualan)
                 ->where('kd_produk', $productId)
@@ -122,11 +117,6 @@ class CartService
             if ($existingItem) {
                 // Update existing item
                 $newQty = $existingItem->qty + $qty;
-
-                // Check stock again with new total using locked product
-                if ($produk->stok_total < $newQty) {
-                    throw new \Exception("Insufficient stock. Available: {$produk->stok_total}, Requested: {$newQty}");
-                }
 
                 $existingItem->qty = $newQty;
                 $existingItem->sub_total = ($existingItem->harga_jual * $newQty) - $existingItem->diskon;
@@ -187,11 +177,6 @@ class CartService
             $produk = Produk::lockForUpdate()->find($productId);
             if (!$produk) {
                 throw new \Exception('Product not found');
-            }
-
-            // Check stock availability using the locked product
-            if ($produk->stok_total < $qty) {
-                throw new \Exception("Insufficient stock. Available: {$produk->stok_total}, Requested: {$qty}");
             }
 
             $item = PenjualanDetail::where('kd_penjualan', $cart->kd_penjualan)
@@ -377,11 +362,6 @@ class CartService
 
                 if (!$product) {
                     throw new \Exception("Product not found: {$item->kd_produk}");
-                }
-
-                // Check stock availability
-                if ($product->stok_total < $item->qty) {
-                    throw new \Exception("Insufficient stock for product {$product->nama_produk}. Available: {$product->stok_total}, Required: {$item->qty}");
                 }
 
                 // Update stock atomically
