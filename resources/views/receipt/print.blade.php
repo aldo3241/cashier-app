@@ -220,7 +220,7 @@
                 <div class="payment-line">
                     <div style="display: flex; flex-direction: column;">
                         <span>Lunas</span>
-                        <span>Tunai</span>
+                        <span>{{ $transaction->keuangan_kotak ?? 'Tunai' }}</span>
                     </div>
                     <div style="display: flex; flex-direction: column; text-align: right;">
                         <span class="payment-line-total">Total=</span>
