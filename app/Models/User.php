@@ -38,6 +38,12 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'photo_profile',
         'dibuat_oleh',
+        'menu_keuangan',
+        'edit_produk',
+        'edit_stok',
+        'penjualan',
+        'laporan',
+        'edit_akun',
     ];
 
     /**
@@ -62,6 +68,12 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
             'date_created' => 'datetime',
             'date_updated' => 'datetime',
+            'menu_keuangan' => 'boolean',
+            'edit_produk' => 'boolean',
+            'edit_stok' => 'boolean',
+            'penjualan' => 'boolean',
+            'laporan' => 'boolean',
+            'edit_akun' => 'boolean',
         ];
     }
 

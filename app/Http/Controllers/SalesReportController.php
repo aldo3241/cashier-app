@@ -429,5 +429,146 @@ class SalesReportController extends Controller
             ];
         });
     }
+
+    /**
+     * Show period sales report
+     */
+    public function periodSales()
+    {
+        $user = auth()->user();
+        return view('sales.period-sales', compact('user'));
+    }
+
+    /**
+     * API endpoint for Period Sales DataTable server-side processing
+     * Uses LaporanKasir table as requested
+     */
+    public function periodSalesData(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $query = \App\Models\LaporanKasir::query();
+
+        if ($request->start_date && $request->end_date) {
+            $startDate = Carbon::parse($request->start_date)->startOfDay();
+            $endDate = Carbon::parse($request->end_date)->endOfDay();
+            $query->whereBetween('mulai', [$startDate, $endDate]);
+        }
+
+
+        // Calculate stats
+        $statsQuery = clone $query;
+        $totalIncome = $statsQuery->sum('pemasukkan');
+        $totalExpense = $statsQuery->sum('pengeluaran');
+        $totalProfit = $statsQuery->sum('laba_kotor');
+
+        $stats = [
+            'total_income' => 'Rp ' . number_format($totalIncome, 0, ',', '.'),
+            'total_expense' => 'Rp ' . number_format($totalExpense, 0, ',', '.'),
+            'total_profit' => 'Rp ' . number_format($totalProfit, 0, ',', '.')
+        ];
+
+        // Pagination
+        $totalRecords = \App\Models\LaporanKasir::count();
+        $filteredRecords = $query->count();
+        
+        $start = $request->start ?? 0;
+        $length = $request->length ?? 25;
+
+        $reports = $query->orderBy('mulai', 'desc')
+            ->offset($start)
+            ->limit($length)
+            ->get();
+
+        $data = $reports->map(function ($report) {
+            return [
+                'id' => $report->kd_laporan_kasir,
+                'start_date' => $report->mulai ? Carbon::parse($report->mulai)->format('Y-m-d H:i') : '-',
+                'end_date' => $report->akhir ? Carbon::parse($report->akhir)->format('Y-m-d H:i') : '-',
+                'income' => 'Rp ' . number_format($report->pemasukkan, 0, ',', '.'),
+                'correction_income' => 'Rp ' . number_format($report->koreksi_pemasukkan, 0, ',', '.'),
+                'expense' => 'Rp ' . number_format($report->pengeluaran, 0, ',', '.'),
+                'correction_expense' => 'Rp ' . number_format($report->koreksi_pengeluaran, 0, ',', '.'),
+                'gross_profit' => 'Rp ' . number_format($report->laba_kotor, 0, ',', '.')
+            ];
+        });
+
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $totalRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data' => $data,
+            'stats' => $stats
+        ]);
+    }
+
+    /**
+     * API endpoint for Period Analytics (Charts & Top Products)
+     */
+    public function periodAnalytics(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $startDate = $request->start_date ? Carbon::parse($request->start_date)->startOfDay() : Carbon::now()->startOfMonth();
+        $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : Carbon::now()->endOfDay();
+
+        // 1. Trend Data (Income vs Expense from LaporanKasir)
+        $trendData = \App\Models\LaporanKasir::whereBetween('mulai', [$startDate, $endDate])
+            ->orderBy('mulai', 'asc')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'date' => Carbon::parse($item->mulai)->format('Y-m-d'),
+                    'income' => $item->pemasukkan,
+                    'expense' => $item->pengeluaran,
+                    'profit' => $item->laba_kotor
+                ];
+            });
+        
+        // 2. Payment Method Distribution (From Penjualan)
+        $paymentMethods = Penjualan::whereBetween('date_created', [$startDate, $endDate])
+            ->where('status_bayar', 'Lunas')
+            ->select('keuangan_kotak', DB::raw('count(*) as count'), DB::raw('sum(total_bayar) as total'))
+            ->groupBy('keuangan_kotak')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'method' => $item->keuangan_kotak ?? 'Tunai',
+                    'count' => $item->count,
+                    'total' => $item->total
+                ];
+            });
+
+        // 3. Top Selling Products (From PenjualanDetail)
+        $topProducts = PenjualanDetail::join('penjualan', 'penjualan_detail.kd_penjualan', '=', 'penjualan.kd_penjualan')
+            ->whereBetween('penjualan.date_created', [$startDate, $endDate])
+            ->where('penjualan.status_bayar', 'Lunas')
+            ->select('penjualan_detail.nama_produk', DB::raw('sum(penjualan_detail.qty) as total_qty'), DB::raw('sum(penjualan_detail.sub_total) as total_revenue'))
+            ->groupBy('penjualan_detail.nama_produk')
+            ->orderByDesc('total_qty')
+            ->limit(20)
+            ->get();
+
+        // 3. Cashier Performance
+        $cashierStats = Penjualan::whereBetween('date_created', [$startDate, $endDate])
+            ->where('status_bayar', 'Lunas')
+            ->select('dibuat_oleh', DB::raw('count(*) as transaction_count'), DB::raw('sum(total_bayar) as revenue'))
+            ->groupBy('dibuat_oleh')
+            ->orderByDesc('revenue')
+            ->get();
+
+        return response()->json([
+            'trend' => $trendData,
+            'payment_methods' => $paymentMethods,
+            'top_products' => $topProducts,
+            'cashier_stats' => $cashierStats
+        ]);
+    }
 }
 

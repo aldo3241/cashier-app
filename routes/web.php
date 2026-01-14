@@ -31,6 +31,7 @@ Route::middleware('auth')->group(function () {
     // Sales Report routes (protected)
     Route::get('/sales/my-sales', [SalesReportController::class, 'mySales'])->name('sales.my-sales');
     Route::get('/sales/all-sales', [SalesReportController::class, 'allSales'])->name('sales.all-sales');
+    Route::get('/sales/period', [SalesReportController::class, 'periodSales'])->name('sales.period');
     Route::get('/sales/transaction/{id}', [SalesReportController::class, 'transactionDetails'])->name('sales.transaction-details');
     
     // Receipt routes (protected)
@@ -71,6 +72,8 @@ Route::middleware('auth')->group(function () {
         // Sales Report DataTable APIs (must be before /sales/{id} route)
         Route::get('/sales/my-sales-data', [SalesReportController::class, 'mySalesData'])->name('api.sales.my-sales-data');
         Route::get('/sales/all-sales-data', [SalesReportController::class, 'allSalesData'])->name('api.sales.all-sales-data');
+        Route::get('/sales/period-data', [SalesReportController::class, 'periodSalesData'])->name('api.sales.period-data');
+        Route::get('/sales/period-analytics', [SalesReportController::class, 'periodAnalytics'])->name('api.sales.period-analytics');
         
         // Generic sales route (must be last)
         Route::get('/sales/{id}', [PenjualanController::class, 'show'])->name('api.sales.show');
