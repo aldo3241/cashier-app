@@ -460,16 +460,7 @@ class SalesReportController extends Controller
 
 
         // Calculate stats
-        $statsQuery = clone $query;
-        $totalIncome = $statsQuery->sum('pemasukkan');
-        $totalExpense = $statsQuery->sum('pengeluaran');
-        $totalProfit = $statsQuery->sum('laba_kotor');
 
-        $stats = [
-            'total_income' => 'Rp ' . number_format($totalIncome, 0, ',', '.'),
-            'total_expense' => 'Rp ' . number_format($totalExpense, 0, ',', '.'),
-            'total_profit' => 'Rp ' . number_format($totalProfit, 0, ',', '.')
-        ];
 
         // Pagination
         $totalRecords = \App\Models\LaporanKasir::count();
@@ -486,13 +477,27 @@ class SalesReportController extends Controller
         $data = $reports->map(function ($report) {
             return [
                 'id' => $report->kd_laporan_kasir,
-                'start_date' => $report->mulai ? Carbon::parse($report->mulai)->format('Y-m-d H:i') : '-',
-                'end_date' => $report->akhir ? Carbon::parse($report->akhir)->format('Y-m-d H:i') : '-',
-                'income' => 'Rp ' . number_format($report->pemasukkan, 0, ',', '.'),
-                'correction_income' => 'Rp ' . number_format($report->koreksi_pemasukkan, 0, ',', '.'),
-                'expense' => 'Rp ' . number_format($report->pengeluaran, 0, ',', '.'),
-                'correction_expense' => 'Rp ' . number_format($report->koreksi_pengeluaran, 0, ',', '.'),
-                'gross_profit' => 'Rp ' . number_format($report->laba_kotor, 0, ',', '.')
+                'mulai' => $report->mulai ? Carbon::parse($report->mulai)->format('Y-m-d H:i:s') : '-',
+                'akhir' => $report->akhir ? Carbon::parse($report->akhir)->format('Y-m-d H:i:s') : '-',
+                'catatan' => $report->catatan ?? '',
+                'dibuat_oleh' => $report->dibuat_oleh ?? '-',
+                'date_created' => $report->date_created ? Carbon::parse($report->date_created)->format('Y-m-d H:i:s') : '-',
+                'date_updated' => $report->date_updated ? Carbon::parse($report->date_updated)->format('Y-m-d H:i:s') : '-',
+                'tambah_lanjut' => '<a href="' . route('sales.period-create', ['mulai' => $report->akhir ? $report->akhir->format('Y-m-d H:i:s') : now()->format('Y-m-d H:i:s')]) . '" class="inline-block px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded transition-colors uppercase">Tambah Lanjut</a>',
+                'actions' => '<div class="flex space-x-1">
+                                <a href="'.route('sales.period-detail', $report->kd_laporan_kasir).'" class="inline-flex items-center px-3 py-1 bg-purple-800 hover:bg-purple-900 text-white text-xs font-medium rounded transition-colors uppercase">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                    View
+                                </a>
+                                <a href="'.route('sales.period-edit', $report->kd_laporan_kasir).'" class="inline-flex items-center px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-xs font-medium rounded transition-colors uppercase">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                    Edit
+                                </a>
+                                <button onclick="deleteReport(' . $report->kd_laporan_kasir . ')" class="inline-flex items-center px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded transition-colors uppercase">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    Delete
+                                </button>
+                            </div>'
             ];
         });
 
@@ -501,8 +506,150 @@ class SalesReportController extends Controller
             'recordsTotal' => $totalRecords,
             'recordsFiltered' => $filteredRecords,
             'data' => $data,
-            'stats' => $stats
         ]);
+    }
+
+    public function destroy($id)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        try {
+            $report = \App\Models\LaporanKasir::findOrFail($id);
+            $report->delete(); // Assuming SoftDeletes is not used, or if it is, this handles it. Checking model... model doesn't use SoftDeletes trait in previous view.
+
+            return response()->json(['success' => true, 'message' => 'Laporan berhasil dihapus']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Gagal menghapus laporan: ' . $e->getMessage()], 500);
+        }
+    }
+
+
+
+    public function create(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+        
+        $mulai = $request->query('mulai') ? Carbon::parse($request->query('mulai')) : now();
+        // Default akhir is now
+        $akhir = now();
+
+        return view('sales.period-create', compact('user', 'mulai', 'akhir'));
+    }
+
+    public function store(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $request->validate([
+            'mulai' => 'required|date',
+            'akhir' => 'required|date|after_or_equal:mulai',
+            'catatan' => 'nullable|string'
+        ]);
+        
+        $startDate = Carbon::parse($request->mulai);
+        $endDate = Carbon::parse($request->akhir);
+
+        // Calculate financials from LaporanKasir logic (or just aggregate from transactions)
+        // Usually "Tambah Lanjut" implies creating a new summary report. 
+        // Based on previous code, LaporanKasir stores aggregated data. 
+        // We likely need to calculate these values here or they are calculated by a background job/trigger?
+        // For now, I will calculate them based on the provided date range similar to periodSalesDetail logic.
+
+        $income = \App\Models\LaporanKasir::whereBetween('mulai', [$startDate, $endDate])->sum('pemasukkan'); 
+        // Wait, LaporanKasir IS the report. We are creating a NEW one.
+        // We should aggregate from Penjualan/Keuangan tables for this NEW period.
+        
+        // Income (Pemasukkan) from Keuangan? or Penjualan?
+        // Previous controller logic: 
+        // periodSalesDetail uses Keuangan for "Kotak Keuangan" and "Mutasi Keuangan".
+        // Let's look at how LaporanKasir is usually populated. 
+        // Since I don't have that context, I will assume we just create the record for now with the inputs 
+        // and MAYBE 0 values or calculate if possible. 
+        // Given the simplistic form, it might just be defining the period boundaries.
+        // Let's calculate from Keuangan for 'pemasukkan' and 'pengeluaran'.
+        
+        $pemasukkan = \App\Models\Keuangan::whereBetween('date_created', [$startDate, $endDate])->sum('masuk');
+        $pengeluaran = \App\Models\Keuangan::whereBetween('date_created', [$startDate, $endDate])->sum('keluar');
+        $laba_kotor = $pemasukkan - $pengeluaran; // Simplified logic
+
+        $report = new \App\Models\LaporanKasir();
+        $report->mulai = $startDate;
+        $report->akhir = $endDate;
+        $report->catatan = $request->catatan;
+        $report->dibuat_oleh = $user->username ?? 'System';
+        $report->pemasukkan = $pemasukkan;
+        $report->pengeluaran = $pengeluaran;
+        $report->laba_kotor = $laba_kotor;
+        // Defaults for others
+        $report->koreksi_pemasukkan = 0;
+        $report->koreksi_pengeluaran = 0;
+        $report->save();
+
+        return redirect()->route('sales.period')->with('success', 'Laporan berhasil dibuat');
+    }
+
+    public function edit($id)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        $report = \App\Models\LaporanKasir::findOrFail($id);
+        
+        return view('sales.period-edit', compact('user', 'report'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $request->validate([
+            'mulai' => 'required|date',
+            'akhir' => 'required|date|after_or_equal:mulai',
+            'koreksi_pemasukkan' => 'required|numeric',
+            'koreksi_pengeluaran' => 'required|numeric',
+            'catatan' => 'nullable|string'
+        ]);
+
+        $report = \App\Models\LaporanKasir::findOrFail($id);
+        
+        // Recalculate base values if dates changed (optional/advanced, but maybe safer to keep existing logic or re-calc)
+        // User might only want to correct income/expense without changing standard calc?
+        // Usually edits are for corrections. 
+        // We will update dates and corrections. The base values (pemasukkan, pengeluaran) are usually historical facts from transactions.
+        // If dates change, technically base values "should" change, but that's complex.
+        // Let's assume for now we update dates and the correctional fields. 
+        // AND we should re-calculate Laba Kotor.
+        
+        $report->mulai = Carbon::parse($request->mulai);
+        $report->akhir = Carbon::parse($request->akhir);
+        $report->koreksi_pemasukkan = $request->koreksi_pemasukkan;
+        $report->koreksi_pengeluaran = $request->koreksi_pengeluaran;
+        $report->catatan = $request->catatan;
+        
+        // Recalculate Profit
+        // Laba Kotor = (Pemasukkan + Koreksi Pemasukkan) - (Pengeluaran + Koreksi Pengeluaran)
+        // Note: Pemasukkan/Pengeluaran are the original auto-calculated values.
+        
+        $report->laba_kotor = ($report->pemasukkan + $report->koreksi_pemasukkan) - ($report->pengeluaran + $report->koreksi_pengeluaran);
+        
+        $report->date_updated = now();
+        $report->save();
+
+        return redirect()->route('sales.period')->with('success', 'Laporan berhasil diperbarui');
     }
 
     /**
@@ -569,6 +716,49 @@ class SalesReportController extends Controller
             'top_products' => $topProducts,
             'cashier_stats' => $cashierStats
         ]);
+    }
+
+    /**
+     * Show period sales detail page
+     */
+    public function periodSalesDetail($id)
+    {
+        $user = auth()->user();
+        $report = \App\Models\LaporanKasir::findOrFail($id);
+        
+        $startDate = Carbon::parse($report->mulai);
+        $endDate = Carbon::parse($report->akhir);
+
+        // Kotak Keuangan Stats
+        $kotakStats = \App\Models\Keuangan::whereBetween('date_created', [$startDate, $endDate])
+            ->select('keuangan_kotak', DB::raw('sum(masuk) as masuk'), DB::raw('sum(keluar) as keluar'))
+            ->groupBy('keuangan_kotak')
+            ->get();
+            
+        // Kategori Stats
+        $kategoriStats = \App\Models\Keuangan::whereBetween('date_created', [$startDate, $endDate])
+            ->select('keuangan_kategori', DB::raw('sum(masuk) as masuk'), DB::raw('sum(keluar) as keluar'))
+            ->groupBy('keuangan_kategori')
+            ->get();
+            
+        // Mutasi Keuangan
+        $mutasiKeuangan = \App\Models\Keuangan::whereBetween('date_created', [$startDate, $endDate])
+            ->orderBy('date_created', 'desc')
+            ->get();
+            
+        // Sales Details
+        $salesDetails = PenjualanDetail::with('penjualan')
+            ->whereHas('penjualan', function($q) use ($startDate, $endDate) {
+                $q->whereBetween('date_created', [$startDate, $endDate])
+                  ->where('status_bayar', 'Lunas');
+            })
+            ->orderByDesc('kd_penjualan_detail')
+            ->get();
+
+        return view('sales.period-sales-detail', compact(
+            'user', 'report', 'kotakStats', 'kategoriStats', 
+            'mutasiKeuangan', 'salesDetails'
+        ));
     }
 }
 

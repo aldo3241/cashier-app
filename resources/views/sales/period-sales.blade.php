@@ -17,18 +17,22 @@
     
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         /* Custom DataTable Styling */
         .dataTables_wrapper {
-            padding: 20px;
+            padding: 10px;
         }
 
         table.dataTable thead th {
             background: linear-gradient(135deg, #8b5cf6);
             color: white;
             font-weight: 600;
-            padding: 12px 18px;
+            padding: 8px 12px;
+            font-size: 0.8125rem;
             border: none;
         }
 
@@ -41,7 +45,8 @@
         }
 
         table.dataTable tbody td {
-            padding: 12px 18px;
+            padding: 8px 12px;
+            font-size: 0.8125rem;
         }
 
         .dataTables_filter input {
@@ -181,7 +186,7 @@
                         </svg>
                     </div>
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-800" data-en="Cashier Period Report" data-id="Laporan Periode Kasir">Cashier Period Report</h1>
+                        <h1 class="text-2xl font-bold text-gray-800" data-en="Laporan Kasir" data-id="Laporan Kasir">Laporan Kasir</h1>
                         <p class="text-sm text-gray-600">{{ $user->nama ?? $user->username }}</p>
                     </div>
                 </div>
@@ -207,129 +212,6 @@
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        <!-- Filter Card -->
-        <div class="bg-white rounded-lg shadow p-6 mb-8">
-            <h2 class="text-lg font-bold text-gray-800 mb-4" data-en="Filter Period" data-id="Filter Periode">Filter Period</h2>
-            <div class="flex flex-col md:flex-row gap-4 items-end">
-                <div class="flex-1 w-full">
-                    <label class="block text-sm font-medium text-gray-700 mb-1" data-en="Start Date" data-id="Tanggal Mulai">Start Date</label>
-                    <input type="text" id="start_date" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Select start date">
-                </div>
-                <div class="flex-1 w-full">
-                    <label class="block text-sm font-medium text-gray-700 mb-1" data-en="End Date" data-id="Tanggal Akhir">End Date</label>
-                    <input type="text" id="end_date" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Select end date">
-                </div>
-                <div class="w-full md:w-auto">
-                    <button id="filter-btn" class="w-full md:w-auto px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
-                        <span data-en="Apply Filter" data-id="Terapkan Filter">Apply Filter</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Stats Summary -->
-        <!-- Stats Summary -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center">
-                    <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm text-gray-600" data-en="Total Income" data-id="Total Pemasukan">Total Income</p>
-                        <p class="text-2xl font-bold text-emerald-600" id="total-income">-</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center">
-                    <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm text-gray-600" data-en="Total Expenses" data-id="Total Pengeluaran">Total Expenses</p>
-                        <p class="text-2xl font-bold text-red-600" id="total-expense">-</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center">
-                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm text-gray-600" data-en="Total Profit" data-id="Total Keuntungan">Total Profit</p>
-                        <p class="text-2xl font-bold text-blue-600" id="total-profit">-</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Charts Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <!-- Sales Trend Chart -->
-            <div class="bg-white rounded-lg shadow p-6 lg:col-span-2">
-                <h3 class="text-lg font-bold text-gray-800 mb-4" data-en="Sales & Expense Trend" data-id="Tren Penjualan & Pengeluaran">Sales & Expense Trend</h3>
-                <div class="relative h-72">
-                    <canvas id="trendChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Payment Methods -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-bold text-gray-800 mb-4" data-en="Payment Methods" data-id="Metode Pembayaran">Payment Methods</h3>
-                <div class="relative h-64 flex justify-center">
-                    <canvas id="paymentChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Top Products -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-bold text-gray-800 mb-4" data-en="Top Selling Products" data-id="Produk Terlaris">Top Selling Products</h3>
-                <div class="overflow-y-auto max-h-64 custom-scrollbar">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-en="Product" data-id="Produk">Product</th>
-                                <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" data-en="Qty" data-id="Jml">Qty</th>
-                                <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" data-en="Revenue" data-id="Pendapatan">Revenue</th>
-                            </tr>
-                        </thead>
-                        <tbody id="top-products-list" class="bg-white divide-y divide-gray-200">
-                            <!-- Populated by JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Cashier Performance -->
-            <div class="bg-white rounded-lg shadow p-6 lg:col-span-2">
-                <h3 class="text-lg font-bold text-gray-800 mb-4" data-en="Cashier Performance" data-id="Performa Kasir">Cashier Performance</h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-en="Cashier" data-id="Kasir">Cashier</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" data-en="Transactions" data-id="Transaksi">Transactions</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" data-en="Revenue" data-id="Pendapatan">Revenue</th>
-                            </tr>
-                        </thead>
-                        <tbody id="cashier-stats-list" class="bg-white divide-y divide-gray-200">
-                            <!-- Populated by JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
 
         <!-- DataTable -->
         <div class="bg-white rounded-lg shadow">
@@ -348,20 +230,20 @@
                 </div>
             </div>
 
-            <div class="overflow-x-auto">
-                <table id="reportTable" class="display responsive nowrap" style="width:100%">
+                <table id="reportTable" class="display nowrap" style="width:100%">
                     <thead>
+
                         <tr>
-                        <tr>
-                            <th data-en="Start Date" data-id="Tanggal Mulai">Start Date</th>
-                            <th data-en="End Date" data-id="Tanggal Akhir">End Date</th>
-                            <th data-en="Income" data-id="Pemasukan">Income</th>
-                            <th data-en="Correction (+)" data-id="Koreksi Masuk">Correction (+)</th>
-                            <th data-en="Expense" data-id="Pengeluaran">Expense</th>
-                            <th data-en="Correction (-)" data-id="Koreksi Keluar">Correction (-)</th>
-                            <th data-en="Gross Profit" data-id="Laba Kotor">Gross Profit</th>
+                            <th class="text-left" data-en="Kd" data-id="Kd">Kd</th>
+                            <th class="text-left" data-en="Mulai" data-id="Mulai">Mulai</th>
+                            <th class="text-left" data-en="Akhir" data-id="Akhir">Akhir</th>
+                            <th class="text-left" data-en="Dibuat Oleh" data-id="Dibuat Oleh">Dibuat Oleh</th>
+                            <th class="text-left" data-en="Date Created" data-id="Date Created">Date Created</th>
+                            <th class="text-left" data-en="Date Updated" data-id="Date Updated">Date Updated</th>
+                            <th class="text-left" data-en="Tambah Lanjut" data-id="Tambah Lanjut">Tambah Lanjut</th>
+                            <th class="text-left"></th>
                         </tr>
-                        </tr>
+
                     </thead>
                     <tbody>
                         <!-- Data will be loaded via AJAX -->
@@ -550,16 +432,10 @@
                         d.start_date = $('#start_date').val();
                         d.end_date = $('#end_date').val();
                     },
-                    dataSrc: function(json) {
-                        // Update stats
-                        $('#total-income').text(json.stats.total_income);
-                        $('#total-expense').text(json.stats.total_expense);
-                        $('#total-profit').text(json.stats.total_profit);
-                        
-                        return json.data;
-                    }
+
                 },
-                responsive: true,
+                scrollX: true,
+                autoWidth: false,
                 pageLength: 25,
                 order: [[0, 'desc']], 
                 language: {
@@ -568,17 +444,15 @@
                     processing: "Loading data..."
                 },
                 columns: [
-                    { data: 'start_date', name: 'mulai' },
-                    { data: 'end_date', name: 'akhir' },
-                    { data: 'income', name: 'pemasukkan' },
-                    { data: 'correction_income', name: 'koreksi_pemasukkan' },
-                    { data: 'expense', name: 'pengeluaran', className: "text-red-500" },
-                    { data: 'correction_expense', name: 'koreksi_pengeluaran', className: "text-red-500" },
-                    { 
-                        data: 'gross_profit', 
-                        name: 'laba_kotor',
-                        className: "font-bold text-blue-600"
-                    }
+
+                    { data: 'id', name: 'kd_laporan_kasir' },
+                    { data: 'mulai', name: 'mulai' },
+                    { data: 'akhir', name: 'akhir' },
+                    { data: 'dibuat_oleh', name: 'dibuat_oleh' },
+                    { data: 'date_created', name: 'date_created' },
+                    { data: 'date_updated', name: 'date_updated' },
+                    { data: 'tambah_lanjut', name: 'tambah_lanjut', orderable: false, searchable: false },
+                    { data: 'actions', name: 'actions', orderable: false, searchable: false }
                 ]
             });
 
@@ -755,6 +629,57 @@
                     </tr>
                 `;
                 tbody.append(row);
+            });
+        }
+
+        // Delete Report Function
+        function deleteReport(id) {
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Laporan ini akan dihapus secara permanen dan tidak dapat dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444', // Red-500
+                cancelButtonColor: '#6b7280', // Gray-500
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let url = "{{ route('sales.period-delete', ':id') }}";
+                    url = url.replace(':id', id);
+                    
+                    $.ajax({
+                        url: url,
+                        type: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(result) {
+                            if (result.success) {
+                                Swal.fire(
+                                    'Terhapus!',
+                                    result.message,
+                                    'success'
+                                );
+                                $('#reportTable').DataTable().ajax.reload();
+                                loadAnalytics();
+                            } else {
+                                Swal.fire(
+                                    'Gagal!',
+                                    result.message,
+                                    'error'
+                                );
+                            }
+                        },
+                        error: function(xhr) {
+                            Swal.fire(
+                                'Error!',
+                                'Terjadi kesalahan: ' + (xhr.responseJSON ? xhr.responseJSON.message : xhr.statusText),
+                                'error'
+                            );
+                        }
+                    });
+                }
             });
         }
     </script>

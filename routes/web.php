@@ -74,6 +74,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/sales/all-sales-data', [SalesReportController::class, 'allSalesData'])->name('api.sales.all-sales-data');
         Route::get('/sales/period-data', [SalesReportController::class, 'periodSalesData'])->name('api.sales.period-data');
         Route::get('/sales/period-analytics', [SalesReportController::class, 'periodAnalytics'])->name('api.sales.period-analytics');
+        Route::get('/sales/period/create', [SalesReportController::class, 'create'])->name('sales.period-create');
+        Route::post('/sales/period', [SalesReportController::class, 'store'])->name('sales.period-store');
+        
+        Route::get('/sales/period/{id}/edit', [SalesReportController::class, 'edit'])->name('sales.period-edit');
+        Route::put('/sales/period/{id}', [SalesReportController::class, 'update'])->name('sales.period-update');
+
+        Route::get('/sales/period/{id}', [SalesReportController::class, 'periodSalesDetail'])->name('sales.period-detail');
+        Route::delete('/sales/period/{id}', [SalesReportController::class, 'destroy'])->name('sales.period-delete');
         
         // Generic sales route (must be last)
         Route::get('/sales/{id}', [PenjualanController::class, 'show'])->name('api.sales.show');

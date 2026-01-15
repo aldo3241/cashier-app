@@ -20,8 +20,15 @@ class LaporanKasir extends Model
         'koreksi_pemasukkan',
         'pengeluaran',
         'koreksi_pengeluaran',
-        'laba_kotor'
+        'laba_kotor',
+        'catatan',
+        'dibuat_oleh',
+        'date_created',
+        'date_updated'
     ];
+
+    const CREATED_AT = 'date_created';
+    const UPDATED_AT = 'date_updated';
 
     protected $casts = [
         'mulai' => 'datetime',
@@ -31,5 +38,7 @@ class LaporanKasir extends Model
         'pengeluaran' => 'decimal:2',
         'koreksi_pengeluaran' => 'decimal:2',
         'laba_kotor' => 'decimal:2',
+        'date_created' => 'datetime',
+        'date_updated' => 'datetime',
     ];
 }
