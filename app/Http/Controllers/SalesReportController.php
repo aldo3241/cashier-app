@@ -582,6 +582,12 @@ class SalesReportController extends Controller
         $laba_kotor = $pemasukkan - $pengeluaran; // Simplified logic
 
         $report = new \App\Models\LaporanKasir();
+        
+        // Explicitly set the ID based on the maximum existing value to prevent ID gaps 
+        // after records have been deleted (AUTO_INCREMENT does not reuse skipped IDs)
+        $maxKd = \App\Models\LaporanKasir::max('kd_laporan_kasir');
+        $report->kd_laporan_kasir = $maxKd ? $maxKd + 1 : 1;
+        
         $report->mulai = $startDate;
         $report->akhir = $endDate;
         $report->catatan = $request->catatan;

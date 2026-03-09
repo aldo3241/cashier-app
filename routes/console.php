@@ -8,5 +8,3 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 use Illuminate\Support\Facades\Schedule;
-
-Schedule::command('sales:generate-daily-report')->dailyAt('23:59');
